@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\command">
+      <UniqueIdentifier>{36bbbac2-8838-497d-afeb-bc47a1f3b5d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\session">
+      <UniqueIdentifier>{4db8cf6f-f296-4fc4-b67a-d9ab9a187e31}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\physical">
+      <UniqueIdentifier>{422c4f43-98c2-4414-87d0-368266a4012e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="animalfarm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="animalfarm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="idle.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
+    <ClCompile Include="tx_prep_data.cpp">
+      <Filter>Source Files\physical</Filter>
+    </ClCompile>
+    <ClCompile Include="tx_wait_ack.cpp">
+      <Filter>Source Files\physical</Filter>
+    </ClCompile>
+    <ClCompile Include="tx_wait_connect.cpp">
+      <Filter>Source Files\session</Filter>
+    </ClCompile>
+    <ClCompile Include="tx_send_data.cpp">
+      <Filter>Source Files\physical</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_connect.cpp">
+      <Filter>Source Files\session</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_wait_packet.cpp">
+      <Filter>Source Files\physical</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_parse_packet.cpp">
+      <Filter>Source Files\physical</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_check_error.cpp">
+      <Filter>Source Files\physical</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_process_data.cpp">
+      <Filter>Source Files\physical</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="animalfarm.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="small.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="animalfarm.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+</Project>

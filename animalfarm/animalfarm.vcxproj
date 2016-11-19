@@ -174,7 +174,11 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="animalfarm.ico" />
+    <Image Include="bitmap1.bmp" />
     <Image Include="small.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cursor1.cur" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

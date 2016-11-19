@@ -12,12 +12,17 @@
 HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
+COMMCONFIG	cc;
+BOOL connected;
+COMMTIMEOUTS cto;
+HANDLE comHandle;
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+BOOL                Connect(LPCWSTR commName);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -125,6 +130,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	LPCWSTR cName = NULL;
+	comHandle = NULL;
     switch (message)
     {
     case WM_COMMAND:
@@ -133,6 +140,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             // Parse the menu selections:
             switch (wmId)
             {
+			case ID_CONFIG_COM1:
+				cName = L"Com1";
+				break;
+			case ID_CONFIG_COM2:
+				cName = L"Com2";
+				break;
+			case ID_CONFIG_COM3:
+				cName = L"Com3";
+				break;
+			case ID_CONFIG_COM4:
+				cName = L"Com4";
+				break;
             case IDM_ABOUT:
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
                 break;
@@ -158,6 +177,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
+
+	//*****if Connect Button is clicked******
+	Connect(cName);
+
+
+	//idle_setup(hWnd);
     return 0;
 }
 
@@ -179,4 +204,39 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     }
     return (INT_PTR)FALSE;
+}
+
+BOOL Connect(LPCWSTR commName) {
+	if (commName == NULL) {
+		MessageBox(NULL, L"Select a Com under the Config Menu", L"", MB_OK);
+		return FALSE;
+	}
+
+	if (comHandle != INVALID_HANDLE_VALUE)
+	{
+		CloseHandle(comHandle);
+	}
+
+	if ((comHandle = CreateFile(commName, GENERIC_READ | GENERIC_WRITE, 0,
+		NULL, OPEN_EXISTING, NULL, NULL))
+		== INVALID_HANDLE_VALUE)
+	{
+		MessageBox(NULL, L"Error opening COM port:", L"", MB_OK);
+		return FALSE;
+	}
+
+	cc.dwSize = sizeof(COMMCONFIG);
+	cc.wVersion = 0x100;
+	GetCommConfig(comHandle, &cc, &cc.dwSize);
+	CommConfigDialog(commName, NULL, &cc);
+
+	GetCommTimeouts(comHandle, &cto);
+
+	// Set the new timeouts
+	cto.ReadIntervalTimeout = 1;
+	cto.ReadTotalTimeoutConstant = 1;
+	cto.ReadTotalTimeoutMultiplier = 1;
+	SetCommTimeouts(comHandle, &cto);
+
+	return true;
 }

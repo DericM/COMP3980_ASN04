@@ -42,6 +42,12 @@
     <ClInclude Include="rx_connect.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="tx_wait_connect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_wait_packet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

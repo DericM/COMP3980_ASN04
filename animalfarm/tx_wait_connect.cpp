@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "tx_wait_connect.h"
 
 int ENQ_TIMER = 1000;
 BOOL WaitForConnectAck(HANDLE hwnd, HANDLE hcomm, OVERLAPPED reader) {

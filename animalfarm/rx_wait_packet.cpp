@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "rx_wait_packet.h"
 
 int PACKET_TIMER = 100000;
 

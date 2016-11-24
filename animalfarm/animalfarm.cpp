@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "animalfarm.h"
+#include "tx_wait_connect.h"
 
 
 

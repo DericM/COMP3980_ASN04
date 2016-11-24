@@ -33,12 +33,12 @@ BOOL WaitForConnectAck(HANDLE hwnd, HANDLE hcomm, OVERLAPPED reader) {
 		switch (eventRet) {
 		case WAIT_OBJECT_0:
 			if (!GetOverlappedResult(hcomm, &reader, &eventRet, FALSE)) {
-
+				//do something here
 			}
 			else {
 				// Read completed successfully.
-				if (readChar == 0x06) {
-
+				if (readChar == 0x06) {//ACK
+					//
 				}
 				else {
 					MessageBox(NULL, L"NON ACK CHARACTER RECEIVED", L"", MB_OK);

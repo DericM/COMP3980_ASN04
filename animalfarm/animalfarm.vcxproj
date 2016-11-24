@@ -159,7 +159,6 @@
     <ClCompile Include="rx_parse_packet.cpp" />
     <ClCompile Include="rx_process_data.cpp" />
     <ClCompile Include="rx_wait_packet.cpp" />
-    <ClCompile Include="timer.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

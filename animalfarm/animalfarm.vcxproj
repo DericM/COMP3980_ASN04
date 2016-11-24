@@ -146,6 +146,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="animalfarm.h" />
+    <ClInclude Include="idle.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="rx_connect.h" />
     <ClInclude Include="stdafx.h" />

@@ -1,20 +1,8 @@
 #include "stdafx.h"
-
 #include <iostream>
 #include <stdexcept>
+#include "idle.h"
 
-HANDLE hComm;
-LPCWSTR	lpszCommName;
-
-/*Counters*/
-int enqCounter;
-
-/*timeouts*/
-double randTimeout;
-double idleSqeTimeout = 500;
-
-/*events*/
-HANDLE hEnqEvent;
 
 
 
@@ -43,8 +31,9 @@ void idle_setup(HWND& hWnd) {
 }
 
 
-
-
+/* 
+* Open the comm port.
+*/
 void idle_open_port(HWND& hWnd, HANDLE& hComm, LPCWSTR& lpszCommName) {
 	COMMCONFIG cc;
 
@@ -74,7 +63,9 @@ void idle_open_port(HWND& hWnd, HANDLE& hComm, LPCWSTR& lpszCommName) {
 
 }
 
-
+/*
+* Resets randTimeout to a value between 0-100
+*/
 void idle_rand_timeout_reset() {
 	randTimeout = rand() % 101; //0-100
 }
@@ -158,3 +149,18 @@ Get file name(if Not sequence timer timeout)
 Send ENQ
 Got to Wait for Connect WFC Wait State
 */
+
+
+
+
+
+
+
+
+
+/*
+* exit the program.
+*/
+void idle_close_connection() {
+
+}

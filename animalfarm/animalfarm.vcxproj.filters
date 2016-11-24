@@ -22,6 +22,9 @@
     <Filter Include="Source Files\physical">
       <UniqueIdentifier>{422c4f43-98c2-4414-87d0-368266a4012e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\helpers">
+      <UniqueIdentifier>{f5dc9e74-78a0-4333-bcb6-091f2fea59b3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -50,9 +53,6 @@
     <ClCompile Include="idle.cpp">
       <Filter>Source Files\command</Filter>
     </ClCompile>
-    <ClCompile Include="tx_prep_data.cpp">
-      <Filter>Source Files\physical</Filter>
-    </ClCompile>
     <ClCompile Include="tx_wait_ack.cpp">
       <Filter>Source Files\physical</Filter>
     </ClCompile>
@@ -76,6 +76,12 @@
     </ClCompile>
     <ClCompile Include="rx_process_data.cpp">
       <Filter>Source Files\physical</Filter>
+    </ClCompile>
+    <ClCompile Include="tx_get_data.cpp">
+      <Filter>Source Files\physical</Filter>
+    </ClCompile>
+    <ClCompile Include="timer.cpp">
+      <Filter>Source Files\helpers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

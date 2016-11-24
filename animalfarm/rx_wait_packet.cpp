@@ -1,5 +1,7 @@
 #include "stdafx.h"
+#include "rx_wait_packet.h"
 
+int PACKET_TIMER = 100000;
 
 BOOL waitFOrPacketSetUp(HANDLE hwnd, HANDLE hcomm, OVERLAPPED reader) {
 	char readChar;
@@ -29,17 +31,17 @@ BOOL waitFOrPacketSetUp(HANDLE hwnd, HANDLE hcomm, OVERLAPPED reader) {
 	}
 
 	if (fWaitingOnRead) {
-		eventRet = WaitForSingleObject(reader.hEvent, ENQ_TIMER);
+		eventRet = WaitForSingleObject(reader.hEvent, PACKET_TIMER);
 
 		switch (eventRet) {
 		case WAIT_OBJECT_0:
 			if (!GetOverlappedResult(hcomm, &reader, &eventRet, FALSE)) {
 
-			}
-			else {
+			} else {
 				// Read completed successfully.
 				if (readChar == 0x16) {
 					//syn char recieved
+					return TRUE;
 				}
 				else {
 					MessageBox(NULL, L"NON SYNC CHARACTER RECEIVED", L"", MB_OK);
@@ -58,4 +60,5 @@ BOOL waitFOrPacketSetUp(HANDLE hwnd, HANDLE hcomm, OVERLAPPED reader) {
 			break;
 		}
 	}
+	return FALSE;
 }

@@ -51,6 +51,9 @@
     <ClInclude Include="rx_wait_packet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="tx_wait_ack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

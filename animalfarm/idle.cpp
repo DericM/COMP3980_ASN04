@@ -1,8 +1,33 @@
 #include "stdafx.h"
 #include <iostream>
 #include <stdexcept>
+#include <string>
 #include "idle.h"
+#include "tx_wait_connect.h"
 
+
+HANDLE hComm;
+//LPCWSTR	lpszCommName;
+
+/*Counters*/
+int ENQ_COUNTER;
+
+
+/*timeouts*/
+int RAND_TIMEOUT;
+int IDLE_SEQ_TIMEOUT = 500;
+
+/*events*/
+//HANDLE hEnqEvent;
+OVERLAPPED osReader = { 0 };
+
+
+/*Flags*/
+bool fSendingFile = false;
+
+/*Thread handles*/
+HANDLE hReadThread;
+HANDLE hWriteThread;
 
 
 
@@ -14,9 +39,13 @@ Create Rand Timer duration
 Create / set Idle Sequence timer duration
 Go to IDLE Wait State
 */
-void idle_setup(HWND& hWnd) {
+void idle_setup(HWND& hWnd, LPCWSTR lpszCommName) {
 
-	enqCounter = 0;
+#ifdef _DEBUG
+	OutputDebugStringW(L"Entering: idle_setup()\n");
+#endif
+	
+	ENQ_COUNTER = 0;
 	idle_rand_timeout_reset();
 
 	try {
@@ -27,7 +56,15 @@ void idle_setup(HWND& hWnd) {
 		throw std::runtime_error("Failed in Idle Setup");
 	}
 
-	idle_wait();
+#ifdef _DEBUG
+	OutputDebugStringW(L"ENQ_COUNTER assigned value: ");
+	wchar_t buffer[256];
+	wsprintfW(buffer, L"%d\n", ENQ_COUNTER);
+	OutputDebugStringW(buffer);
+	OutputDebugStringW(L"Entering: idle_setup()\n");
+#endif
+
+	idle_wait(hWnd);
 }
 
 
@@ -35,6 +72,11 @@ void idle_setup(HWND& hWnd) {
 * Open the comm port.
 */
 void idle_open_port(HWND& hWnd, HANDLE& hComm, LPCWSTR& lpszCommName) {
+
+#ifdef _DEBUG
+	OutputDebugStringW(L"Entering: idle_open_port()\n");
+#endif
+
 	COMMCONFIG cc;
 
 	//set comm settings
@@ -67,7 +109,19 @@ void idle_open_port(HWND& hWnd, HANDLE& hComm, LPCWSTR& lpszCommName) {
 * Resets randTimeout to a value between 0-100
 */
 void idle_rand_timeout_reset() {
-	randTimeout = rand() % 101; //0-100
+
+#ifdef _DEBUG
+	OutputDebugStringW(L"Entering: idle_rand_timeout_reset()\n");
+#endif
+
+	RAND_TIMEOUT = rand() % 101; //0-100
+
+#ifdef _DEBUG
+	OutputDebugStringW(L"RAND_TIMEOUT assigned value: ");
+	wchar_t buffer[256];
+	wsprintfW(buffer, L"%d\n", RAND_TIMEOUT);
+	OutputDebugStringW(buffer);
+#endif
 }
 
 
@@ -84,48 +138,116 @@ Check ENQ counter
 		Exit
 
 Start Idle Sequence Timer
+
 If sequence timer times out
-increment Enq counter
-start write thread(starts IDLE Write State)
+	increment Enq counter
+	start write thread(starts IDLE Write State)
+
 If transfer button listener triggers(user wants to send file)
-Start / set Rand Timer
+	Start / set Rand Timer
+
 If Rand Timer times out
-Stop Sequence Timer
-start write Thread(starts IDLE Write State)
+	Stop Sequence Timer
+	start write Thread(starts IDLE Write State)
+
 If ENQ received event triggers
-Stop Timers
-start read Thread(starts IDLE Read State)
+	Stop Timers
+	start read Thread(starts IDLE Read State)
 */
-void idle_wait() {
+void idle_wait(HWND& hWnd) {
+
+#ifdef _DEBUG
+	OutputDebugStringW(L"\n");
+	OutputDebugStringW(L"Entering: idle_wait()\n");
+#endif
+
+
+	int timeout = IDLE_SEQ_TIMEOUT;
+
+	if (fSendingFile) {
+#ifdef _DEBUG
+		OutputDebugStringW(L"fSendingFile TRUE\n");
+		OutputDebugStringW(L"Switching to RAND_TIMEOUT\n");
+#endif
+		idle_rand_timeout_reset();
+		timeout = RAND_TIMEOUT;
+	}
+#ifdef _DEBUG
+	OutputDebugStringW(L"timeout value: ");
+	wchar_t buffer[256];
+	wsprintfW(buffer, L"%d\n", timeout);
+	OutputDebugStringW(buffer);
+#endif
+
 
 	try {
-		idle_create_enq_event();
+		idle_create_event();
 
-		if (enqCounter > 3) {
-			//exit(1);
+		if (ENQ_COUNTER > 3) {
+			idle_close_port();
+			return;
 		}
+		
+		
+
 	}
 	catch (std::exception const& e) {
 		std::cerr << e.what() << std::endl;
 		throw std::runtime_error("Failed in Idle Wait");
 	}
+
+	DWORD dwRes;
+#ifdef _DEBUG
+	OutputDebugStringW(L"Entering: idle_wait loop\n");
+#endif
+	while (true) {
+
+
+		dwRes = WaitForSingleObject(osReader.hEvent, timeout);
+
+		switch (dwRes)
+		{
+		case WAIT_OBJECT_0:
+
+			break;
+
+		case WAIT_TIMEOUT:
+#ifdef _DEBUG
+			OutputDebugStringW(L"WAIT_TIMEOUT\n");
+#endif
+			idle_create_write_thread(hWnd);
+			break;
+
+		default:
+			break;
+		}
+	}
+
+
+
 }
 
 
 
 
-void idle_create_enq_event() {
-	hEnqEvent = CreateEvent(
+void idle_create_event() {
+
+#ifdef _DEBUG
+	OutputDebugStringW(L"Entering: idle_create_event()\n");
+#endif
+
+	osReader.hEvent = CreateEvent(
 		NULL,               // default security attributes
 		TRUE,               // manual-reset event
 		FALSE,              // initial state is nonsignaled
-		TEXT("ENQEvent")    // object name
+		NULL    // object name
 	);
 
-	if (hEnqEvent == NULL) {
-		throw std::runtime_error("Failed to create Enquire Event");
+	if (osReader.hEvent == NULL) {
+		throw std::runtime_error("Failed to create event");
 	}
 }
+
 
 
 
@@ -149,11 +271,30 @@ Get file name(if Not sequence timer timeout)
 Send ENQ
 Got to Wait for Connect WFC Wait State
 */
+void idle_create_write_thread(HWND& hWnd) {
+#ifdef _DEBUG
+	OutputDebugStringW(L"\n");
+	OutputDebugStringW(L"Entering: idle_create_write_thread\n");
+#endif
+	//make new thread for reading
+	hReadThread = CreateThread(
+		NULL,
+		0,
+		write_thread_entry_point,
+		(LPVOID)hWnd,
+		0,
+		NULL
+	);
+}
 
 
+DWORD WINAPI write_thread_entry_point(LPVOID pData) {
 
+	WaitForConnectAck((HWND)pData, hComm, osReader);
 
+	return TRUE;
 
+}
 
 
 
@@ -161,6 +302,131 @@ Got to Wait for Connect WFC Wait State
 /*
 * exit the program.
 */
-void idle_close_connection() {
+void idle_close_port() {
+
+#ifdef _DEBUG
+	OutputDebugStringW(L"Entering: idle_close_port()\n");
+#endif
+
+	CloseHandle(osReader.hEvent);
+	CloseHandle(hComm);
+}
+
+
+
+
+
+void idle_read_ack() {
+
+
+
+
+
+
+
+
+
+}
+
+
+bool writeToPort(char * lpBuf,
+	DWORD dwToWrite,
+	HANDLE& hComm)
+{
+	OVERLAPPED osWrite = { 0 };
+	DWORD dwWritten;
+	bool fRes;
+
+	// Create this writes OVERLAPPED structure hEvent.
+	osWrite.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (osWrite.hEvent == NULL)
+		// Error creating overlapped event handle.
+		return FALSE;
+
+	// Issue write.
+	if (!WriteFile(hComm, lpBuf, dwToWrite, &dwWritten, &osWrite)) {
+		if (GetLastError() != ERROR_IO_PENDING) {
+			// WriteFile failed, but it isn't delayed. Report error and abort.
+			fRes = FALSE;
+		}
+		else {
+			// Write is pending.
+			if (!GetOverlappedResult(hComm, &osWrite, &dwWritten, TRUE))
+				fRes = FALSE;
+			else
+				// Write operation completed successfully.
+				fRes = TRUE;
+		}
+	}
+	else {
+		// WriteFile completed immediately.
+		fRes = TRUE;
+	}
+
+	CloseHandle(osWrite.hEvent);
+	return fRes;
+}
+
+
+
+
+
+
+
+
+BOOL read_from_port(HANDLE hcomm, OVERLAPPED reader, int timout) {
+	char readChar;
+	BOOL fWaitingOnRead = false;
+	DWORD eventRet;
+
+	if (reader.hEvent == NULL) {
+		throw std::runtime_error("Reader Event is NULL");
+	}
+
+
+
+	if (!fWaitingOnRead) {
+		// Issue read operation.
+		if (!ReadFile(hcomm, &readChar, 1, &eventRet, &reader)) {
+			if (GetLastError() != ERROR_IO_PENDING) {
+				throw std::runtime_error("Error reading from port.");
+			}
+			else {
+				fWaitingOnRead = TRUE;
+			}
+
+		}
+		else {
+			// read completed immediately
+			//HandleASuccessfulRead(readChar, hwnd);
+		}
+	}
+
+	if (fWaitingOnRead) {
+		eventRet = WaitForSingleObject(reader.hEvent, timout);
+
+		switch (eventRet) {
+		case WAIT_OBJECT_0:
+			if (!GetOverlappedResult(hcomm, &reader, &eventRet, FALSE)) {
+				//do something here
+			}
+			else {
+				// Read completed successfully.
+				if (readChar == 0x06) {//ACK
+					//
+				}
+				else {
+					MessageBox(NULL, L"NON ACK CHARACTER RECEIVED", L"", MB_OK);
+					//ack not received
+				}
+			}
+			//  Reset flag so that another opertion can be issued.
+			fWaitingOnRead = FALSE;
+			break;
+		case WAIT_TIMEOUT:
+
+			break;
+		}
+	}
 
 }

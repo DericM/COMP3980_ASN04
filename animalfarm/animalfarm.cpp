@@ -4,6 +4,8 @@
 #include "stdafx.h"
 #include "animalfarm.h"
 #include "tx_wait_connect.h"
+#include "idle.h"
+
 
 
 
@@ -23,7 +25,7 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
-BOOL                Connect(LPCWSTR commName);
+BOOL                Connect(HWND& hWnd, LPCWSTR commName);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -143,15 +145,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             {
 			case ID_CONFIG_COM1:
 				cName = L"Com1";
+				idle_setup(hWnd, cName);
 				break;
 			case ID_CONFIG_COM2:
 				cName = L"Com2";
+				idle_setup(hWnd, cName);
 				break;
 			case ID_CONFIG_COM3:
 				cName = L"Com3";
+				idle_setup(hWnd, cName);
 				break;
 			case ID_CONFIG_COM4:
 				cName = L"Com4";
+				idle_setup(hWnd, cName);
 				break;
             case IDM_ABOUT:
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
@@ -180,10 +186,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     }
 
 	//*****if Connect Button is clicked******
-	Connect(cName);
+	//idle_setup(hWnd, cName);
+	//Connect(hWnd, cName);
 
-
-	//idle_setup(hWnd);
     return 0;
 }
 
@@ -207,17 +212,19 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     return (INT_PTR)FALSE;
 }
 
-BOOL Connect(LPCWSTR commName) {
+BOOL Connect(HWND& hWnd, LPCWSTR commName) {
 	if (commName == NULL) {
 		MessageBox(NULL, L"Select a Com under the Config Menu", L"", MB_OK);
 		return FALSE;
 	}
 
+	/*
 	if (comHandle != INVALID_HANDLE_VALUE)
 	{
 		CloseHandle(comHandle);
 	}
 
+	
 	if ((comHandle = CreateFile(commName, GENERIC_READ | GENERIC_WRITE, 0,
 		NULL, OPEN_EXISTING, NULL, NULL))
 		== INVALID_HANDLE_VALUE)
@@ -225,7 +232,9 @@ BOOL Connect(LPCWSTR commName) {
 		MessageBox(NULL, L"Error opening COM port:", L"", MB_OK);
 		return FALSE;
 	}
+	*/
 
+	/*
 	cc.dwSize = sizeof(COMMCONFIG);
 	cc.wVersion = 0x100;
 	GetCommConfig(comHandle, &cc, &cc.dwSize);
@@ -238,6 +247,9 @@ BOOL Connect(LPCWSTR commName) {
 	cto.ReadTotalTimeoutConstant = 1;
 	cto.ReadTotalTimeoutMultiplier = 1;
 	SetCommTimeouts(comHandle, &cto);
+	*/
+
+	//idle_setup(hWnd);
 
 	return true;
 }

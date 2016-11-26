@@ -1,3 +1,3 @@
 #pragma once
 
-BOOL WaitForConnectAck(HANDLE hwnd, HANDLE hcomm, OVERLAPPED reader);
+BOOL WaitForConnectAck(HWND hwnd, HANDLE hcomm, OVERLAPPED reader, int enqCounter);

@@ -2,7 +2,7 @@
 #include "tx_wait_connect.h"
 
 int ENQ_TIMER = 1000;
-BOOL WaitForConnectAck(HWND hwnd, HANDLE hcomm, OVERLAPPED reader, int enqCounter) {
+BOOL WaitForConnectAck(HWND hwnd, HANDLE hcomm, OVERLAPPED reader, int& enqCounter) {
 	char readChar;
 	BOOL receivedAck = false;
 	BOOL fWaitingOnRead = false;

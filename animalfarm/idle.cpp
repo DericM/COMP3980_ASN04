@@ -290,7 +290,7 @@ void idle_create_write_thread(HWND& hWnd) {
 
 DWORD WINAPI write_thread_entry_point(LPVOID pData) {
 
-	WaitForConnectAck((HWND)pData, hComm, osReader);
+	WaitForConnectAck((HWND)pData, hComm, osReader, ENQ_COUNTER);
 
 	return TRUE;
 

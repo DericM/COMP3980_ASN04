@@ -211,67 +211,70 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 #ifdef _DEBUG
 	OutputDebugStringW(L"Entering: idle_wait loop\n");
 #endif
-	while (GlobalVar::g_bWaitENQ) {
-		DWORD dwRes;
-
-		char readChar;
-		BOOL fWaitingOnRead = FALSE;
-		DWORD eventRet;
-
-		if (!fWaitingOnRead) {
-			// Issue read operation.
-			if (!ReadFile(hComm, &readChar, 1, &eventRet, &osReader)) {
-				if (GetLastError() != ERROR_IO_PENDING) {
-					throw std::runtime_error("Error reading from port.");
-				}
-				else {
-					fWaitingOnRead = TRUE;
-				}
-
-			}
-			else {
-				// read completed immediately
-				if (readChar == 0x05) {//ENQ
-					SetEvent(GlobalVar::g_hEnqEvent);
-				}
-				//HandleASuccessfulRead(readChar, hwnd);
-			}
-		}
-
-		dwRes = WaitForSingleObject(osReader.hEvent, timeout);
-		switch (dwRes)
+	while (true) {
+		if (GlobalVar::g_bWaitENQ)
 		{
-		case WAIT_OBJECT_0:
-			if (!GetOverlappedResult(hComm, &osReader, &eventRet, FALSE)) {
-				//do something here
-			}
-			else {
-				// Read completed successfully.
-				if (readChar == 0x05) {//ENQ
-										//
-					SetEvent(GlobalVar::g_hEnqEvent);
+			DWORD dwRes;
+
+			char readChar;
+			BOOL fWaitingOnRead = FALSE;
+			DWORD eventRet;
+
+			if (!fWaitingOnRead) {
+				// Issue read operation.
+				if (!ReadFile(hComm, &readChar, 1, &eventRet, &osReader)) {
+					if (GetLastError() != ERROR_IO_PENDING) {
+						throw std::runtime_error("Error reading from port.");
+					}
+					else {
+						fWaitingOnRead = TRUE;
+					}
+
 				}
 				else {
+					// read completed immediately
+					if (readChar == 0x05) {//ENQ
+						SetEvent(GlobalVar::g_hEnqEvent);
+					}
+					//HandleASuccessfulRead(readChar, hwnd);
+				}
+			}
+
+			dwRes = WaitForSingleObject(osReader.hEvent, timeout);
+			switch (dwRes)
+			{
+			case WAIT_OBJECT_0:
+				if (!GetOverlappedResult(hComm, &osReader, &eventRet, FALSE)) {
+					//do something here
+				}
+				else {
+					// Read completed successfully.
+					if (readChar == 0x05) {//ENQ
+											//
+						SetEvent(GlobalVar::g_hEnqEvent);
+					}
+					else {
 #ifdef _DEBUG
-					//OutputDebugStringW(L"NON ENQ character\n");
+						//OutputDebugStringW(L"NON ENQ character\n");
 #endif
 					//ack not received
+					}
 				}
-			}
-			//  Reset flag so that another opertion can be issued.
-			fWaitingOnRead = FALSE;
+				//  Reset flag so that another opertion can be issued.
+				fWaitingOnRead = FALSE;
 
-			break;
+				break;
 
-		case WAIT_TIMEOUT:
+			case WAIT_TIMEOUT:
 #ifdef _DEBUG
-			OutputDebugStringW(L"WAIT_TIMEOUT\n");
+				OutputDebugStringW(L"WAIT_TIMEOUT\n");
 #endif
-			idle_create_write_thread(hWnd);
-			break;
+				idle_create_write_thread(hWnd);
+				break;
 
-		default:
-			break;
+			default:
+				break;
+			}
 		}
 	}
 

@@ -247,38 +247,5 @@ BOOL Connect(HWND& hWnd, LPCWSTR commName) {
 		return FALSE;
 	}
 
-	/*
-	if (comHandle != INVALID_HANDLE_VALUE)
-	{
-		CloseHandle(comHandle);
-	}
-
-	
-	if ((comHandle = CreateFile(commName, GENERIC_READ | GENERIC_WRITE, 0,
-		NULL, OPEN_EXISTING, NULL, NULL))
-		== INVALID_HANDLE_VALUE)
-	{
-		MessageBox(NULL, L"Error opening COM port:", L"", MB_OK);
-		return FALSE;
-	}
-	*/
-
-	/*
-	cc.dwSize = sizeof(COMMCONFIG);
-	cc.wVersion = 0x100;
-	GetCommConfig(comHandle, &cc, &cc.dwSize);
-	CommConfigDialog(commName, NULL, &cc);
-
-	GetCommTimeouts(comHandle, &cto);
-
-	// Set the new timeouts
-	cto.ReadIntervalTimeout = 1;
-	cto.ReadTotalTimeoutConstant = 1;
-	cto.ReadTotalTimeoutMultiplier = 1;
-	SetCommTimeouts(comHandle, &cto);
-	*/
-
-	//idle_setup(hWnd);
-
 	return true;
 }

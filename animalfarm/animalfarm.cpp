@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#include "globalvar.h"
 #include "animalfarm.h"
 #include "tx_wait_connect.h"
 #include "idle.h"
@@ -19,9 +20,6 @@ COMMCONFIG	cc;
 BOOL connected;
 COMMTIMEOUTS cto;
 HANDLE comHandle;
-
-extern HANDLE hReadThread;
-extern HANDLE hWriteThread;
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -185,8 +183,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     case WM_DESTROY:
-		TerminateThread(hReadThread, 0);
-		TerminateThread(hWriteThread, 0);
+		TerminateThread(GlobalVar::hReadThread, 0);
+		TerminateThread(GlobalVar::hWriteThread, 0);
         PostQuitMessage(0);
         break;
     default:

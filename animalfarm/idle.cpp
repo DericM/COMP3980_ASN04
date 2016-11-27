@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "globalvar.h"
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -24,10 +25,6 @@ OVERLAPPED osReader = { 0 };
 
 /*Flags*/
 bool fSendingFile = false;
-
-/*Thread handles*/
-HANDLE hReadThread;
-HANDLE hWriteThread;
 
 
 
@@ -327,7 +324,7 @@ void idle_create_write_thread(HWND& hWnd) {
 	OutputDebugStringW(L"Entering: idle_create_write_thread\n");
 #endif
 	//make new thread for reading
-	hReadThread = CreateThread(
+	GlobalVar::hReadThread = CreateThread(
 		NULL,
 		0,
 		write_thread_entry_point,

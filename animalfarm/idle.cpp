@@ -46,12 +46,9 @@ Create / set Idle Sequence timer duration
 Go to IDLE Wait State
 */
 void idle_setup(HWND& hWnd, LPCWSTR lpszCommName) {
+	LOGMESSAGE(L"\n");
+	LOGMESSAGE(L"Entering: idle_setup()\n");
 
-#ifdef _DEBUG
-	OutputDebugStringW(L"\n");
-	OutputDebugStringW(L"Entering: idle_setup()\n");
-#endif
-	lpszCommName = L"com3";//////////////////////////////////////////////
 	ENQ_COUNTER = 0;
 	idle_rand_timeout_reset();
 
@@ -63,16 +60,11 @@ void idle_setup(HWND& hWnd, LPCWSTR lpszCommName) {
 		throw std::runtime_error("Failed in Idle Setup");
 	}
 
-#ifdef _DEBUG
-	OutputDebugStringW(L"ENQ_COUNTER assigned value: ");
-	wchar_t buffer[256];
-	wsprintfW(buffer, L"%d\n", ENQ_COUNTER);
-	OutputDebugStringW(buffer);
-	OutputDebugStringW(L"Entering: idle_setup()\n");
-#endif
+	LOGMESSAGE(L"ENQ_COUNTER assigned value: ");
+	LOGMESSAGE(L"" + ENQ_COUNTER + '\n');
+	LOGMESSAGE(L"Entering: idle_setup()\n");
 
 	GlobalVar::hIdleWaitThread = CreateThread(NULL, 0, idle_wait, (LPVOID)hWnd, 0, 0);
-	//idle_wait(hWnd);
 }
 
 
@@ -80,10 +72,7 @@ void idle_setup(HWND& hWnd, LPCWSTR lpszCommName) {
 * Open the comm port.
 */
 void idle_open_port(HWND& hWnd, HANDLE& hComm, LPCWSTR& lpszCommName) {
-
-#ifdef _DEBUG
-	OutputDebugStringW(L"Entering: idle_open_port()\n");
-#endif
+	LOGMESSAGE(L"Entering: idle_open_port()\n");
 
 	COMMCONFIG cc;
 
@@ -119,24 +108,14 @@ void idle_open_port(HWND& hWnd, HANDLE& hComm, LPCWSTR& lpszCommName) {
 * Resets randTimeout to a value between 0-100
 */
 void idle_rand_timeout_reset() {
-
-#ifdef _DEBUG
-	OutputDebugStringW(L"\n");
-	OutputDebugStringW(L"Entering: idle_rand_timeout_reset()\n");
-#endif
+	LOGMESSAGE(L"\n");
+	LOGMESSAGE(L"Entering: idle_rand_timeout_reset()\n");
 
 	RAND_TIMEOUT = rand() % 101; //0-100
 
-#ifdef _DEBUG
-	OutputDebugStringW(L"RAND_TIMEOUT assigned value: ");
-	wchar_t buffer[256];
-	wsprintfW(buffer, L"%d\n", RAND_TIMEOUT);
-	OutputDebugStringW(buffer);
-#endif
+	LOGMESSAGE(L"RAND_TIMEOUT assigned value: ");
+	LOGMESSAGE(L"" + RAND_TIMEOUT + '\n');
 }
-
-
-
 
 /*
 IDLE Wait
@@ -165,32 +144,24 @@ If ENQ received event triggers
 	Stop Timers
 	start read Thread(starts IDLE Read State)
 */
-//void idle_wait(HWND& hWnd) {
 DWORD WINAPI idle_wait(LPVOID _hWnd) {
 	HWND hWnd = (HWND)_hWnd;
 
-#ifdef _DEBUG
-	OutputDebugStringW(L"\n");
-	OutputDebugStringW(L"Entering: idle_wait()\n");
-#endif
-
+	LOGMESSAGE(L"\n");
+	LOGMESSAGE(L"Entering: idle_wait()\n");
 
 	int timeout = IDLE_SEQ_TIMEOUT;
 
 	if (fSendingFile) {
-#ifdef _DEBUG
-		OutputDebugStringW(L"fSendingFile TRUE\n");
-		OutputDebugStringW(L"Switching to RAND_TIMEOUT\n");
-#endif
+		LOGMESSAGE(L"fSendingFile TRUE\n");
+		LOGMESSAGE(L"Switching to RAND_TIMEOUT\n");
+
 		idle_rand_timeout_reset();
 		timeout = RAND_TIMEOUT;
 	}
-#ifdef _DEBUG
-	OutputDebugStringW(L"timeout value: ");
-	wchar_t buffer[256];
-	wsprintfW(buffer, L"%d\n", timeout);
-	OutputDebugStringW(buffer);
-#endif
+
+	LOGMESSAGE(L"timeout value: ");
+	LOGMESSAGE(L"" + timeout + '\n');
 
 
 	try {
@@ -222,12 +193,8 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 		throw std::runtime_error("Reader Event is NULL");
 	}
 
+	LOGMESSAGE(L"Entering: idle_wait loop\n");
 
-
-
-#ifdef _DEBUG
-	OutputDebugStringW(L"Entering: idle_wait loop\n");
-#endif
 	while (true) {
 		if (GlobalVar::g_bWaitENQ)
 		{
@@ -250,10 +217,9 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 				}
 				else {
 					// read completed immediately
-					if (readChar == 0x05) {//ENQ
+					if (readChar == 0x05) { //ENQ
 						SetEvent(GlobalVar::g_hEnqEvent);
 					}
-					//HandleASuccessfulRead(readChar, hwnd);
 				}
 			}
 
@@ -271,10 +237,7 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 						SetEvent(GlobalVar::g_hEnqEvent);
 					}
 					else {
-#ifdef _DEBUG
-						//OutputDebugStringW(L"NON ENQ character\n");
-#endif
-					//ack not received
+						//ack not received
 					}
 				}
 				//  Reset flag so that another opertion can be issued.
@@ -283,9 +246,8 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 				break;
 
 			case WAIT_TIMEOUT:
-#ifdef _DEBUG
-				OutputDebugStringW(L"WAIT_TIMEOUT\n");
-#endif
+				LOGMESSAGE(L"WAIT_TIMEOUT\n");
+
 				idle_create_write_thread(hWnd);
 				break;
 
@@ -326,10 +288,7 @@ DWORD WINAPI idle_send_enq(LPVOID tData_) {
 
 
 void idle_create_event() {
-
-#ifdef _DEBUG
-	OutputDebugStringW(L"Entering: idle_create_event()\n");
-#endif
+	LOGMESSAGE(L"Entering: idle_create_event()\n");
 
 	osReader.hEvent = CreateEvent(
 		NULL,               // default security attributes
@@ -354,22 +313,12 @@ void idle_create_event() {
 	}
 }
 
-
-
-
-
-
 /*
 IDLE Read
 Read char
 Check if character is ENQ
 If character is ENQ stop timers go to Rx Connected State
 */
-
-
-
-
-
 
 /*
 IDLE Write
@@ -378,10 +327,9 @@ Send ENQ
 Got to Wait for Connect WFC Wait State
 */
 void idle_create_write_thread(HWND& hWnd) {
-#ifdef _DEBUG
-	OutputDebugStringW(L"\n");
-	OutputDebugStringW(L"Entering: idle_create_write_thread\n");
-#endif
+	LOGMESSAGE(L"\n");
+	LOGMESSAGE(L"Entering: idle_create_write_thread\n");
+
 	//make new thread for reading
 	GlobalVar::hReadThread = CreateThread(
 		NULL,
@@ -395,13 +343,9 @@ void idle_create_write_thread(HWND& hWnd) {
 
 
 DWORD WINAPI write_thread_entry_point(LPVOID pData) {
-#ifdef _DEBUG
-	OutputDebugStringW(L"\n");
-	OutputDebugStringW(L"Entering: write_thread_entry_point\n");
-#endif
+	LOGMESSAGE(L"\n");
+	LOGMESSAGE(L"Entering: write_thread_entry_point\n");
 	writeEnqToPort();
-
-
 
 	WaitForConnectAck((HWND)pData, hComm, osReader, ENQ_COUNTER);
 
@@ -409,29 +353,20 @@ DWORD WINAPI write_thread_entry_point(LPVOID pData) {
 
 }
 
-
-
-
 /*
 * exit the program.
 */
 void idle_close_port() {
-
-#ifdef _DEBUG
-	OutputDebugStringW(L"Entering: idle_close_port()\n");
-#endif
+	LOGMESSAGE(L"Entering: idle_close_port()\n");
 
 	CloseHandle(osReader.hEvent);
 	CloseHandle(hComm);
 }
 
-
-
 bool writeEnqToPort()
 {
-#ifdef _DEBUG
-	OutputDebugStringW(L"Entering: writeEnqToPort()\n");
-#endif
+	LOGMESSAGE(L"Entering: writeEnqToPort()\n");
+
 	OVERLAPPED osWrite = { 0 };
 	DWORD dwWritten;
 	DWORD dwToWrite = 1;
@@ -467,13 +402,6 @@ bool writeEnqToPort()
 	CloseHandle(osWrite.hEvent);
 	return fRes;
 }
-
-
-
-
-
-
-
 
 BOOL read_from_port(HANDLE hcomm, OVERLAPPED reader, int timout) {
 	char readChar;

@@ -20,6 +20,9 @@ BOOL connected;
 COMMTIMEOUTS cto;
 HANDLE comHandle;
 
+extern HANDLE hReadThread;
+extern HANDLE hWriteThread;
+
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
@@ -182,6 +185,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     case WM_DESTROY:
+		TerminateThread(hReadThread, 0);
+		TerminateThread(hWriteThread, 0);
         PostQuitMessage(0);
         break;
     default:
@@ -208,7 +213,8 @@ INT_PTR CALLBACK MainDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
 		{
 			EndDialog(hDlg, LOWORD(wParam));
-			PostQuitMessage(0);
+			SendMessage(GetParent(hDlg), WM_DESTROY, 0, 0);
+			//PostQuitMessage(0);
 			return (INT_PTR)TRUE;
 		}
 		break;

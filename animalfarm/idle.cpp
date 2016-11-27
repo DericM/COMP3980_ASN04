@@ -28,6 +28,15 @@ bool fSendingFile = false;
 
 
 
+
+struct EnqParams
+{
+	HWND hWnd;
+	int timer;
+};
+
+
+
 /*
 Open port
 Set Baud rate
@@ -186,7 +195,15 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 
 	try {
 		idle_create_event();
-		GlobalVar::g_hIdleSendENQThread = CreateThread(NULL, 0, idle_send_enq, (LPVOID)hWnd, 0, 0);
+
+		// Allocate memory for the struct on the heap
+		EnqParams *tData = new EnqParams();
+
+		// Initialize _all_ fields of the struct (malloc won't zero fill)
+		tData->hWnd = hWnd;
+		tData->timer = IDLE_SEQ_TIMEOUT;
+
+		GlobalVar::g_hIdleSendENQThread = CreateThread(NULL, 0, idle_send_enq, (LPVOID)tData, 0, 0);
 
 		if (ENQ_COUNTER > 3) {
 			idle_close_port();
@@ -281,18 +298,20 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 	return 0;
 }
 
-DWORD WINAPI idle_send_enq(LPVOID _hWnd) {
-	HWND hWnd = (HWND)_hWnd;
+DWORD WINAPI idle_send_enq(LPVOID tData_) {
+	EnqParams *tData = static_cast<EnqParams*>(tData_);
 
-	DWORD dwRes = WaitForSingleObject(GlobalVar::g_hEnqEvent, 500);
+	DWORD dwRes = WaitForSingleObject(GlobalVar::g_hEnqEvent, tData->timer);
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
+
+
 		break;
 
 	case WAIT_TIMEOUT:
 		GlobalVar::g_bWaitENQ = FALSE;
-		idle_create_write_thread(hWnd);
+		idle_create_write_thread(tData->hWnd);
 		break;
 
 	default:

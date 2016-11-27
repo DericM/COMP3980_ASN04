@@ -42,7 +42,7 @@ void idle_setup(HWND& hWnd, LPCWSTR lpszCommName) {
 	OutputDebugStringW(L"\n");
 	OutputDebugStringW(L"Entering: idle_setup()\n");
 #endif
-	lpszCommName = L"com5";//////////////////////////////////////////////
+	lpszCommName = L"com3";//////////////////////////////////////////////
 	ENQ_COUNTER = 0;
 	idle_rand_timeout_reset();
 
@@ -62,7 +62,8 @@ void idle_setup(HWND& hWnd, LPCWSTR lpszCommName) {
 	OutputDebugStringW(L"Entering: idle_setup()\n");
 #endif
 
-	idle_wait(hWnd);
+	GlobalVar::hIdleWaitThread = CreateThread(NULL, 0, idle_wait, (LPVOID)hWnd, 0, 0);
+	//idle_wait(hWnd);
 }
 
 
@@ -153,7 +154,9 @@ If ENQ received event triggers
 	Stop Timers
 	start read Thread(starts IDLE Read State)
 */
-void idle_wait(HWND& hWnd) {
+//void idle_wait(HWND& hWnd) {
+DWORD WINAPI idle_wait(LPVOID _hWnd) {
+	HWND hWnd = (HWND)_hWnd;
 
 #ifdef _DEBUG
 	OutputDebugStringW(L"\n");
@@ -181,10 +184,11 @@ void idle_wait(HWND& hWnd) {
 
 	try {
 		idle_create_event();
+		GlobalVar::g_hIdleSendENQThread = CreateThread(NULL, 0, idle_send_enq, (LPVOID)hWnd, 0, 0);
 
 		if (ENQ_COUNTER > 3) {
 			idle_close_port();
-			return;
+			return 0;
 		}
 		
 		
@@ -194,12 +198,6 @@ void idle_wait(HWND& hWnd) {
 		std::cerr << e.what() << std::endl;
 		throw std::runtime_error("Failed in Idle Wait");
 	}
-
-	DWORD dwRes;
-
-	char readChar;
-	BOOL fWaitingOnRead = false;
-	DWORD eventRet;
 
 	if (osReader.hEvent == NULL) {
 		throw std::runtime_error("Reader Event is NULL");
@@ -211,7 +209,12 @@ void idle_wait(HWND& hWnd) {
 #ifdef _DEBUG
 	OutputDebugStringW(L"Entering: idle_wait loop\n");
 #endif
-	while (true) {
+	while (GlobalVar::g_bWaitENQ) {
+		DWORD dwRes;
+
+		char readChar;
+		BOOL fWaitingOnRead = FALSE;
+		DWORD eventRet;
 
 		if (!fWaitingOnRead) {
 			// Issue read operation.
@@ -227,14 +230,13 @@ void idle_wait(HWND& hWnd) {
 			else {
 				// read completed immediately
 				if (readChar == 0x05) {//ENQ
-									   //
+					SetEvent(GlobalVar::g_hEnqEvent);
 				}
 				//HandleASuccessfulRead(readChar, hwnd);
 			}
 		}
 
 		dwRes = WaitForSingleObject(osReader.hEvent, timeout);
-
 		switch (dwRes)
 		{
 		case WAIT_OBJECT_0:
@@ -244,11 +246,12 @@ void idle_wait(HWND& hWnd) {
 			else {
 				// Read completed successfully.
 				if (readChar == 0x05) {//ENQ
-									   //
+										//
+					SetEvent(GlobalVar::g_hEnqEvent);
 				}
 				else {
 #ifdef _DEBUG
-					OutputDebugStringW(L"NON ENQ character\n");
+					//OutputDebugStringW(L"NON ENQ character\n");
 #endif
 					//ack not received
 				}
@@ -270,8 +273,29 @@ void idle_wait(HWND& hWnd) {
 		}
 	}
 
+	return 0;
+}
 
+DWORD WINAPI idle_send_enq(LPVOID _hWnd) {
+	HWND hWnd = (HWND)_hWnd;
 
+	DWORD dwRes = WaitForSingleObject(GlobalVar::g_hEnqEvent, 500);
+	switch (dwRes)
+	{
+	case WAIT_OBJECT_0:
+		break;
+
+	case WAIT_TIMEOUT:
+		GlobalVar::g_bWaitENQ = FALSE;
+		idle_create_write_thread(hWnd);
+		break;
+
+	default:
+		GlobalVar::g_bWaitENQ = FALSE;
+		break;
+	}
+
+	return 0;
 }
 
 
@@ -291,6 +315,17 @@ void idle_create_event() {
 	);
 
 	if (osReader.hEvent == NULL) {
+		throw std::runtime_error("Failed to create event");
+	}
+
+	GlobalVar::g_hEnqEvent = CreateEvent(
+		NULL,               // default security attributes
+		TRUE,               // manual-reset event
+		FALSE,              // initial state is nonsignaled
+		NULL    // object name
+	);
+
+	if (GlobalVar::g_hEnqEvent == NULL) {
 		throw std::runtime_error("Failed to create event");
 	}
 }
@@ -377,7 +412,10 @@ bool writeEnqToPort()
 	DWORD dwWritten;
 	DWORD dwToWrite = 1;
 	bool fRes;
-	char ENQ = 0x05;
+	int ENQ = 0x5;
+	char buff[16];
+	//sprintf_s(buff, "%c", static_cast<char>(0x41));
+	sprintf_s(buff, "%s", "test");
 
 	// Create this writes OVERLAPPED structure hEvent.
 	osWrite.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
@@ -386,7 +424,7 @@ bool writeEnqToPort()
 		return FALSE;
 
 	// Issue write.
-	if (!WriteFile(hComm, &ENQ, dwToWrite, &dwWritten, &osWrite)) {
+	if (!WriteFile(hComm, buff, strlen(buff), &dwWritten, &osWrite)) {
 		if (GetLastError() != ERROR_IO_PENDING) {
 			// WriteFile failed, but it isn't delayed. Report error and abort.
 			fRes = FALSE;

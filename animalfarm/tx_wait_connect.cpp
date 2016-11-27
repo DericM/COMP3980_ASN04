@@ -3,6 +3,10 @@
 
 int ENQ_TIMER = 1000;
 BOOL WaitForConnectAck(HWND hwnd, HANDLE hcomm, OVERLAPPED reader, int& enqCounter) {
+#ifdef _DEBUG
+	OutputDebugStringW(L"\n");
+	OutputDebugStringW(L"Entering: WaitForConnectAck\n");
+#endif
 	char readChar;
 	BOOL receivedAck = false;
 	BOOL fWaitingOnRead = false;

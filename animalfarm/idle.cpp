@@ -42,14 +42,15 @@ Go to IDLE Wait State
 void idle_setup(HWND& hWnd, LPCWSTR lpszCommName) {
 
 #ifdef _DEBUG
+	OutputDebugStringW(L"\n");
 	OutputDebugStringW(L"Entering: idle_setup()\n");
 #endif
-	
+	lpszCommName = L"com5";//////////////////////////////////////////////
 	ENQ_COUNTER = 0;
 	idle_rand_timeout_reset();
 
 	try {
-		idle_open_port(hWnd, hComm, lpszCommName);
+		idle_open_port(hWnd, hComm, lpszCommName);////////////////////////
 	}
 	catch (std::exception const& e) {
 		std::cerr << e.what() << std::endl;
@@ -111,6 +112,7 @@ void idle_open_port(HWND& hWnd, HANDLE& hComm, LPCWSTR& lpszCommName) {
 void idle_rand_timeout_reset() {
 
 #ifdef _DEBUG
+	OutputDebugStringW(L"\n");
 	OutputDebugStringW(L"Entering: idle_rand_timeout_reset()\n");
 #endif
 
@@ -197,17 +199,65 @@ void idle_wait(HWND& hWnd) {
 	}
 
 	DWORD dwRes;
+
+	char readChar;
+	BOOL fWaitingOnRead = false;
+	DWORD eventRet;
+
+	if (osReader.hEvent == NULL) {
+		throw std::runtime_error("Reader Event is NULL");
+	}
+
+
+
+
 #ifdef _DEBUG
 	OutputDebugStringW(L"Entering: idle_wait loop\n");
 #endif
 	while (true) {
 
+		if (!fWaitingOnRead) {
+			// Issue read operation.
+			if (!ReadFile(hComm, &readChar, 1, &eventRet, &osReader)) {
+				if (GetLastError() != ERROR_IO_PENDING) {
+					throw std::runtime_error("Error reading from port.");
+				}
+				else {
+					fWaitingOnRead = TRUE;
+				}
+
+			}
+			else {
+				// read completed immediately
+				if (readChar == 0x05) {//ENQ
+									   //
+				}
+				//HandleASuccessfulRead(readChar, hwnd);
+			}
+		}
 
 		dwRes = WaitForSingleObject(osReader.hEvent, timeout);
 
 		switch (dwRes)
 		{
 		case WAIT_OBJECT_0:
+			if (!GetOverlappedResult(hComm, &osReader, &eventRet, FALSE)) {
+				//do something here
+			}
+			else {
+				// Read completed successfully.
+				if (readChar == 0x05) {//ENQ
+									   //
+				}
+				else {
+#ifdef _DEBUG
+					OutputDebugStringW(L"NON ENQ character\n");
+#endif
+					//ack not received
+				}
+			}
+			//  Reset flag so that another opertion can be issued.
+			fWaitingOnRead = FALSE;
 
 			break;
 
@@ -289,6 +339,13 @@ void idle_create_write_thread(HWND& hWnd) {
 
 
 DWORD WINAPI write_thread_entry_point(LPVOID pData) {
+#ifdef _DEBUG
+	OutputDebugStringW(L"\n");
+	OutputDebugStringW(L"Entering: write_thread_entry_point\n");
+#endif
+	writeEnqToPort();
+
+
 
 	WaitForConnectAck((HWND)pData, hComm, osReader, ENQ_COUNTER);
 
@@ -314,28 +371,16 @@ void idle_close_port() {
 
 
 
-
-
-void idle_read_ack() {
-
-
-
-
-
-
-
-
-
-}
-
-
-bool writeToPort(char * lpBuf,
-	DWORD dwToWrite,
-	HANDLE& hComm)
+bool writeEnqToPort()
 {
+#ifdef _DEBUG
+	OutputDebugStringW(L"Entering: writeEnqToPort()\n");
+#endif
 	OVERLAPPED osWrite = { 0 };
 	DWORD dwWritten;
+	DWORD dwToWrite = 1;
 	bool fRes;
+	char ENQ = 0x05;
 
 	// Create this writes OVERLAPPED structure hEvent.
 	osWrite.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
@@ -344,7 +389,7 @@ bool writeToPort(char * lpBuf,
 		return FALSE;
 
 	// Issue write.
-	if (!WriteFile(hComm, lpBuf, dwToWrite, &dwWritten, &osWrite)) {
+	if (!WriteFile(hComm, &ENQ, dwToWrite, &dwWritten, &osWrite)) {
 		if (GetLastError() != ERROR_IO_PENDING) {
 			// WriteFile failed, but it isn't delayed. Report error and abort.
 			fRes = FALSE;
@@ -412,7 +457,7 @@ BOOL read_from_port(HANDLE hcomm, OVERLAPPED reader, int timout) {
 			}
 			else {
 				// Read completed successfully.
-				if (readChar == 0x06) {//ACK
+				if (readChar == 0x05) {//ENQ
 					//
 				}
 				else {

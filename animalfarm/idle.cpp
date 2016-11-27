@@ -267,8 +267,8 @@ DWORD WINAPI idle_send_enq(LPVOID tData_) {
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
-
-
+		tData->timer = RAND_TIMEOUT;
+		idle_send_enq((LPVOID)tData);
 		break;
 
 	case WAIT_TIMEOUT:

@@ -102,6 +102,8 @@ void idle_open_port(HWND& hWnd, HANDLE& hComm, LPCWSTR& lpszCommName) {
 		throw std::runtime_error("Failed to open Comm Port");
 	}
 
+	SetCommState(hComm, &cc.dcb);
+
 }
 
 /*

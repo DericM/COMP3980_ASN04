@@ -412,10 +412,7 @@ bool writeEnqToPort()
 	DWORD dwWritten;
 	DWORD dwToWrite = 1;
 	bool fRes;
-	int ENQ = 0x5;
-	char buff[16];
-	//sprintf_s(buff, "%c", static_cast<char>(0x41));
-	sprintf_s(buff, "%s", "test");
+	char ENQ = 0x05;
 
 	// Create this writes OVERLAPPED structure hEvent.
 	osWrite.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
@@ -424,7 +421,7 @@ bool writeEnqToPort()
 		return FALSE;
 
 	// Issue write.
-	if (!WriteFile(hComm, buff, strlen(buff), &dwWritten, &osWrite)) {
+	if (!WriteFile(hComm, &ENQ, dwToWrite, &dwWritten, &osWrite)) {
 		if (GetLastError() != ERROR_IO_PENDING) {
 			// WriteFile failed, but it isn't delayed. Report error and abort.
 			fRes = FALSE;

@@ -57,6 +57,12 @@
     <ClInclude Include="globalvar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="receive.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="send.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -97,6 +103,15 @@
     </ClCompile>
     <ClCompile Include="globalvar.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="idle_session.cpp">
+      <Filter>Source Files\session</Filter>
+    </ClCompile>
+    <ClCompile Include="send.cpp">
+      <Filter>Source Files\physical</Filter>
+    </ClCompile>
+    <ClCompile Include="receive.cpp">
+      <Filter>Source Files\physical</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

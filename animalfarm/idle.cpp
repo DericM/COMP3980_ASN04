@@ -147,8 +147,7 @@ If ENQ received event triggers
 DWORD WINAPI idle_wait(LPVOID _hWnd) {
 	HWND hWnd = (HWND)_hWnd;
 
-	LOGMESSAGE(L"\n");
-	LOGMESSAGE(L"Entering: idle_wait()\n");
+	LOGMESSAGE(L"\nEntering: idle_wait()\n");
 
 	int timeout = IDLE_SEQ_TIMEOUT;
 
@@ -160,8 +159,7 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 		timeout = RAND_TIMEOUT;
 	}
 
-	LOGMESSAGE(L"timeout value: ");
-	LOGMESSAGE(L"" + timeout + '\n');
+	LOGMESSAGE(L"timeout value: " + timeout + '\n');
 
 
 	try {
@@ -327,8 +325,7 @@ Send ENQ
 Got to Wait for Connect WFC Wait State
 */
 void idle_create_write_thread(HWND& hWnd) {
-	LOGMESSAGE(L"\n");
-	LOGMESSAGE(L"Entering: idle_create_write_thread\n");
+	LOGMESSAGE(L"\nEntering: idle_create_write_thread\n");
 
 	//make new thread for reading
 	GlobalVar::hReadThread = CreateThread(
@@ -343,8 +340,7 @@ void idle_create_write_thread(HWND& hWnd) {
 
 
 DWORD WINAPI write_thread_entry_point(LPVOID pData) {
-	LOGMESSAGE(L"\n");
-	LOGMESSAGE(L"Entering: write_thread_entry_point\n");
+	LOGMESSAGE(L"\nEntering: write_thread_entry_point\n");
 	writeEnqToPort();
 
 	WaitForConnectAck((HWND)pData, hComm, osReader, ENQ_COUNTER);

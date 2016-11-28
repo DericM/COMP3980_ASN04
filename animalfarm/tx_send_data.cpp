@@ -10,7 +10,7 @@ SP Set Up
 		go back to IDLE Set Up
 	go to Wait For Ack WFA Wait
 */
-void txsd_send(char frame[1027]) {
+bool txsd_send(char frame[1027]) {
 	LOGMESSAGE(L"\nEntering: txsd_send() ");
 
 	OVERLAPPED osWrite = { 0 };
@@ -26,14 +26,14 @@ void txsd_send(char frame[1027]) {
 	}
 
 	// Issue write.
-	if (!WriteFile(GlobalVar::hComm, &frame, dwToWrite, &dwWritten, &osWrite)) {
+	if (!WriteFile(GlobalVar::g_hComm, &frame, dwToWrite, &dwWritten, &osWrite)) {
 		if (GetLastError() != ERROR_IO_PENDING) {
 			// WriteFile failed, but it isn't delayed. Report error and abort.
 			fRes = FALSE;
 		}
 		else {
 			// Write is pending.
-			if (!GetOverlappedResult(GlobalVar::hComm, &osWrite, &dwWritten, TRUE)) {
+			if (!GetOverlappedResult(GlobalVar::g_hComm, &osWrite, &dwWritten, TRUE)) {
 				fRes = FALSE;
 			}
 			else {

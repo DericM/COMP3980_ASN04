@@ -146,6 +146,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="animalfarm.h" />
+    <ClInclude Include="globalvar.h" />
     <ClInclude Include="idle.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="rx_connect.h" />
@@ -158,6 +159,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="animalfarm.cpp" />
+    <ClCompile Include="globalvar.cpp" />
     <ClCompile Include="idle.cpp" />
     <ClCompile Include="rx_check_error.cpp" />
     <ClCompile Include="rx_connect.cpp" />

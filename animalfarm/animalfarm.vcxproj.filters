@@ -54,7 +54,7 @@
     <ClInclude Include="tx_wait_ack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tx_get_data.h">
+    <ClInclude Include="globalvar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -94,6 +94,9 @@
     </ClCompile>
     <ClCompile Include="tx_get_data.cpp">
       <Filter>Source Files\physical</Filter>
+    </ClCompile>
+    <ClCompile Include="globalvar.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

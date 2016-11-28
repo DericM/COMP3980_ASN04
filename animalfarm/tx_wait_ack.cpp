@@ -3,6 +3,7 @@
 
 int TRANSMISSION_TIMER = 1000;
 BOOL WaitForReceivedAck(HANDLE hwnd, HANDLE hcomm, OVERLAPPED reader) {
+
 	char readChar;
 	BOOL receivedAck = false;
 	BOOL fWaitingOnRead = false;

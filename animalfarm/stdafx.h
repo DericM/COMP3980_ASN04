@@ -19,6 +19,12 @@
 #include <memory.h>
 #include <tchar.h>
 
+#ifdef _DEBUG
+#define LOGMESSAGE( str ) OutputDebugString( str );
+#else
+#define LOGMESSAGE( str )
+#endif
+
 
 
 // TODO: reference additional headers your program requires here

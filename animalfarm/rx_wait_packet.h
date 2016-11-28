@@ -1,4 +1,7 @@
 #pragma once
 
 
-BOOL waitFOrPacketSetUp(HANDLE hwnd, HANDLE hcomm, OVERLAPPED reader);
+BOOL rxwp_setup(HANDLE hwnd);
+void rxwp_create_event();
+BOOL rxwp_readFromPort();
+DWORD WINAPI rxwp_check_event(LPVOID var);

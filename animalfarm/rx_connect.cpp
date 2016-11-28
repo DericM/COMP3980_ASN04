@@ -1,7 +1,8 @@
 #include "stdafx.h"
-#include "rx_connect.h"
-
-
+#include <winsock2.h>
+#include <Ws2tcpip.h>
+#include <stdio.h>
+#include <string>
 // Link with ws2_32.lib
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -11,7 +12,7 @@ using namespace std;
 
 	
 
-void send_ack() {
+DWORD WINAPI send_ack(LPVOID var) {
 	int result;
 	char ACK = 0x06;
 
@@ -29,7 +30,10 @@ void send_ack() {
 
 	
 	result = send(ConnectSocket, &ACK, 1, 0);			//send ACK through socket
+	//string result1 = to_string(3);
+	//MessageBox(NULL, result1.c_str, L"asdf", MB_OK);
 
+	return 0;
 }
 
 

@@ -13,6 +13,7 @@ namespace GlobalVar
 	HANDLE g_hReceivingWaitForACK;
 
 	HANDLE g_hEnqEvent;
+	HANDLE g_hRXSynEvent;
 
 	BOOL g_bWaitENQ = TRUE;
 	HANDLE g_hComm;

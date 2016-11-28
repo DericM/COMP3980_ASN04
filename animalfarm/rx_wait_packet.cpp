@@ -8,26 +8,28 @@
 #include "rx_wait_packet.h"
 
 int PACKET_TIMER = 100000;
+bool waitForSYN = true;
 OVERLAPPED osReader = {0};
 
-BOOL rxwp_setup(HANDLE hwnd, HANDLE hcomm) {
-	
-}
-
-
-DWORD WINAPI idle_wait(LPVOID _hWnd) {
+BOOL rxwp_setup(HANDLE _hWnd) {
 	HWND hWnd = (HWND)_hWnd;
 
 	rxwp_create_event();
 
 
-	//GlobalVar::g_hReceivingWaitForACK = CreateThread(NULL, 0, rxwp_check_event, NULL, 0, 0);
+	GlobalVar::g_hReceivingWaitForACK = CreateThread(NULL, 0, rxwp_check_event, NULL, 0, 0);
 
 	LOGMESSAGE(L"Entering: idle_wait loop\n");
 
+	rxwp_readFromPort();
+
+	return true;
+}
+
+BOOL rxwp_readFromPort() {
+
 	while (true) {
-		if (GlobalVar::g_bWaitENQ)
-		{
+		if (waitForSYN){
 			DWORD dwRes;
 
 			char readChar;
@@ -36,7 +38,7 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 
 			if (!fWaitingOnRead) {
 				// Issue read operation.
-				if (!ReadFile(hComm, &readChar, 1, &eventRet, &osReader)) {
+				if (!ReadFile(GlobalVar::g_hComm, &readChar, 1, &eventRet, &osReader)) {
 					if (GetLastError() != ERROR_IO_PENDING) {
 						throw std::runtime_error("Error reading from port.");
 					}
@@ -53,21 +55,21 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 				}
 			}
 
-			dwRes = WaitForSingleObject(osReader.hEvent, timeout);
+			dwRes = WaitForSingleObject(osReader.hEvent, 10000);
 			switch (dwRes)
 			{
 			case WAIT_OBJECT_0:
-				if (!GetOverlappedResult(hComm, &osReader, &eventRet, FALSE)) {
+				if (!GetOverlappedResult(GlobalVar::g_hComm, &osReader, &eventRet, FALSE)) {
 					//do something here
 				}
 				else {
 					// Read completed successfully.
-					if (readChar == 0x05) {//ENQ
+					if (readChar == 0x16) {//SYN
 										   //
-						SetEvent(GlobalVar::g_hEnqEvent);
+						SetEvent(GlobalVar::g_hRXSynEvent);
 					}
 					else {
-						//ack not received
+						//SYN not received
 					}
 				}
 				//  Reset flag so that another opertion can be issued.
@@ -77,8 +79,7 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 
 			case WAIT_TIMEOUT:
 				LOGMESSAGE(L"WAIT_TIMEOUT\n");
-
-				idle_create_write_thread(hWnd);
+				//didnt get char from port
 				break;
 
 			default:
@@ -92,7 +93,7 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 
 
 
-DWORD WINAPI rxwp_check_event(LPVOID tData_) {
+DWORD WINAPI rxwp_check_event(LPVOID var) {
 
 	DWORD dwRes = WaitForSingleObject(GlobalVar::g_hEnqEvent, PACKET_TIMER);
 	switch (dwRes)
@@ -105,6 +106,7 @@ DWORD WINAPI rxwp_check_event(LPVOID tData_) {
 	case WAIT_TIMEOUT:
 		//no packet
 		//go to Idle wait
+		waitForSYN = false;
 		break;
 
 	default:
@@ -129,14 +131,14 @@ void rxwp_create_event() {
 		throw std::runtime_error("Failed to create event");
 	}
 
-	GlobalVar::g_hEnqEvent = CreateEvent(
+	GlobalVar::g_hRXSynEvent = CreateEvent(
 		NULL,               // default security attributes
 		TRUE,               // manual-reset event
 		FALSE,              // initial state is nonsignaled
 		NULL    // object name
 		);
 
-	if (GlobalVar::g_hEnqEvent == NULL) {
-		throw std::runtime_error("Failed to create event");
+	if (GlobalVar::g_hRXSynEvent == NULL) {
+		throw std::runtime_error("Failed to create  WP Packet event");
 	}
 }

@@ -171,7 +171,7 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 		enqParam.hWnd = hWnd;
 		enqParam.timer = IDLE_SEQ_TIMEOUT;
 
-		GlobalVar::g_hIdleSendENQThread = CreateThread(NULL, 0, idle_send_enq, &enqParam, 0, 0);
+		GlobalVar::g_hIdleSendENQThread = CreateThread(NULL, 0, idle_send_enq, 0, 0, 0);
 
 		if (ENQ_COUNTER > 3) {
 			idle_close_port();
@@ -255,9 +255,8 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 }
 
 DWORD WINAPI idle_send_enq(LPVOID tData_) {
-	EnqParams* tData = static_cast<EnqParams*>(tData_);
 
-	DWORD dwRes = WaitForSingleObject(GlobalVar::g_hEnqEvent, tData->timer);
+	DWORD dwRes = WaitForSingleObject(GlobalVar::g_hEnqEvent, enqParam.timer);
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
@@ -267,12 +266,12 @@ DWORD WINAPI idle_send_enq(LPVOID tData_) {
 
 	case WAIT_TIMEOUT:
 		if (!bSendingFile) {
-			tData->timer = RAND_TIMEOUT;
+			enqParam.timer = RAND_TIMEOUT;
 			bSendingFile = true;
-			idle_send_enq(tData);
+			idle_send_enq(NULL);
 		} else {
 			GlobalVar::g_bWaitENQ = FALSE;
-			idle_create_write_thread(tData->hWnd);
+			idle_create_write_thread(enqParam.hWnd);
 		}
 		break;
 

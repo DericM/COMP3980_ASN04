@@ -61,7 +61,6 @@ BOOL WaitForConnectAck(HWND& hWnd, HANDLE& hcomm, int& enqCounter) {
 
 DWORD WINAPI tx_wait_connect(LPVOID pData_)
 {
-	ConnectParams* pData = static_cast<ConnectParams*>(pData_);
 	while (true)
 	{
 		if (GlobalVar::g_bWaitACK)
@@ -71,14 +70,14 @@ DWORD WINAPI tx_wait_connect(LPVOID pData_)
 			BOOL fWaitingOnRead = false;
 			DWORD eventRet;
 
-			if (pData->reader.hEvent == NULL) {
+			if (conParam.reader.hEvent == NULL) {
 				//reader is null
 				LOGMESSAGE(NULL, L"Reader Event is NULL", L"", MB_OK);
 				return false;
 			}
 			if (!fWaitingOnRead) {
 				// Issue read operation.
-				if (!ReadFile(pData->hcomm, &readChar, 1, &eventRet, &pData->reader)) {
+				if (!ReadFile(conParam.hcomm, &readChar, 1, &eventRet, &conParam.reader)) {
 					if (GetLastError() != ERROR_IO_PENDING) {
 					}
 					else {
@@ -95,11 +94,11 @@ DWORD WINAPI tx_wait_connect(LPVOID pData_)
 			}
 
 			if (fWaitingOnRead) {
-				eventRet = WaitForSingleObject(pData->reader.hEvent, ENQ_TIMER);
+				eventRet = WaitForSingleObject(conParam.reader.hEvent, ENQ_TIMER);
 
 				switch (eventRet) {
 				case WAIT_OBJECT_0:
-					if (!GetOverlappedResult(pData->hcomm, &pData->reader, &eventRet, FALSE)) {
+					if (!GetOverlappedResult(conParam.hcomm, &conParam.reader, &eventRet, FALSE)) {
 						//do something here
 					}
 					else {
@@ -132,9 +131,7 @@ DWORD WINAPI tx_wait_connect(LPVOID pData_)
 
 DWORD WINAPI tx_wait_ack(LPVOID pData_)
 {
-	AckParams* pData = static_cast<AckParams*>(pData_);
-
-	DWORD dwRes = WaitForSingleObject(GlobalVar::g_hAckEvent, pData->timer);
+	DWORD dwRes = WaitForSingleObject(GlobalVar::g_hAckEvent, ackParam.timer);
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:

@@ -349,7 +349,7 @@ DWORD WINAPI write_thread_entry_point(LPVOID pData) {
 	LOGMESSAGE(L"Entering: write_thread_entry_point\n");
 	writeEnqToPort();
 
-	WaitForConnectAck((HWND&)pData, GlobalVar::g_hComm, osReader, ENQ_COUNTER);
+	WaitForConnectAck((HWND&)pData, GlobalVar::g_hComm, ENQ_COUNTER);
 
 	return TRUE;
 

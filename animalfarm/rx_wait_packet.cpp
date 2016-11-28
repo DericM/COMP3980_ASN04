@@ -9,7 +9,7 @@
 
 int PACKET_TIMER = 100000;
 bool waitForSYN = true;
-OVERLAPPED osReader = {0};
+OVERLAPPED reader = {0};
 
 BOOL rxwp_setup(HANDLE _hWnd) {
 	HWND hWnd = (HWND)_hWnd;
@@ -38,7 +38,7 @@ BOOL rxwp_readFromPort() {
 
 			if (!fWaitingOnRead) {
 				// Issue read operation.
-				if (!ReadFile(GlobalVar::g_hComm, &readChar, 1, &eventRet, &osReader)) {
+				if (!ReadFile(GlobalVar::g_hComm, &readChar, 1, &eventRet, &reader)) {
 					if (GetLastError() != ERROR_IO_PENDING) {
 						throw std::runtime_error("Error reading from port.");
 					}
@@ -55,11 +55,11 @@ BOOL rxwp_readFromPort() {
 				}
 			}
 
-			dwRes = WaitForSingleObject(osReader.hEvent, 10000);
+			dwRes = WaitForSingleObject(reader.hEvent, 10000);
 			switch (dwRes)
 			{
 			case WAIT_OBJECT_0:
-				if (!GetOverlappedResult(GlobalVar::g_hComm, &osReader, &eventRet, FALSE)) {
+				if (!GetOverlappedResult(GlobalVar::g_hComm, &reader, &eventRet, FALSE)) {
 					//do something here
 				}
 				else {
@@ -120,14 +120,14 @@ DWORD WINAPI rxwp_check_event(LPVOID var) {
 void rxwp_create_event() {
 	LOGMESSAGE(L"Entering: idle_create_event()\n");
 
-	osReader.hEvent = CreateEvent(
+	reader.hEvent = CreateEvent(
 		NULL,               // default security attributes
 		TRUE,               // manual-reset event
 		FALSE,              // initial state is nonsignaled
 		NULL    // object name
 		);
 
-	if (osReader.hEvent == NULL) {
+	if (reader.hEvent == NULL) {
 		throw std::runtime_error("Failed to create event");
 	}
 

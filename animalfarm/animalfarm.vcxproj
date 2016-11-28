@@ -152,6 +152,7 @@
     <ClInclude Include="rx_wait_packet.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="tx_get_data.h" />
     <ClInclude Include="tx_wait_ack.h" />
     <ClInclude Include="tx_wait_connect.h" />
   </ItemGroup>

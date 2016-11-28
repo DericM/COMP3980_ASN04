@@ -1,5 +1,14 @@
 #pragma once
 #include "stdafx.h"
+#include <iostream>
+#include <exception>
+#include <regex>
+
+//functions for tx_Get_Data
+bool hasSpecialChars(LPCWSTR pFile);
+int readFile(OVERLAPPED osReader);
+void getFilePosition();
+void createPacket(int data);
 
 
 
@@ -26,3 +35,4 @@ void idle_wait();
 void idle_open_port(HWND& hWnd, HANDLE& hComm, LPCWSTR& lpszCommName);
 void idle_rand_timeout_reset();
 void idle_create_enq_event();
+

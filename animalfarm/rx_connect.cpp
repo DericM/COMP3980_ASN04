@@ -1,8 +1,7 @@
 #include "stdafx.h"
-#include <winsock2.h>
-#include <Ws2tcpip.h>
-#include <stdio.h>
-#include <string>
+#include "rx_connect.h"
+
+
 // Link with ws2_32.lib
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -30,8 +29,7 @@ void send_ack() {
 
 	
 	result = send(ConnectSocket, &ACK, 1, 0);			//send ACK through socket
-	//string result1 = to_string(3);
-	//MessageBox(NULL, result1.c_str, L"asdf", MB_OK);
+
 }
 
 

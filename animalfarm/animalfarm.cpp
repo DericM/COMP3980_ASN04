@@ -186,6 +186,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		TerminateThread(GlobalVar::g_hReadThread, 0);
 		TerminateThread(GlobalVar::g_hWriteThread, 0);
 		TerminateThread(GlobalVar::g_hIdleSendENQThread, 0);
+		TerminateThread(GlobalVar::g_hReceivingThread, 0);
         PostQuitMessage(0);
         break;
     default:

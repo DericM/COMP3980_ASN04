@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "globalvar.h"
+#include "send.h"
 
 /*
 	Send an ACK through ipc_send_to_port

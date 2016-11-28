@@ -13,7 +13,7 @@ SP Set Up
 		go back to IDLE Set Up
 	go to Wait For Ack WFA Wait
 */
-bool txsd_send(char frame[1027]) {
+void txsd_send(char frame[1027]) {
 	LOGMESSAGE(L"\nEntering: txsd_send() - ");
 
 	//send packet

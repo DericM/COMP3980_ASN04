@@ -183,9 +183,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     case WM_DESTROY:
-		TerminateThread(GlobalVar::hReadThread, 0);
-		TerminateThread(GlobalVar::hWriteThread, 0);
+		TerminateThread(GlobalVar::g_hReadThread, 0);
+		TerminateThread(GlobalVar::g_hWriteThread, 0);
 		TerminateThread(GlobalVar::g_hIdleSendENQThread, 0);
+		TerminateThread(GlobalVar::g_hReceivingThread, 0);
         PostQuitMessage(0);
         break;
     default:

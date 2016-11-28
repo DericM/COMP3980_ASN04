@@ -13,7 +13,7 @@ DWORD WINAPI idle_send_enq(LPVOID);
 
 
 
-void idle_open_port(HWND& hWnd, HANDLE& hComm, LPCWSTR& lpszCommName);
+void idle_open_port(HWND& hWnd, LPCWSTR& lpszCommName);
 void idle_close_port();
 
 void idle_rand_timeout_reset();

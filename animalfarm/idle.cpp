@@ -8,7 +8,7 @@
 #include "rx_connect.h"
 
 
-HANDLE hComm;
+
 //LPCWSTR	lpszCommName;
 
 /*Counters*/
@@ -54,7 +54,7 @@ void idle_setup(HWND& hWnd, LPCWSTR lpszCommName) {
 	idle_rand_timeout_reset();
 
 	try {
-		idle_open_port(hWnd, hComm, lpszCommName);////////////////////////
+		idle_open_port(hWnd, lpszCommName);////////////////////////
 	}
 	catch (std::exception const& e) {
 		std::cerr << e.what() << std::endl;
@@ -72,7 +72,7 @@ void idle_setup(HWND& hWnd, LPCWSTR lpszCommName) {
 /* 
 * Open the comm port.
 */
-void idle_open_port(HWND& hWnd, HANDLE& hComm, LPCWSTR& lpszCommName) {
+void idle_open_port(HWND& hWnd, LPCWSTR& lpszCommName) {
 	LOGMESSAGE(L"Entering: idle_open_port()\n");
 
 	COMMCONFIG cc;
@@ -80,13 +80,13 @@ void idle_open_port(HWND& hWnd, HANDLE& hComm, LPCWSTR& lpszCommName) {
 	//set comm settings
 	cc.dwSize = sizeof(COMMCONFIG);
 	cc.wVersion = 0x100;
-	GetCommConfig(hComm, &cc, &cc.dwSize);
+	GetCommConfig(GlobalVar::g_hComm, &cc, &cc.dwSize);
 	if (!CommConfigDialog(lpszCommName, hWnd, &cc)) {
 		throw std::runtime_error("Failed to configure Comm Settings");
 	}
 
 	//open comm port
-	hComm = CreateFile(
+	GlobalVar::g_hComm = CreateFile(
 		lpszCommName,
 		GENERIC_READ | GENERIC_WRITE,
 		0,
@@ -97,11 +97,11 @@ void idle_open_port(HWND& hWnd, HANDLE& hComm, LPCWSTR& lpszCommName) {
 	);
 
 	//check for failure
-	if (hComm == INVALID_HANDLE_VALUE) {
+	if (GlobalVar::g_hComm == INVALID_HANDLE_VALUE) {
 		throw std::runtime_error("Failed to open Comm Port");
 	}
 
-	SetCommState(hComm, &cc.dcb);
+	SetCommState(GlobalVar::g_hComm, &cc.dcb);
 
 }
 
@@ -205,7 +205,7 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 
 			if (!fWaitingOnRead) {
 				// Issue read operation.
-				if (!ReadFile(hComm, &readChar, 1, &eventRet, &osReader)) {
+				if (!ReadFile(GlobalVar::g_hComm, &readChar, 1, &eventRet, &osReader)) {
 					if (GetLastError() != ERROR_IO_PENDING) {
 						throw std::runtime_error("Error reading from port.");
 					}
@@ -226,7 +226,7 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 			switch (dwRes)
 			{
 			case WAIT_OBJECT_0:
-				if (!GetOverlappedResult(hComm, &osReader, &eventRet, FALSE)) {
+				if (!GetOverlappedResult(GlobalVar::g_hComm, &osReader, &eventRet, FALSE)) {
 					//do something here
 				}
 				else {
@@ -351,7 +351,7 @@ DWORD WINAPI write_thread_entry_point(LPVOID pData) {
 	LOGMESSAGE(L"Entering: write_thread_entry_point\n");
 	writeEnqToPort();
 
-	WaitForConnectAck((HWND)pData, hComm, osReader, ENQ_COUNTER);
+	WaitForConnectAck((HWND)pData, GlobalVar::g_hComm, osReader, ENQ_COUNTER);
 
 	return TRUE;
 
@@ -364,7 +364,7 @@ void idle_close_port() {
 	LOGMESSAGE(L"Entering: idle_close_port()\n");
 
 	CloseHandle(osReader.hEvent);
-	CloseHandle(hComm);
+	CloseHandle(GlobalVar::g_hComm);
 }
 
 bool writeEnqToPort()
@@ -384,14 +384,14 @@ bool writeEnqToPort()
 		return FALSE;
 
 	// Issue write.
-	if (!WriteFile(hComm, &ENQ, dwToWrite, &dwWritten, &osWrite)) {
+	if (!WriteFile(GlobalVar::g_hComm, &ENQ, dwToWrite, &dwWritten, &osWrite)) {
 		if (GetLastError() != ERROR_IO_PENDING) {
 			// WriteFile failed, but it isn't delayed. Report error and abort.
 			fRes = FALSE;
 		}
 		else {
 			// Write is pending.
-			if (!GetOverlappedResult(hComm, &osWrite, &dwWritten, TRUE))
+			if (!GetOverlappedResult(GlobalVar::g_hComm, &osWrite, &dwWritten, TRUE))
 				fRes = FALSE;
 			else
 				// Write operation completed successfully.

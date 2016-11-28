@@ -10,8 +10,10 @@ namespace GlobalVar
 	HANDLE g_hIdleSendENQThread;
 
 	HANDLE g_hReceivingThread;
+	HANDLE g_hReceivingWaitForACK;
 
 	HANDLE g_hEnqEvent;
 
 	BOOL g_bWaitENQ = TRUE;
+	HANDLE g_hComm;
 }

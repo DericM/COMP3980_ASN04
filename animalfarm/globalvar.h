@@ -9,8 +9,10 @@ namespace GlobalVar
 	extern HANDLE g_hIdleSendENQThread;
 
 	extern HANDLE g_hReceivingThread;
+	extern HANDLE g_hReceivingWaitForACK;
 
 	extern HANDLE g_hEnqEvent;
 
 	extern BOOL g_bWaitENQ;
+	extern HANDLE g_hComm;
 }

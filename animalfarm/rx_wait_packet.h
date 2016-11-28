@@ -1,4 +1,4 @@
 #pragma once
 
 
-BOOL waitFOrPacketSetUp(HANDLE hwnd, HANDLE hcomm, OVERLAPPED reader);
+BOOL rx_wp_setup(HANDLE hwnd, HANDLE hcomm, OVERLAPPED reader);

@@ -4,10 +4,12 @@
 namespace GlobalVar
 {
 	/*Thread handles*/
-	HANDLE hReadThread;
-	HANDLE hWriteThread;
-	HANDLE hIdleWaitThread;
+	HANDLE g_hReadThread;
+	HANDLE g_hWriteThread;
+	HANDLE g_hIdleWaitThread;
 	HANDLE g_hIdleSendENQThread;
+
+	HANDLE g_hReceivingThread;
 
 	HANDLE g_hEnqEvent;
 

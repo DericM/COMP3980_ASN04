@@ -5,6 +5,7 @@
 #include <string>
 #include "idle.h"
 #include "tx_wait_connect.h"
+#include "rx_connect.h"
 
 
 HANDLE hComm;
@@ -64,7 +65,7 @@ void idle_setup(HWND& hWnd, LPCWSTR lpszCommName) {
 	LOGMESSAGE(L"" + ENQ_COUNTER + '\n');
 	LOGMESSAGE(L"Entering: idle_setup()\n");
 
-	GlobalVar::hIdleWaitThread = CreateThread(NULL, 0, idle_wait, (LPVOID)hWnd, 0, 0);
+	GlobalVar::g_hIdleWaitThread = CreateThread(NULL, 0, idle_wait, (LPVOID)hWnd, 0, 0);
 }
 
 
@@ -149,14 +150,12 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 
 	LOGMESSAGE(L"\n");
 	LOGMESSAGE(L"Entering: idle_wait()\n");
-
+	
 	int timeout = IDLE_SEQ_TIMEOUT;
-
+	idle_rand_timeout_reset();
 	if (fSendingFile) {
 		LOGMESSAGE(L"fSendingFile TRUE\n");
 		LOGMESSAGE(L"Switching to RAND_TIMEOUT\n");
-
-		idle_rand_timeout_reset();
 		timeout = RAND_TIMEOUT;
 	}
 
@@ -267,13 +266,18 @@ DWORD WINAPI idle_send_enq(LPVOID tData_) {
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
-		tData->timer = RAND_TIMEOUT;
-		idle_send_enq((LPVOID)tData);
+
+		GlobalVar::g_hReceivingThread = CreateThread(NULL, 0, send_ack, NULL, 0, 0);
 		break;
 
 	case WAIT_TIMEOUT:
-		GlobalVar::g_bWaitENQ = FALSE;
-		idle_create_write_thread(tData->hWnd);
+		if (!fSendingFile) {
+			tData->timer = RAND_TIMEOUT;
+			idle_send_enq((LPVOID)tData);
+		} else {
+			GlobalVar::g_bWaitENQ = FALSE;
+			idle_create_write_thread(tData->hWnd);
+		}
 		break;
 
 	default:
@@ -331,7 +335,7 @@ void idle_create_write_thread(HWND& hWnd) {
 	LOGMESSAGE(L"Entering: idle_create_write_thread\n");
 
 	//make new thread for reading
-	GlobalVar::hReadThread = CreateThread(
+	GlobalVar::g_hReadThread = CreateThread(
 		NULL,
 		0,
 		write_thread_entry_point,

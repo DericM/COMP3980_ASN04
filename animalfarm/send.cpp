@@ -7,9 +7,8 @@
 bool ipc_send_ack() {
 	LOGMESSAGE(L"Entering: ipc_send_ack() -> ");
 	DWORD dwToWrite = 1;
-	char ACK[1];
-	ACK[0] = 0x06;
-	if (!ipc_send_to_port(GlobalVar::g_hComm, ACK, dwToWrite)) {
+	char ACK = 0x06;
+	if (!ipc_send_to_port(GlobalVar::g_hComm, &ACK, dwToWrite)) {
 		LOGMESSAGE(L"Failed to send ACK.");
 		return FALSE;
 	}
@@ -22,9 +21,8 @@ bool ipc_send_ack() {
 bool ipc_send_enq() {
 	LOGMESSAGE(L"Entering: ipc_send_enq() -> ");
 	DWORD dwToWrite = 1;
-	char ENQ[1];
-	ENQ[0] = 0x05;
-	if (!ipc_send_to_port(GlobalVar::g_hComm, ENQ, dwToWrite)) {
+	char ENQ = 0x05;
+	if (!ipc_send_to_port(GlobalVar::g_hComm, &ENQ, dwToWrite)) {
 		LOGMESSAGE(L"Failed to send ENQ.");
 		return FALSE;
 	}

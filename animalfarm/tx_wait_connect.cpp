@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "globalvar.h"
 #include "tx_wait_connect.h"
+#include "idle.h"
 
 #include <stdexcept>
 #include <memory>
@@ -144,6 +145,8 @@ DWORD WINAPI tx_wait_ack(LPVOID pData_)
 	case WAIT_TIMEOUT:
 		// Not receieved ack.
 		GlobalVar::g_bWaitACK = FALSE;
+		
+		idle_go_to_idle();
 		break;
 
 	default:

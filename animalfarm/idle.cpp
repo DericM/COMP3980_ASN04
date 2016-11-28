@@ -284,7 +284,7 @@ DWORD WINAPI idle_send_enq(LPVOID tData_) {
 			idle_send_enq(NULL);
 		} else {
 			GlobalVar::g_bWaitENQ = FALSE;
-			idle_create_write_thread(tData->hWnd);
+			idle_create_write_thread(enqParam.hWnd);
 
 		}
 		break;

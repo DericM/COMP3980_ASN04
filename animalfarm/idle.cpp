@@ -25,7 +25,7 @@ OVERLAPPED osReader = { 0 };
 
 
 /*Flags*/
-bool fSendingFile = false;
+bool bSendingFile = false;
 
 
 
@@ -35,6 +35,7 @@ struct EnqParams
 	HWND hWnd;
 	int timer;
 };
+EnqParams enqParam;
 
 
 
@@ -153,7 +154,7 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 	
 	int timeout = IDLE_SEQ_TIMEOUT;
 	idle_rand_timeout_reset();
-	if (fSendingFile) {
+	if (bSendingFile) {
 		LOGMESSAGE(L"fSendingFile TRUE\n");
 		LOGMESSAGE(L"Switching to RAND_TIMEOUT\n");
 		timeout = RAND_TIMEOUT;
@@ -166,22 +167,16 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 	try {
 		idle_create_event();
 
-		// Allocate memory for the struct on the heap
-		EnqParams *tData = new EnqParams();
-
 		// Initialize _all_ fields of the struct (malloc won't zero fill)
-		tData->hWnd = hWnd;
-		tData->timer = IDLE_SEQ_TIMEOUT;
+		enqParam.hWnd = hWnd;
+		enqParam.timer = IDLE_SEQ_TIMEOUT;
 
-		GlobalVar::g_hIdleSendENQThread = CreateThread(NULL, 0, idle_send_enq, (LPVOID)tData, 0, 0);
+		GlobalVar::g_hIdleSendENQThread = CreateThread(NULL, 0, idle_send_enq, &enqParam, 0, 0);
 
 		if (ENQ_COUNTER > 3) {
 			idle_close_port();
 			return 0;
 		}
-		
-		
-
 	}
 	catch (std::exception const& e) {
 		std::cerr << e.what() << std::endl;
@@ -260,7 +255,7 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 }
 
 DWORD WINAPI idle_send_enq(LPVOID tData_) {
-	EnqParams *tData = static_cast<EnqParams*>(tData_);
+	EnqParams* tData = static_cast<EnqParams*>(tData_);
 
 	DWORD dwRes = WaitForSingleObject(GlobalVar::g_hEnqEvent, tData->timer);
 	switch (dwRes)
@@ -271,9 +266,10 @@ DWORD WINAPI idle_send_enq(LPVOID tData_) {
 		break;
 
 	case WAIT_TIMEOUT:
-		if (!fSendingFile) {
+		if (!bSendingFile) {
 			tData->timer = RAND_TIMEOUT;
-			idle_send_enq((LPVOID)tData);
+			bSendingFile = true;
+			idle_send_enq(tData);
 		} else {
 			GlobalVar::g_bWaitENQ = FALSE;
 			idle_create_write_thread(tData->hWnd);
@@ -284,6 +280,8 @@ DWORD WINAPI idle_send_enq(LPVOID tData_) {
 		GlobalVar::g_bWaitENQ = FALSE;
 		break;
 	}
+
+	ResetEvent(GlobalVar::g_hEnqEvent);
 
 	return 0;
 }
@@ -351,7 +349,7 @@ DWORD WINAPI write_thread_entry_point(LPVOID pData) {
 	LOGMESSAGE(L"Entering: write_thread_entry_point\n");
 	writeEnqToPort();
 
-	WaitForConnectAck((HWND)pData, hComm, osReader, ENQ_COUNTER);
+	WaitForConnectAck((HWND&)pData, hComm, ENQ_COUNTER);
 
 	return TRUE;
 

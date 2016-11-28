@@ -1,3 +1,5 @@
 #pragma once
 
-BOOL WaitForConnectAck(HWND hwnd, HANDLE hcomm, OVERLAPPED reader, int &enqCounter);
+BOOL WaitForConnectAck(HWND& hWnd, HANDLE& hcomm, int &enqCounter);
+DWORD WINAPI tx_wait_connect(LPVOID);
+DWORD WINAPI tx_wait_ack(LPVOID);

@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "receive.h"
 #include "globalvar.h"
 
 
@@ -66,6 +67,7 @@ bool ipc_recieve_packet() {
 		return TRUE;
 	}
 	else {
+		LOGMESSAGE(L"PACKET TIMED OUT BAD BAD BAD");
 		return FALSE;
 	}
 }

@@ -90,6 +90,7 @@ DWORD WINAPI tx_wait_connect(LPVOID pData_)
 					// read completed immediately
 					if (readChar == 0x06) {//ACK
 						SetEvent(GlobalVar::g_hAckEvent);
+						LOGMESSAGE(L"Received ACK.\n")
 					}
 				}
 			}
@@ -106,6 +107,7 @@ DWORD WINAPI tx_wait_connect(LPVOID pData_)
 						// Read completed successfully.
 						if (readChar == 0x06) {//ACK
 							SetEvent(GlobalVar::g_hAckEvent);
+							LOGMESSAGE(L"Received ACK.\n")
 						}
 						else {
 							LOGMESSAGE(NULL, L"NON ACK CHARACTER RECEIVED", L"", MB_OK);

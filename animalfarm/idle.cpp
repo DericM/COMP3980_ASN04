@@ -77,7 +77,7 @@ void idle_open_port(HWND& hWnd, LPCWSTR& lpszCommName) {
 	LOGMESSAGE(L"Entering: idle_open_port()\n");
 
 	COMMCONFIG cc;
-
+	lpszCommName = L"com5";
 	//set comm settings
 	cc.dwSize = sizeof(COMMCONFIG);
 	cc.wVersion = 0x100;
@@ -119,6 +119,12 @@ void idle_rand_timeout_reset() {
 	LOGMESSAGE(L"" + RAND_TIMEOUT + '\n');
 }
 
+
+void idle_go_to_idle() {
+	idle_rand_timeout_reset();
+	GlobalVar::g_bWaitENQ = TRUE;
+	GlobalVar::g_hIdleSendENQThread = CreateThread(NULL, 0, idle_send_enq, &enqParam, 0, 0);
+}
 /*
 IDLE Wait
 /////Create listener for transfer button
@@ -171,7 +177,7 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 		enqParam.hWnd = hWnd;
 		enqParam.timer = IDLE_SEQ_TIMEOUT;
 
-		GlobalVar::g_hIdleSendENQThread = CreateThread(NULL, 0, idle_send_enq, &enqParam, 0, 0);
+		GlobalVar::g_hIdleSendENQThread = CreateThread(NULL, 0, idle_send_enq, 0, 0, 0);
 
 		if (ENQ_COUNTER > 3) {
 			idle_close_port();
@@ -212,6 +218,8 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 				else {
 					// read completed immediately
 					if (readChar == 0x05) { //ENQ
+						LOGMESSAGE(L"GOT ENQ");
+						GlobalVar::g_bWaitENQ = FALSE;
 						SetEvent(GlobalVar::g_hEnqEvent);
 					}
 				}
@@ -227,7 +235,8 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 				else {
 					// Read completed successfully.
 					if (readChar == 0x05) {//ENQ
-											//
+						LOGMESSAGE(L"GOT ENQ");
+						GlobalVar::g_bWaitENQ = FALSE;
 						SetEvent(GlobalVar::g_hEnqEvent);
 					}
 					else {
@@ -249,30 +258,34 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 				break;
 			}
 		}
+		ResetEvent(osReader.hEvent);
 	}
 
 	return 0;
 }
 
 DWORD WINAPI idle_send_enq(LPVOID tData_) {
-	EnqParams* tData = static_cast<EnqParams*>(tData_);
 
-	DWORD dwRes = WaitForSingleObject(GlobalVar::g_hEnqEvent, tData->timer);
+	DWORD dwRes = WaitForSingleObject(GlobalVar::g_hEnqEvent, enqParam.timer);
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
 
+		LOGMESSAGE(L"GOING TO TRANSMISSION");
+		GlobalVar::g_bWaitENQ = FALSE;
 		GlobalVar::g_hReceivingThread = CreateThread(NULL, 0, send_ack, NULL, 0, 0);
 		break;
 
 	case WAIT_TIMEOUT:
 		if (!bSendingFile) {
-			tData->timer = RAND_TIMEOUT;
+			LOGMESSAGE(L"SETTING RANDTIMER");
+			enqParam.timer = RAND_TIMEOUT;
 			bSendingFile = true;
-			idle_send_enq(tData);
+			idle_send_enq(NULL);
 		} else {
 			GlobalVar::g_bWaitENQ = FALSE;
-			idle_create_write_thread(tData->hWnd);
+			idle_create_write_thread(enqParam.hWnd);
+
 		}
 		break;
 

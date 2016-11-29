@@ -55,7 +55,8 @@ void idle_setup(HWND& hWnd, LPCWSTR lpszCommName) {
 	idle_rand_timeout_reset();
 
 	try {
-		idle_open_port(hWnd, lpszCommName);////////////////////////
+		if (!idle_open_port(hWnd, lpszCommName))
+			return;
 	}
 	catch (std::exception const& e) {
 		std::cerr << e.what() << std::endl;
@@ -73,7 +74,7 @@ void idle_setup(HWND& hWnd, LPCWSTR lpszCommName) {
 /* 
 * Open the comm port.
 */
-void idle_open_port(HWND& hWnd, LPCWSTR& lpszCommName) {
+bool idle_open_port(HWND& hWnd, LPCWSTR& lpszCommName) {
 	LOGMESSAGE(L"Entering: idle_open_port()\n");
 
 	COMMCONFIG cc;
@@ -83,7 +84,8 @@ void idle_open_port(HWND& hWnd, LPCWSTR& lpszCommName) {
 	cc.wVersion = 0x100;
 	GetCommConfig(GlobalVar::g_hComm, &cc, &cc.dwSize);
 	if (!CommConfigDialog(lpszCommName, hWnd, &cc)) {
-		throw std::runtime_error("Failed to configure Comm Settings");
+		MessageBoxW(hWnd, L"Failed to configure Comm Settings", 0, 0);
+		return false;
 	}
 
 	//open comm port
@@ -104,6 +106,7 @@ void idle_open_port(HWND& hWnd, LPCWSTR& lpszCommName) {
 
 	SetCommState(GlobalVar::g_hComm, &cc.dcb);
 
+	return true;
 }
 
 /*

@@ -29,7 +29,7 @@ BOOL WaitForConnectAck(HWND& hWnd, HANDLE& hcomm, int& enqCounter) {
 
 	LOGMESSAGE(L"\n");
 	LOGMESSAGE(L"Entering: WaitForConnectAck\n");
-	ENQ_TIMER = 16 / GlobalVar::g_cc.dcb.BaudRate;
+	ENQ_TIMER = (int)((16.0 / GlobalVar::g_cc.dcb.BaudRate) * 1000);
 
 	OVERLAPPED reader = { 0 };
 	reader.hEvent = CreateEvent(

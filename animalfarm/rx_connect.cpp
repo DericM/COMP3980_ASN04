@@ -15,6 +15,7 @@ using namespace std;
 DWORD WINAPI send_ack(LPVOID var) {
 	int result;
 	char ACK = 0x06;
+	int sendlen = strlen(&ACK);
 
 	SOCKET ConnectSocket = INVALID_SOCKET;	//initialize to a non-valid socket first
 
@@ -29,7 +30,7 @@ DWORD WINAPI send_ack(LPVOID var) {
 	}
 
 	
-	result = send(ConnectSocket, &ACK, 1, 0);			//send ACK through socket
+	result = send(ConnectSocket, &ACK, sendlen, 0);			//send ACK through socket
 	//string result1 = to_string(3);
 	//MessageBox(NULL, result1.c_str, L"asdf", MB_OK);
 

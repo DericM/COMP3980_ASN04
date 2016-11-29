@@ -163,6 +163,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				cName = L"Com4";
 				idle_setup(hWnd, cName);
 				break;
+			case ID_CONFIG_COM5:
+				cName = L"Com5";
+				idle_setup(hWnd, cName);
+				break;
+			case ID_CONFIG_COM6:
+				cName = L"Com6";
+				idle_setup(hWnd, cName);
+				break;
             case IDM_ABOUT:
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
                 break;

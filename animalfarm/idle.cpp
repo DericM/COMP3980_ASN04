@@ -77,7 +77,6 @@ void idle_open_port(HWND& hWnd, LPCWSTR& lpszCommName) {
 	LOGMESSAGE(L"Entering: idle_open_port()\n");
 
 	COMMCONFIG cc;
-	lpszCommName = L"com5";
 	//set comm settings
 	cc.dwSize = sizeof(COMMCONFIG);
 	cc.wVersion = 0x100;

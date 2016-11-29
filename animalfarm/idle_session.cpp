@@ -9,13 +9,11 @@
 void is_open_port(HWND& hWnd, LPCWSTR& lpszCommName) {
 	LOGMESSAGE(L"Entering: idle_open_port()\n");
 
-	COMMCONFIG cc;
-
 	//set comm settings
-	cc.dwSize = sizeof(COMMCONFIG);
-	cc.wVersion = 0x100;
-	GetCommConfig(GlobalVar::g_hComm, &cc, &cc.dwSize);
-	if (!CommConfigDialog(lpszCommName, hWnd, &cc)) {
+	GlobalVar::g_cc.dwSize = sizeof(COMMCONFIG);
+	GlobalVar::g_cc.wVersion = 0x100;
+	GetCommConfig(GlobalVar::g_hComm, &GlobalVar::g_cc, &GlobalVar::g_cc.dwSize);
+	if (!CommConfigDialog(lpszCommName, hWnd, &GlobalVar::g_cc)) {
 		throw std::runtime_error("Failed to configure Comm Settings");
 	}
 
@@ -35,7 +33,7 @@ void is_open_port(HWND& hWnd, LPCWSTR& lpszCommName) {
 		throw std::runtime_error("Failed to open Comm Port");
 	}
 
-	SetCommState(GlobalVar::g_hComm, &cc.dcb);
+	SetCommState(GlobalVar::g_hComm, &GlobalVar::g_cc.dcb);
 }
 
 

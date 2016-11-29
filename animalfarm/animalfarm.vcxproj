@@ -148,6 +148,7 @@
     <ClInclude Include="animalfarm.h" />
     <ClInclude Include="globalvar.h" />
     <ClInclude Include="idle.h" />
+    <ClInclude Include="idle_session.h" />
     <ClInclude Include="receive.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="rx_connect.h" />

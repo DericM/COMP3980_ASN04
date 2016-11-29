@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <memory>
 
-int ENQ_TIMER = 5000;
+int ENQ_TIMER;
 
 struct ConnectParams
 {
@@ -26,8 +26,10 @@ struct AckParams
 AckParams ackParam;
 
 BOOL WaitForConnectAck(HWND& hWnd, HANDLE& hcomm, int& enqCounter) {
+
 	LOGMESSAGE(L"\n");
 	LOGMESSAGE(L"Entering: WaitForConnectAck\n");
+	ENQ_TIMER = 16 / GlobalVar::g_cc.dcb.BaudRate;
 
 	OVERLAPPED reader = { 0 };
 	reader.hEvent = CreateEvent(

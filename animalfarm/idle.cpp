@@ -9,28 +9,18 @@
 #include "send.h"
 #include "idle_session.h"
 
-
-
-//LPCWSTR	lpszCommName;
-
 /*Counters*/
 int ENQ_COUNTER;
-
 
 /*timeouts*/
 int RAND_TIMEOUT;
 int IDLE_SEQ_TIMEOUT = 500;
 
 /*events*/
-//HANDLE hEnqEvent;
 OVERLAPPED osReader = { 0 };
-
 
 /*Flags*/
 bool bSendingFile = false;
-
-
-
 
 struct EnqParams
 {
@@ -38,8 +28,6 @@ struct EnqParams
 	int timer;
 };
 EnqParams enqParam;
-
-
 
 /*
 Open port
@@ -58,7 +46,6 @@ void idle_setup(HWND& hWnd, LPCWSTR lpszCommName) {
 
 	try {
 		is_open_port(hWnd, lpszCommName);
-		//idle_open_port(hWnd, lpszCommName);
 	}
 	catch (std::exception const& e) {
 		std::cerr << e.what() << std::endl;
@@ -72,44 +59,6 @@ void idle_setup(HWND& hWnd, LPCWSTR lpszCommName) {
 	GlobalVar::g_hIdleWaitThread = CreateThread(NULL, 0, idle_wait, (LPVOID)hWnd, 0, 0);
 }
 
-
-/* 
-* Open the comm port.
-*/
-/*
-void idle_open_port(HWND& hWnd, LPCWSTR& lpszCommName) {
-	LOGMESSAGE(L"Entering: idle_open_port()\n");
-
-	COMMCONFIG cc;
-	lpszCommName = L"com5";
-	//set comm settings
-	cc.dwSize = sizeof(COMMCONFIG);
-	cc.wVersion = 0x100;
-	GetCommConfig(GlobalVar::g_hComm, &cc, &cc.dwSize);
-	if (!CommConfigDialog(lpszCommName, hWnd, &cc)) {
-		throw std::runtime_error("Failed to configure Comm Settings");
-	}
-
-	//open comm port
-	GlobalVar::g_hComm = CreateFile(
-		lpszCommName,
-		GENERIC_READ | GENERIC_WRITE,
-		0,
-		NULL,
-		OPEN_EXISTING,
-		FILE_FLAG_OVERLAPPED,
-		NULL
-	);
-
-	//check for failure
-	if (GlobalVar::g_hComm == INVALID_HANDLE_VALUE) {
-		throw std::runtime_error("Failed to open Comm Port");
-	}
-
-	SetCommState(GlobalVar::g_hComm, &cc.dcb);
-
-}*/
-
 /*
 * Resets randTimeout to a value between 0-100
 */
@@ -122,38 +71,14 @@ void idle_rand_timeout_reset() {
 	LOGMESSAGE(L"" + RAND_TIMEOUT + '\n');
 }
 
-
 void idle_go_to_idle() {
 	idle_rand_timeout_reset();
 	GlobalVar::g_bWaitENQ = TRUE;
 	GlobalVar::g_hIdleSendENQThread = CreateThread(NULL, 0, idle_send_enq, &enqParam, 0, 0);
 }
+
 /*
 IDLE Wait
-/////Create listener for transfer button
-
-Create Event for when ENQ is received
-
-Check ENQ counter
-	If > 3 Close Threads
-		Exit
-
-Start Idle Sequence Timer
-
-If sequence timer times out
-	increment Enq counter
-	start write thread(starts IDLE Write State)
-
-If transfer button listener triggers(user wants to send file)
-	Start / set Rand Timer
-
-If Rand Timer times out
-	Stop Sequence Timer
-	start write Thread(starts IDLE Write State)
-
-If ENQ received event triggers
-	Stop Timers
-	start read Thread(starts IDLE Read State)
 */
 DWORD WINAPI idle_wait(LPVOID _hWnd) {
 	HWND hWnd = (HWND)_hWnd;
@@ -268,6 +193,7 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 	return 0;
 }
 
+
 DWORD WINAPI idle_send_enq(LPVOID tData_) {
 	EnqParams* tData = static_cast<EnqParams*>(tData_);
 
@@ -334,13 +260,6 @@ void idle_create_event() {
 }
 
 /*
-IDLE Read
-Read char
-Check if character is ENQ
-If character is ENQ stop timers go to Rx Connected State
-*/
-
-/*
 IDLE Write
 Get file name(if Not sequence timer timeout)
 Send ENQ
@@ -363,9 +282,9 @@ void idle_create_write_thread(HWND& hWnd) {
 
 
 DWORD WINAPI write_thread_entry_point(LPVOID pData) {
-	LOGMESSAGE(L"\n");
-	LOGMESSAGE(L"Entering: write_thread_entry_point\n");
-	//writeEnqToPort();
+
+	LOGMESSAGE(L"\nEntering: write_thread_entry_point\n");
+
 	ipc_send_enq();
 
 	WaitForConnectAck((HWND&)pData, GlobalVar::g_hComm, ENQ_COUNTER);
@@ -374,17 +293,14 @@ DWORD WINAPI write_thread_entry_point(LPVOID pData) {
 
 }
 
+
+
 /*
-* exit the program.
+IDLE Read
+Read char
+Check if character is ENQ
+If character is ENQ stop timers go to Rx Connected State
 */
-void idle_close_port() {
-	LOGMESSAGE(L"Entering: idle_close_port()\n");
-
-	CloseHandle(osReader.hEvent);
-	CloseHandle(GlobalVar::g_hComm);
-}
-
-
 
 BOOL read_from_port(HANDLE hcomm, OVERLAPPED reader, int timout) {
 	char readChar;

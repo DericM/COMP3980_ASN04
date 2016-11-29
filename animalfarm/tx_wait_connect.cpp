@@ -142,6 +142,7 @@ DWORD WINAPI tx_wait_ack(LPVOID pData_)
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
+		GlobalVar::g_bWaitACK = FALSE;
 		// Received ack;
 		break;
 

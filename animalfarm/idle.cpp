@@ -56,6 +56,7 @@ void idle_setup(HWND& hWnd, LPCWSTR lpszCommName) {
 	LOGMESSAGE(L"" + ENQ_COUNTER + '\n');
 	LOGMESSAGE(L"Entering: idle_setup()\n");
 
+	TerminateThread(GlobalVar::g_hIdleWaitThread, 0);
 	GlobalVar::g_hIdleWaitThread = CreateThread(NULL, 0, idle_wait, (LPVOID)hWnd, 0, 0);
 }
 
@@ -74,6 +75,8 @@ void idle_rand_timeout_reset() {
 void idle_go_to_idle() {
 	idle_rand_timeout_reset();
 	GlobalVar::g_bWaitENQ = TRUE;
+
+	TerminateThread(GlobalVar::g_hIdleSendENQThread, 0);
 	GlobalVar::g_hIdleSendENQThread = CreateThread(NULL, 0, idle_send_enq, &enqParam, 0, 0);
 }
 
@@ -105,6 +108,7 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 		enqParam.hWnd = hWnd;
 		enqParam.timer = IDLE_SEQ_TIMEOUT;
 
+		TerminateThread(GlobalVar::g_hIdleSendENQThread, 0);
 		GlobalVar::g_hIdleSendENQThread = CreateThread(NULL, 0, idle_send_enq, &enqParam, 0, 0);
 
 		if (ENQ_COUNTER > 3) {
@@ -204,6 +208,8 @@ DWORD WINAPI idle_send_enq(LPVOID tData_) {
 
 		LOGMESSAGE(L"GOING TO TRANSMISSION");
 		GlobalVar::g_bWaitENQ = FALSE;
+
+		TerminateThread(GlobalVar::g_hReceivingThread, 0);
 		GlobalVar::g_hReceivingThread = CreateThread(NULL, 0, send_ack, NULL, 0, 0);
 		break;
 
@@ -270,6 +276,7 @@ void idle_create_write_thread(HWND& hWnd) {
 	LOGMESSAGE(L"Entering: idle_create_write_thread\n");
 
 	//make new thread for reading
+	TerminateThread(GlobalVar::g_hReadThread, 0);
 	GlobalVar::g_hReadThread = CreateThread(
 		NULL,
 		0,

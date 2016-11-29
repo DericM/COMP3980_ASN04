@@ -59,7 +59,7 @@ bool ipc_send_to_port(HANDLE hComm, char* data, DWORD dwToWrite)
 		return FALSE;
 	}
 
-	if (!WriteFile(hComm, &data, dwToWrite, &dwWritten, &osWrite)) {
+	if (!WriteFile(hComm, data, dwToWrite, &dwWritten, &osWrite)) {
 		if (GetLastError() != ERROR_IO_PENDING) {
 			fRes = FALSE;
 		}

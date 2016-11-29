@@ -20,4 +20,6 @@ namespace GlobalVar
 	extern BOOL g_bWaitENQ;
 	extern BOOL g_bWaitACK;
 	extern HANDLE g_hComm;
+
+	extern COMMCONFIG g_cc;
 }

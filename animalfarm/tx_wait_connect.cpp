@@ -5,8 +5,7 @@
 
 #include <stdexcept>
 #include <memory>
-
-int ENQ_TIMER = 5000;
+#include <math.h>
 
 struct ConnectParams
 {
@@ -26,8 +25,10 @@ struct AckParams
 AckParams ackParam;
 
 BOOL WaitForConnectAck(HWND& hWnd, HANDLE& hcomm, int& enqCounter) {
+
 	LOGMESSAGE(L"\n");
 	LOGMESSAGE(L"Entering: WaitForConnectAck\n");
+	DWORD ACK_TIMER = (DWORD)(ceil(16.0 / GlobalVar::g_cc.dcb.BaudRate * 1000));
 
 	OVERLAPPED reader = { 0 };
 	reader.hEvent = CreateEvent(
@@ -52,9 +53,10 @@ BOOL WaitForConnectAck(HWND& hWnd, HANDLE& hcomm, int& enqCounter) {
 	conParam.hcomm = hcomm;
 	conParam.enqCounter = enqCounter;
 	conParam.reader = reader;
+	conParam.timer = ACK_TIMER;
 
 	ackParam.hWnd = hWnd;
-	ackParam.timer = ENQ_TIMER;
+	ackParam.timer = ACK_TIMER;
 
 	TerminateThread(GlobalVar::g_hWaitConnectThread, 0);
 	TerminateThread(GlobalVar::g_hWaitForACKThread, 0);
@@ -91,14 +93,14 @@ DWORD WINAPI tx_wait_connect(LPVOID pData_)
 				else {
 					// read completed immediately
 					if (readChar == 0x06) {//ACK
-						SetEvent(GlobalVar::g_hAckEvent);
-						LOGMESSAGE(L"Received ACK.\n")
+						LOGMESSAGE(L"Received ACK.\n");
+						HandleReceivedAck();
 					}
 				}
 			}
 
 			if (fWaitingOnRead) {
-				eventRet = WaitForSingleObject(conParam.reader.hEvent, ENQ_TIMER);
+				eventRet = WaitForSingleObject(conParam.reader.hEvent, conParam.timer);
 
 				switch (eventRet) {
 				case WAIT_OBJECT_0:
@@ -108,8 +110,8 @@ DWORD WINAPI tx_wait_connect(LPVOID pData_)
 					else {
 						// Read completed successfully.
 						if (readChar == 0x06) {//ACK
-							SetEvent(GlobalVar::g_hAckEvent);
-							LOGMESSAGE(L"Received ACK.\n")
+							LOGMESSAGE(L"Received ACK.\n");
+							HandleReceivedAck();
 						}
 						else {
 							LOGMESSAGE(NULL, L"NON ACK CHARACTER RECEIVED", L"", MB_OK);
@@ -134,6 +136,12 @@ DWORD WINAPI tx_wait_connect(LPVOID pData_)
 	}
 
 	return 0;
+}
+
+void HandleReceivedAck()
+{
+	GlobalVar::g_bWaitACK = FALSE;
+	SetEvent(GlobalVar::g_hAckEvent);
 }
 
 DWORD WINAPI tx_wait_ack(LPVOID pData_)

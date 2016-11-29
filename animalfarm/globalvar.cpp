@@ -21,4 +21,6 @@ namespace GlobalVar
 	BOOL g_bWaitENQ = TRUE;
 	BOOL g_bWaitACK = TRUE;
 	HANDLE g_hComm;
+
+	COMMCONFIG g_cc;
 }

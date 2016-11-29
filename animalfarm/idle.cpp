@@ -6,6 +6,8 @@
 #include "idle.h"
 #include "tx_wait_connect.h"
 #include "rx_connect.h"
+#include "send.h"
+#include "idle_session.h"
 
 
 
@@ -55,8 +57,8 @@ void idle_setup(HWND& hWnd, LPCWSTR lpszCommName) {
 	idle_rand_timeout_reset();
 
 	try {
-		if (!idle_open_port(hWnd, lpszCommName))
-			return;
+		is_open_port(hWnd, lpszCommName);
+		//idle_open_port(hWnd, lpszCommName);
 	}
 	catch (std::exception const& e) {
 		std::cerr << e.what() << std::endl;
@@ -74,17 +76,18 @@ void idle_setup(HWND& hWnd, LPCWSTR lpszCommName) {
 /* 
 * Open the comm port.
 */
-bool idle_open_port(HWND& hWnd, LPCWSTR& lpszCommName) {
+/*
+void idle_open_port(HWND& hWnd, LPCWSTR& lpszCommName) {
 	LOGMESSAGE(L"Entering: idle_open_port()\n");
 
 	COMMCONFIG cc;
+	lpszCommName = L"com5";
 	//set comm settings
 	cc.dwSize = sizeof(COMMCONFIG);
 	cc.wVersion = 0x100;
 	GetCommConfig(GlobalVar::g_hComm, &cc, &cc.dwSize);
 	if (!CommConfigDialog(lpszCommName, hWnd, &cc)) {
-		MessageBoxW(hWnd, L"Failed to configure Comm Settings", 0, 0);
-		return false;
+		throw std::runtime_error("Failed to configure Comm Settings");
 	}
 
 	//open comm port
@@ -105,15 +108,13 @@ bool idle_open_port(HWND& hWnd, LPCWSTR& lpszCommName) {
 
 	SetCommState(GlobalVar::g_hComm, &cc.dcb);
 
-	return true;
-}
+}*/
 
 /*
 * Resets randTimeout to a value between 0-100
 */
 void idle_rand_timeout_reset() {
-	LOGMESSAGE(L"\n");
-	LOGMESSAGE(L"Entering: idle_rand_timeout_reset()\n");
+	LOGMESSAGE(L"\nEntering: idle_rand_timeout_reset() ");
 
 	RAND_TIMEOUT = rand() % 101; //0-100
 
@@ -179,10 +180,11 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 		enqParam.hWnd = hWnd;
 		enqParam.timer = IDLE_SEQ_TIMEOUT;
 
-		GlobalVar::g_hIdleSendENQThread = CreateThread(NULL, 0, idle_send_enq, 0, 0, 0);
+		GlobalVar::g_hIdleSendENQThread = CreateThread(NULL, 0, idle_send_enq, &enqParam, 0, 0);
 
 		if (ENQ_COUNTER > 3) {
-			idle_close_port();
+			CloseHandle(osReader.hEvent);
+			is_close_port();
 			return 0;
 		}
 	}
@@ -267,8 +269,9 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 }
 
 DWORD WINAPI idle_send_enq(LPVOID tData_) {
+	EnqParams* tData = static_cast<EnqParams*>(tData_);
 
-	DWORD dwRes = WaitForSingleObject(GlobalVar::g_hEnqEvent, enqParam.timer);
+	DWORD dwRes = WaitForSingleObject(GlobalVar::g_hEnqEvent, tData->timer);
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
@@ -281,12 +284,12 @@ DWORD WINAPI idle_send_enq(LPVOID tData_) {
 	case WAIT_TIMEOUT:
 		if (!bSendingFile) {
 			LOGMESSAGE(L"SETTING RANDTIMER");
-			enqParam.timer = RAND_TIMEOUT;
+			tData->timer = RAND_TIMEOUT;
 			bSendingFile = true;
-			idle_send_enq(NULL);
+			idle_send_enq(tData);
 		} else {
 			GlobalVar::g_bWaitENQ = FALSE;
-			idle_create_write_thread(enqParam.hWnd);
+			idle_create_write_thread(tData->hWnd);
 
 		}
 		break;
@@ -362,7 +365,8 @@ void idle_create_write_thread(HWND& hWnd) {
 DWORD WINAPI write_thread_entry_point(LPVOID pData) {
 	LOGMESSAGE(L"\n");
 	LOGMESSAGE(L"Entering: write_thread_entry_point\n");
-	writeEnqToPort();
+	//writeEnqToPort();
+	ipc_send_enq();
 
 	WaitForConnectAck((HWND&)pData, GlobalVar::g_hComm, ENQ_COUNTER);
 
@@ -380,45 +384,7 @@ void idle_close_port() {
 	CloseHandle(GlobalVar::g_hComm);
 }
 
-bool writeEnqToPort()
-{
-	LOGMESSAGE(L"Entering: writeEnqToPort()\n");
 
-	OVERLAPPED osWrite = { 0 };
-	DWORD dwWritten;
-	DWORD dwToWrite = 1;
-	bool fRes;
-	char ENQ = 0x05;
-
-	// Create this writes OVERLAPPED structure hEvent.
-	osWrite.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-	if (osWrite.hEvent == NULL)
-		// Error creating overlapped event handle.
-		return FALSE;
-
-	// Issue write.
-	if (!WriteFile(GlobalVar::g_hComm, &ENQ, dwToWrite, &dwWritten, &osWrite)) {
-		if (GetLastError() != ERROR_IO_PENDING) {
-			// WriteFile failed, but it isn't delayed. Report error and abort.
-			fRes = FALSE;
-		}
-		else {
-			// Write is pending.
-			if (!GetOverlappedResult(GlobalVar::g_hComm, &osWrite, &dwWritten, TRUE))
-				fRes = FALSE;
-			else
-				// Write operation completed successfully.
-				fRes = TRUE;
-		}
-	}
-	else {
-		// WriteFile completed immediately.
-		fRes = TRUE;
-	}
-
-	CloseHandle(osWrite.hEvent);
-	return fRes;
-}
 
 BOOL read_from_port(HANDLE hcomm, OVERLAPPED reader, int timout) {
 	char readChar;

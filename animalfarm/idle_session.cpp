@@ -6,7 +6,7 @@
 /*
 * Open the comm port.
 */
-void ipc_open_port(HWND& hWnd, LPCWSTR& lpszCommName) {
+void is_open_port(HWND& hWnd, LPCWSTR& lpszCommName) {
 	LOGMESSAGE(L"Entering: idle_open_port()\n");
 
 	COMMCONFIG cc;
@@ -43,7 +43,7 @@ void ipc_open_port(HWND& hWnd, LPCWSTR& lpszCommName) {
 /*
 * close port.
 */
-void ipc_close_port() {
+void is_close_port() {
 	LOGMESSAGE(L"Entering: idle_close_port()\n");
 
 	//CloseHandle(osReader.hEvent);

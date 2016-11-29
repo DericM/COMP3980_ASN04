@@ -63,6 +63,12 @@
     <ClInclude Include="send.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="tx_get_data.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="idle_session.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

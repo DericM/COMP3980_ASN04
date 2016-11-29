@@ -58,6 +58,8 @@ BOOL WaitForConnectAck(HWND& hWnd, HANDLE& hcomm, int& enqCounter) {
 	ackParam.hWnd = hWnd;
 	ackParam.timer = ENQ_TIMER;
 
+	GlobalVar::g_bWaitACK = TRUE;
+
 	TerminateThread(GlobalVar::g_hWaitConnectThread, 0);
 	TerminateThread(GlobalVar::g_hWaitForACKThread, 0);
 	GlobalVar::g_hWaitConnectThread = CreateThread(NULL, 0, tx_wait_connect, &conParam, 0, 0);

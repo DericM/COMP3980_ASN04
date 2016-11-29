@@ -129,6 +129,8 @@ DWORD WINAPI tx_wait_connect(LPVOID pData_)
 				}
 			}
 		}
+
+		ResetEvent(conParam.reader.hEvent);
 	}
 
 	return 0;

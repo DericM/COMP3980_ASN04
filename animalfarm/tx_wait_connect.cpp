@@ -91,8 +91,8 @@ DWORD WINAPI tx_wait_connect(LPVOID pData_)
 				else {
 					// read completed immediately
 					if (readChar == 0x06) {//ACK
-						SetEvent(GlobalVar::g_hAckEvent);
-						LOGMESSAGE(L"Received ACK.\n")
+						LOGMESSAGE(L"Received ACK.\n");
+						HandleReceivedAck();
 					}
 				}
 			}
@@ -108,8 +108,8 @@ DWORD WINAPI tx_wait_connect(LPVOID pData_)
 					else {
 						// Read completed successfully.
 						if (readChar == 0x06) {//ACK
-							SetEvent(GlobalVar::g_hAckEvent);
-							LOGMESSAGE(L"Received ACK.\n")
+							LOGMESSAGE(L"Received ACK.\n");
+							HandleReceivedAck();
 						}
 						else {
 							LOGMESSAGE(NULL, L"NON ACK CHARACTER RECEIVED", L"", MB_OK);
@@ -134,6 +134,12 @@ DWORD WINAPI tx_wait_connect(LPVOID pData_)
 	}
 
 	return 0;
+}
+
+void HandleReceivedAck()
+{
+	GlobalVar::g_bWaitACK = FALSE;
+	SetEvent(GlobalVar::g_hAckEvent);
 }
 
 DWORD WINAPI tx_wait_ack(LPVOID pData_)

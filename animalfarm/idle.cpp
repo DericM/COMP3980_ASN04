@@ -152,8 +152,7 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 					// read completed immediately
 					if (readChar == 0x05) { //ENQ
 						LOGMESSAGE(L"GOT ENQ");
-						GlobalVar::g_bWaitENQ = FALSE;
-						SetEvent(GlobalVar::g_hEnqEvent);
+						HandleReceivedEnq();
 					}
 				}
 			}
@@ -169,8 +168,7 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 					// Read completed successfully.
 					if (readChar == 0x05) {//ENQ
 						LOGMESSAGE(L"GOT ENQ");
-						GlobalVar::g_bWaitENQ = FALSE;
-						SetEvent(GlobalVar::g_hEnqEvent);
+						HandleReceivedEnq();
 					}
 					else {
 						//ack not received
@@ -195,6 +193,12 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 	}
 
 	return 0;
+}
+
+void HandleReceivedEnq()
+{
+	GlobalVar::g_bWaitENQ = FALSE;
+	SetEvent(GlobalVar::g_hEnqEvent);
 }
 
 

@@ -5,8 +5,7 @@
 
 #include <stdexcept>
 #include <memory>
-
-int ENQ_TIMER;
+#include <math.h>
 
 struct ConnectParams
 {
@@ -29,7 +28,7 @@ BOOL WaitForConnectAck(HWND& hWnd, HANDLE& hcomm, int& enqCounter) {
 
 	LOGMESSAGE(L"\n");
 	LOGMESSAGE(L"Entering: WaitForConnectAck\n");
-	ENQ_TIMER = (int)((16.0 / GlobalVar::g_cc.dcb.BaudRate) * 1000);
+	DWORD ACK_TIMER = (DWORD)(ceil(16.0 / GlobalVar::g_cc.dcb.BaudRate * 1000));
 
 	OVERLAPPED reader = { 0 };
 	reader.hEvent = CreateEvent(
@@ -54,11 +53,10 @@ BOOL WaitForConnectAck(HWND& hWnd, HANDLE& hcomm, int& enqCounter) {
 	conParam.hcomm = hcomm;
 	conParam.enqCounter = enqCounter;
 	conParam.reader = reader;
+	conParam.timer = ACK_TIMER;
 
 	ackParam.hWnd = hWnd;
-	ackParam.timer = ENQ_TIMER;
-
-	GlobalVar::g_bWaitACK = TRUE;
+	ackParam.timer = ACK_TIMER;
 
 	TerminateThread(GlobalVar::g_hWaitConnectThread, 0);
 	TerminateThread(GlobalVar::g_hWaitForACKThread, 0);
@@ -102,7 +100,7 @@ DWORD WINAPI tx_wait_connect(LPVOID pData_)
 			}
 
 			if (fWaitingOnRead) {
-				eventRet = WaitForSingleObject(conParam.reader.hEvent, ENQ_TIMER);
+				eventRet = WaitForSingleObject(conParam.reader.hEvent, conParam.timer);
 
 				switch (eventRet) {
 				case WAIT_OBJECT_0:

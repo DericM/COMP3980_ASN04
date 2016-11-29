@@ -17,6 +17,8 @@ DWORD WINAPI send_ack(LPVOID var) {
 	char ACK = 0x06;
 	int sendlen = strlen(&ACK);
 
+	LOGMESSAGE(L" TRYING TO SEND ACK")
+
 	SOCKET ConnectSocket = INVALID_SOCKET;	//initialize to a non-valid socket first
 
 	ConnectSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);	//AF: The Internet Protocol version 4 (IPv4) address family.

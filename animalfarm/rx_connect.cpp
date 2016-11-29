@@ -2,6 +2,7 @@
 #include <winsock2.h>
 #include <Ws2tcpip.h>
 #include <stdio.h>
+#include "send.h"
 #include <string>
 // Link with ws2_32.lib
 #pragma comment(lib, "Ws2_32.lib")
@@ -10,12 +11,16 @@
 using namespace std;
 
 
-	
+
 
 DWORD WINAPI send_ack(LPVOID var) {
-	int result;
+	ipc_send_ack();
+	/*int result;
 	char ACK = 0x06;
-	LOGMESSAGE(L" TRYING TO SEND ACK")
+	int sendlen = strlen(&ACK);
+
+
+
 	SOCKET ConnectSocket = INVALID_SOCKET;	//initialize to a non-valid socket first
 
 	ConnectSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);	//AF: The Internet Protocol version 4 (IPv4) address family.
@@ -29,10 +34,10 @@ DWORD WINAPI send_ack(LPVOID var) {
 	}
 
 	
-	result = send(ConnectSocket, &ACK, 1, 0);			//send ACK through socket
+	result = send(ConnectSocket, &ACK, sendlen, 0);			//send ACK through socket
 	//string result1 = to_string(3);
 	//MessageBox(NULL, result1.c_str, L"asdf", MB_OK);
-
+	*/
 	return 0;
 }
 

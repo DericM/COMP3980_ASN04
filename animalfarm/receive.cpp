@@ -103,14 +103,19 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 				LOGMESSAGE(L"Error reading from port. ");
 			}
 			else {
+				LOGMESSAGE(L"===================WAITING TO READ=======================\n");
 				fWaitingOnRead = TRUE;
 			}
 		}
 		else {
-			// read completed immediately
+			
 			if (target == NULL || readChar[0] == target) { 
+				LOGMESSAGE(L"" + target);
+				LOGMESSAGE(L"" + readChar[0]);
+				LOGMESSAGE(L"===================GOT TARGET1=======================\n");
 				return TRUE;
 			}
+			LOGMESSAGE(L"===================GOT NOTHING=======================\n");
 		}
 	}
 
@@ -118,12 +123,14 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
+		LOGMESSAGE(L"===================WAIT_OBJECT_0=======================\n");
 		if (!GetOverlappedResult(hComm, &osReader, &eventRet, FALSE)) {
 			//do something here
 		}
 		else {
 			// Read completed successfully.
 			if (target == NULL || readChar[0] == target) {
+				LOGMESSAGE(L"===================GOT TARGET2=======================\n");
 				return TRUE;
 			}
 			else {
@@ -135,11 +142,11 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 		break;
 
 	case WAIT_TIMEOUT:
-		LOGMESSAGE(L"WAIT_TIMEOUT\n");
+		LOGMESSAGE(L"===================WAIT_TIMEOUT=======================\n");
 		return FALSE;
 
 	default:
-		LOGMESSAGE(L"Default Case(This should never happen)\n");
+		LOGMESSAGE(L"===================DEFAULT=======================\n");
 		break;
 	}
 

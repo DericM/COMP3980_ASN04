@@ -13,6 +13,8 @@
 #define MAX_LOADSTRING 100
 
 // Global Variables:
+HWND hWnd;
+HWND hMainDlg;
 HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
@@ -109,7 +111,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // Store instance handle in our global variable
 
-  HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+  hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
       CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
 
    if (!hWnd)
@@ -117,7 +119,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
       return FALSE;
    }
 
-   HWND hMainDlg = CreateDialogW(hInst, MAKEINTRESOURCE(IDD_MAIN_DLG), hWnd, MainDlg);
+   hMainDlg = CreateDialogW(hInst, MAKEINTRESOURCE(IDD_MAIN_DLG), hWnd, MainDlg);
    ShowWindow(hMainDlg, SW_SHOW);
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
@@ -224,6 +226,16 @@ INT_PTR CALLBACK MainDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 			SendMessage(GetParent(hDlg), WM_DESTROY, 0, 0);
 			//PostQuitMessage(0);
 			return (INT_PTR)TRUE;
+		}
+		int wmId = LOWORD(wParam);
+		switch (wmId)
+		{
+		case IDC_CONNECT:
+			idle_go_to_idle_wait(hWnd);
+			break;
+		case IDC_SENDFILE:
+			MessageBoxW(hDlg, L"click", 0, 0);
+			break;
 		}
 		break;
 	}

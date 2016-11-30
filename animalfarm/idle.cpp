@@ -52,7 +52,6 @@ void idle_setup(LPCWSTR lpszCommName) {
 		std::cerr << e.what() << std::endl;
 		throw std::runtime_error("Failed in Idle Setup");
 	}
-}
 
 void idle_go_to_idle_wait()
 {
@@ -160,12 +159,14 @@ DWORD WINAPI idle_wait(LPVOID pData) {
 				else {
 					// read completed immediately
 					if (readChar == 0x05) { //ENQ
-						LOGMESSAGE(L"GOT ENQ");
+						LOGMESSAGE(L"GOT ENQ1 \n");
 						HandleReceivedEnq();
 					}
 				}
 			}
 
+			if (fWaitingOnRead)
+			{
 			dwRes = WaitForSingleObject(osReader.hEvent, timeout);
 			switch (dwRes)
 			{
@@ -176,7 +177,7 @@ DWORD WINAPI idle_wait(LPVOID pData) {
 				else {
 					// Read completed successfully.
 					if (readChar == 0x05) {//ENQ
-						LOGMESSAGE(L"GOT ENQ");
+							LOGMESSAGE(L"GOT ENQ2 \n");
 						HandleReceivedEnq();
 					}
 					else {
@@ -198,6 +199,7 @@ DWORD WINAPI idle_wait(LPVOID pData) {
 				break;
 			}
 		}
+		}
 		ResetEvent(osReader.hEvent);
 	}
 
@@ -217,9 +219,8 @@ DWORD WINAPI idle_send_enq(LPVOID tData_) {
 	{
 	case WAIT_OBJECT_0:
 
-		LOGMESSAGE(L"GOING TO TRANSMISSION");
+		LOGMESSAGE(L"GOING TO TRANSMISSION \n");
 		GlobalVar::g_bWaitENQ = FALSE;
-
 		TerminateThread(GlobalVar::g_hReceivingThread, 0);
 		GlobalVar::g_hReceivingThread = CreateThread(NULL, 0, send_ack, NULL, 0, 0);
 		break;

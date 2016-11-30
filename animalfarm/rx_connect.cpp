@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "send.h"
 #include <string>
+#include "rx_wait_packet.h"
 // Link with ws2_32.lib
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -38,6 +39,8 @@ DWORD WINAPI send_ack(LPVOID var) {
 	//string result1 = to_string(3);
 	//MessageBox(NULL, result1.c_str, L"asdf", MB_OK);
 	*/
+	rxwp_setUp();
+
 	return 0;
 }
 

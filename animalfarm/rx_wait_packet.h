@@ -1,7 +1,6 @@
 #pragma once
-
-
-BOOL rxwp_setup(HANDLE hwnd);
-void rxwp_create_event();
-BOOL rxwp_readFromPort();
-DWORD WINAPI rxwp_check_event(LPVOID var);
+#include "stdafx.h"
+BOOL rxwp_setUp();
+DWORD WINAPI rx_read_for_syn(LPVOID pData_);
+DWORD WINAPI rx_wait_syn(LPVOID pData_);
+void HandleReceivedSYN();

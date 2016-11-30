@@ -16,6 +16,7 @@ char SYN = 0x16;
 //opens and connects to file 
 
 DWORD WINAPI openFile(LPCWSTR pFile) {
+	LOGMESSAGE(L"IN GET DATA");
 	OVERLAPPED osReader = {0};
 	try {
 		//returns handle to the file to be read
@@ -32,7 +33,7 @@ DWORD WINAPI openFile(LPCWSTR pFile) {
 	}
 	else
 		readFile(osReader);
-		
+	return 0;
 }
 
 //returns true if it can find a special character
@@ -62,7 +63,7 @@ int readFile(OVERLAPPED osReader) {
 	//getFilePosition(buff);
 
 	createPacket(buff);
-
+	return 0;
 }
 
 //Function NOT USED

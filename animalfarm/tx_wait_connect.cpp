@@ -79,7 +79,7 @@ DWORD WINAPI tx_wait_connect(LPVOID pData_)
 
 			if (conParam.reader.hEvent == NULL) {
 				//reader is null
-				LOGMESSAGE(NULL, L"Reader Event is NULL", L"", MB_OK);
+				LOGMESSAGE(L"Reader Event is NULL");
 				return false;
 			}
 			if (!fWaitingOnRead) {
@@ -116,7 +116,7 @@ DWORD WINAPI tx_wait_connect(LPVOID pData_)
 							HandleReceivedAck();
 						}
 						else {
-							LOGMESSAGE(NULL, L"NON ACK CHARACTER RECEIVED", L"", MB_OK);
+							LOGMESSAGE(L"NON ACK CHARACTER RECEIVED");
 							//ack not received
 						}
 					}
@@ -153,7 +153,7 @@ DWORD WINAPI tx_wait_ack(LPVOID pData_)
 	{
 	case WAIT_OBJECT_0:
 		GlobalVar::g_bWaitACK = FALSE;
-		openFile(L"FILE", pData_);
+		openFile(L"FILE");
 		// Received ack;
 		break;
 

@@ -52,15 +52,7 @@ void idle_setup(HWND& hWnd, LPCWSTR lpszCommName) {
 		std::cerr << e.what() << std::endl;
 		throw std::runtime_error("Failed in Idle Setup");
 	}
-}
 
-void idle_go_to_idle_wait(HWND& hWnd)
-{
-	if (GlobalVar::g_hComm == NULL)
-	{
-		MessageBoxW(hWnd, L"COM setting is not set up yet.", 0, 0);
-		return;
-	}
 	LOGMESSAGE(L"ENQ_COUNTER assigned value: ");
 	LOGMESSAGE(L"" + ENQ_COUNTER + '\n');
 	LOGMESSAGE(L"Entering: idle_setup()\n");

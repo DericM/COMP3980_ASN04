@@ -12,7 +12,8 @@
 bool hasSpecialChars(LPCWSTR pFile);
 int readFile(OVERLAPPED osReader);
 void getFilePosition();
-void createPacket(int data);
+uint8_t* createPacket(char data[]);
+uint16_t gen_crc16(const uint8_t *data, uint16_t size);
 
 static bool LastPacketAck = true;
 static bool FinalPacketSent = false;

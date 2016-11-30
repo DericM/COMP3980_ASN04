@@ -4,18 +4,21 @@
 
 using namespace std;
 
-char buff[128];
+char buff[1024];
 DWORD dwBytesRead;
 HANDLE hdlF;
 int counter;
+uint8_t		 packet[1027];
 
-int SYN = 0x016;
+char SYN = 0x16;
 
 
-//opens and connects to file with file name "pFile"
-//returns handle to the file to be read
-DWORD WINAPI openFile(LPCWSTR pFile, OVERLAPPED osReader) {
+//opens and connects to file 
+
+DWORD WINAPI openFile(LPCWSTR pFile) {
+	OVERLAPPED osReader = {0};
 	try {
+		//returns handle to the file to be read
 		hdlF = CreateFile(pFile, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	}
 	catch (exception e) {
@@ -35,18 +38,18 @@ DWORD WINAPI openFile(LPCWSTR pFile, OVERLAPPED osReader) {
 //returns true if it can find a special character
 bool hasSpecialChars(LPCWSTR pFile) {
 	//if (pFile(""))		
-		return true;
+		//return true;
 	//else 
-		//return false;
+		return false;
 }
 
 //if last packet was successfully sent (LastPacketACK Bool == true && FinalPacketSent == False)
 //
 int readFile(OVERLAPPED osReader) {
-
+	char data[1024];
 
 	//reads and checks for end of file
-	if (!ReadFile(hdlF, buff, 1028, &dwBytesRead, &osReader))
+	if (!ReadFile(hdlF, buff, 1024, &dwBytesRead, &osReader))
 		return 0;				//end of file
 		//set data to all null?
 
@@ -56,12 +59,13 @@ int readFile(OVERLAPPED osReader) {
 		//increment  counter
 	}
 
-	getFilePosition();
-						
+	//getFilePosition(buff);
+
+	createPacket(buff);
 
 }
 
-//gets current position of pointer in file
+//Function NOT USED
 void getFilePosition()
 {
 	int data[1024];
@@ -71,21 +75,19 @@ void getFilePosition()
 
 	data[endPacket - startPacket];
 
-	createPacket(*data);
-
-
 }
 
 
 
-void createPacket(int data) {
-
-	char packet[1027];
-	
-	packet[data + SYN];
+uint8_t* createPacket(char data[]) {
 
 
-	//add crc to packet
+	uint16_t crc = gen_crc16(packet, sizeof(packet));
+	char temp = (char)SYN;
+	memcpy_s(packet, 1, &temp, sizeof(temp));
+	memcpy_s(packet + 1, 1024, data, 1024);
+	memcpy_s(packet + 1024, 2, &crc, sizeof(uint16_t));
+	return packet;
 
 }
 
@@ -145,3 +147,5 @@ uint16_t gen_crc16(const uint8_t *data, uint16_t size)
 
 	return crc;
 }
+
+

@@ -2,7 +2,6 @@
 #include "globalvar.h"
 #include <iostream>
 #include <stdexcept>
-#include <string>
 #include "idle.h"
 #include "tx_wait_connect.h"
 #include "rx_connect.h"
@@ -21,6 +20,8 @@ OVERLAPPED osReader = { 0 };
 
 /*Flags*/
 bool bSendingFile = false;
+
+std::wstring sendFileName = L"";
 
 struct EnqParams
 {
@@ -85,6 +86,8 @@ void idle_go_to_idle() {
 	idle_rand_timeout_reset();
 	GlobalVar::g_bWaitENQ = TRUE;
 	bSendingFile = false;
+	sendFileName = L"";
+
 
 	TerminateThread(GlobalVar::g_hIdleSendENQThread, 0);
 	GlobalVar::g_hIdleSendENQThread = CreateThread(NULL, 0, idle_send_enq, &enqParam, 0, 0);
@@ -306,7 +309,7 @@ DWORD WINAPI write_thread_entry_point(LPVOID pData) {
 
 	ipc_send_enq();
 
-	WaitForConnectAck((HWND&)pData, GlobalVar::g_hComm, ENQ_COUNTER);
+	WaitForConnectAck((HWND&)pData, GlobalVar::g_hComm, ENQ_COUNTER, sendFileName);
 
 	return TRUE;
 
@@ -376,4 +379,10 @@ BOOL read_from_port(HANDLE hcomm, OVERLAPPED reader, int timout) {
 		}
 	}
 
+}
+
+void idle_go_to_sendfile(const std::wstring& fileName)
+{
+	bSendingFile = true;
+	sendFileName = fileName;
 }

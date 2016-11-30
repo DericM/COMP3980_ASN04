@@ -22,10 +22,11 @@ struct AckParams
 {
 	HWND hWnd;
 	int timer;
+	std::wstring filename;
 };
 AckParams ackParam;
 
-BOOL WaitForConnectAck(HWND& hWnd, HANDLE& hcomm, int& enqCounter) {
+BOOL WaitForConnectAck(HWND& hWnd, HANDLE& hcomm, int& enqCounter, const std::wstring& fileName) {
 
 	LOGMESSAGE(L"\n");
 	LOGMESSAGE(L"Entering: WaitForConnectAck\n");
@@ -58,12 +59,13 @@ BOOL WaitForConnectAck(HWND& hWnd, HANDLE& hcomm, int& enqCounter) {
 
 	ackParam.hWnd = hWnd;
 	ackParam.timer = ACK_TIMER;
+	ackParam.filename = fileName;
 	GlobalVar::g_bWaitACK = TRUE;
 
 	TerminateThread(GlobalVar::g_hWaitConnectThread, 0);
 	TerminateThread(GlobalVar::g_hWaitForACKThread, 0);
-	GlobalVar::g_hWaitConnectThread = CreateThread(NULL, 0, tx_wait_connect, &conParam, 0, 0);
-	GlobalVar::g_hWaitForACKThread = CreateThread(NULL, 0, tx_wait_ack, &ackParam, 0, 0);
+	GlobalVar::g_hWaitConnectThread = CreateThread(NULL, 0, tx_wait_connect, NULL, 0, 0);
+	GlobalVar::g_hWaitForACKThread = CreateThread(NULL, 0, tx_wait_ack, NULL, 0, 0);
 }
 
 DWORD WINAPI tx_wait_connect(LPVOID pData_)
@@ -153,7 +155,10 @@ DWORD WINAPI tx_wait_ack(LPVOID pData_)
 	{
 	case WAIT_OBJECT_0:
 		GlobalVar::g_bWaitACK = FALSE;
-		openFile(L"FILE");
+		if (ackParam.filename.length() == 0)
+			idle_go_to_idle();
+		else
+			openFile(L"FILE");
 		// Received ack;
 		break;
 

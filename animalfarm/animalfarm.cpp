@@ -234,7 +234,10 @@ INT_PTR CALLBACK MainDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 			idle_go_to_idle_wait(hWnd);
 			break;
 		case IDC_SENDFILE:
-			MessageBoxW(hDlg, L"click", 0, 0);
+			wchar_t filenameBuff[128];
+			GetDlgItemTextW(hDlg, IDC_EDIT_SENDFILE, filenameBuff, 128);
+			std::wstring filename(filenameBuff);
+			idle_go_to_sendfile(filename);
 			break;
 		}
 		break;

@@ -54,79 +54,80 @@ BOOL WaitForConnectAck(int& enqCounter, const std::wstring& fileName) {
 
 	ackParam.timer = ACK_TIMER;
 	ackParam.filename = fileName;
-	GlobalVar::g_bWaitACK = TRUE;
 
 	TerminateThread(GlobalVar::g_hWaitConnectThread, 0);
 	TerminateThread(GlobalVar::g_hWaitForACKThread, 0);
+	CloseHandle(GlobalVar::g_hWaitConnectThread);
+	CloseHandle(GlobalVar::g_hWaitForACKThread);
 	GlobalVar::g_hWaitConnectThread = CreateThread(NULL, 0, tx_wait_connect, NULL, 0, 0);
 	GlobalVar::g_hWaitForACKThread = CreateThread(NULL, 0, tx_wait_ack, NULL, 0, 0);
 }
 
 DWORD WINAPI tx_wait_connect(LPVOID pData_)
 {
-	while (true)
+	bool bWaitAck = true;
+	while (bWaitAck)
 	{
-		if (GlobalVar::g_bWaitACK)
-		{
-			char readChar;
-			BOOL receivedAck = false;
-			BOOL fWaitingOnRead = false;
-			DWORD eventRet;
+		char readChar;
+		BOOL receivedAck = false;
+		BOOL fWaitingOnRead = false;
+		DWORD eventRet;
 
-			if (conParam.reader.hEvent == NULL) {
-				//reader is null
-				LOGMESSAGE(L"Reader Event is NULL");
-				return false;
-			}
-			if (!fWaitingOnRead) {
-				// Issue read operation.
-				if (!ReadFile(GlobalVar::g_hComm, &readChar, 1, &eventRet, &conParam.reader)) {
-					if (GetLastError() != ERROR_IO_PENDING) {
-					}
-					else {
-						fWaitingOnRead = TRUE;
-					}
-
+		if (conParam.reader.hEvent == NULL) {
+			//reader is null
+			LOGMESSAGE(L"Reader Event is NULL");
+			return false;
+		}
+		if (!fWaitingOnRead) {
+			// Issue read operation.
+			if (!ReadFile(GlobalVar::g_hComm, &readChar, 1, &eventRet, &conParam.reader)) {
+				if (GetLastError() != ERROR_IO_PENDING) {
 				}
 				else {
-					// read completed immediately
-					if (readChar == 0x06) {//ACK
-						LOGMESSAGE(L"Received ACK.\n");
-						HandleReceivedAck();
-					}
+					fWaitingOnRead = TRUE;
+				}
+
+			}
+			else {
+				// read completed immediately
+				if (readChar == 0x06) {//ACK
+					LOGMESSAGE(L"Received ACK.\n");
+					bWaitAck = false;
+					HandleReceivedAck();
 				}
 			}
+		}
 
-			if (fWaitingOnRead) {
-				eventRet = WaitForSingleObject(conParam.reader.hEvent, conParam.timer);
+		if (fWaitingOnRead) {
+			eventRet = WaitForSingleObject(conParam.reader.hEvent, conParam.timer);
 
-				switch (eventRet) {
-				case WAIT_OBJECT_0:
-					if (!GetOverlappedResult(GlobalVar::g_hComm, &conParam.reader, &eventRet, FALSE)) {
-						//do something here
+			switch (eventRet) {
+			case WAIT_OBJECT_0:
+				if (!GetOverlappedResult(GlobalVar::g_hComm, &conParam.reader, &eventRet, FALSE)) {
+					//do something here
+				}
+				else {
+					// Read completed successfully.
+					if (readChar == 0x06) {//ACK
+						LOGMESSAGE(L"Received ACK.\n");
+						bWaitAck = false;
+						HandleReceivedAck();
 					}
 					else {
-						// Read completed successfully.
-						if (readChar == 0x06) {//ACK
-							LOGMESSAGE(L"Received ACK.\n");
-							HandleReceivedAck();
-						}
-						else {
-							LOGMESSAGE(L"NON ACK CHARACTER RECEIVED");
-							//ack not received
-						}
+						LOGMESSAGE(L"NON ACK CHARACTER RECEIVED");
+						//ack not received
 					}
-					//  Reset flag so that another opertion can be issued.
-					fWaitingOnRead = FALSE;
-					break;
-				case WAIT_TIMEOUT:
-					// Operation isn't complete yet. fWaitingOnRead flag isn't
-					// changed since I'll loop back around, and I don't want
-					// to issue another read until the first one finishes.
-					//
-					// This is a good time to do some background work.
-					break;
 				}
+				//  Reset flag so that another opertion can be issued.
+				fWaitingOnRead = FALSE;
+				break;
+			case WAIT_TIMEOUT:
+				// Operation isn't complete yet. fWaitingOnRead flag isn't
+				// changed since I'll loop back around, and I don't want
+				// to issue another read until the first one finishes.
+				//
+				// This is a good time to do some background work.
+				break;
 			}
 		}
 
@@ -138,7 +139,6 @@ DWORD WINAPI tx_wait_connect(LPVOID pData_)
 
 void HandleReceivedAck()
 {
-	GlobalVar::g_bWaitACK = FALSE;
 	SetEvent(GlobalVar::g_hAckEvent);
 }
 
@@ -148,7 +148,6 @@ DWORD WINAPI tx_wait_ack(LPVOID pData_)
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
-		GlobalVar::g_bWaitACK = FALSE;
 		if (ackParam.filename.length() == 0)
 			idle_go_to_idle();
 		else
@@ -158,13 +157,10 @@ DWORD WINAPI tx_wait_ack(LPVOID pData_)
 
 	case WAIT_TIMEOUT:
 		// Not receieved ack.
-		GlobalVar::g_bWaitACK = FALSE;
-		
 		idle_go_to_idle();
 		break;
 
 	default:
-		GlobalVar::g_bWaitACK = FALSE;
 		break;
 	}
 

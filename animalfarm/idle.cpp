@@ -54,7 +54,7 @@ void idle_setup(LPCWSTR lpszCommName) {
 	}
 }
 
-void idle_go_to_idle_wait()
+void idle_go_to_idle()
 {
 	if (GlobalVar::g_hComm == NULL)
 	{
@@ -65,7 +65,12 @@ void idle_go_to_idle_wait()
 	LOGMESSAGE(L"" + ENQ_COUNTER + '\n');
 	LOGMESSAGE(L"Entering: idle_setup()\n");
 
+	idle_rand_timeout_reset();
+	bSendingFile = false;
+	sendFileName = L"";
+
 	TerminateThread(GlobalVar::g_hIdleWaitThread, 0);
+	CloseHandle(GlobalVar::g_hIdleWaitThread);
 	GlobalVar::g_hIdleWaitThread = CreateThread(NULL, 0, idle_wait, NULL, 0, 0);
 }
 
@@ -79,17 +84,6 @@ void idle_rand_timeout_reset() {
 
 	LOGMESSAGE(L"RAND_TIMEOUT assigned value: ");
 	LOGMESSAGE(L"" + RAND_TIMEOUT + '\n');
-}
-
-void idle_go_to_idle() {
-	idle_rand_timeout_reset();
-	GlobalVar::g_bWaitENQ = TRUE;
-	bSendingFile = false;
-	sendFileName = L"";
-
-
-	TerminateThread(GlobalVar::g_hIdleSendENQThread, 0);
-	GlobalVar::g_hIdleSendENQThread = CreateThread(NULL, 0, idle_send_enq, &enqParam, 0, 0);
 }
 
 /*
@@ -118,6 +112,7 @@ DWORD WINAPI idle_wait(LPVOID pData) {
 		enqParam.timer = IDLE_SEQ_TIMEOUT;
 
 		TerminateThread(GlobalVar::g_hIdleSendENQThread, 0);
+		CloseHandle(GlobalVar::g_hIdleSendENQThread);
 		GlobalVar::g_hIdleSendENQThread = CreateThread(NULL, 0, idle_send_enq, NULL, 0, 0);
 
 		if (ENQ_COUNTER > 3) {
@@ -138,68 +133,68 @@ DWORD WINAPI idle_wait(LPVOID pData) {
 
 	LOGMESSAGE(L"Entering: idle_wait loop\n");
 
-	while (true) {
-		if (GlobalVar::g_bWaitENQ)
-		{
-			DWORD dwRes;
+	bool bWaitEnq = true;
+	while (bWaitEnq) {
+		DWORD dwRes;
 
-			char readChar;
-			BOOL fWaitingOnRead = FALSE;
-			DWORD eventRet;
+		char readChar;
+		BOOL fWaitingOnRead = FALSE;
+		DWORD eventRet;
 
-			if (!fWaitingOnRead) {
-				// Issue read operation.
-				if (!ReadFile(GlobalVar::g_hComm, &readChar, 1, &eventRet, &osReader)) {
-					if (GetLastError() != ERROR_IO_PENDING) {
-						throw std::runtime_error("Error reading from port.");
-					}
-					else {
-						fWaitingOnRead = TRUE;
-					}
-
+		if (!fWaitingOnRead) {
+			// Issue read operation.
+			if (!ReadFile(GlobalVar::g_hComm, &readChar, 1, &eventRet, &osReader)) {
+				if (GetLastError() != ERROR_IO_PENDING) {
+					throw std::runtime_error("Error reading from port.");
 				}
 				else {
-					// read completed immediately
-					if (readChar == 0x05) { //ENQ
-						LOGMESSAGE(L"GOT ENQ1 \n");
-						HandleReceivedEnq();
-					}
+					fWaitingOnRead = TRUE;
+				}
+
+			}
+			else {
+				// read completed immediately
+				if (readChar == 0x05) { //ENQ
+					LOGMESSAGE(L"GOT ENQ1 \n");
+					bWaitEnq = false;
+					HandleReceivedEnq();
 				}
 			}
+		}
 
-			if (fWaitingOnRead)
+		if (fWaitingOnRead)
+		{
+			dwRes = WaitForSingleObject(osReader.hEvent, timeout);
+			switch (dwRes)
 			{
-				dwRes = WaitForSingleObject(osReader.hEvent, timeout);
-				switch (dwRes)
-				{
-				case WAIT_OBJECT_0:
-					if (!GetOverlappedResult(GlobalVar::g_hComm, &osReader, &eventRet, FALSE)) {
-						//do something here
+			case WAIT_OBJECT_0:
+				if (!GetOverlappedResult(GlobalVar::g_hComm, &osReader, &eventRet, FALSE)) {
+					//do something here
+				}
+				else {
+					// Read completed successfully.
+					if (readChar == 0x05) {//ENQ
+						LOGMESSAGE(L"GOT ENQ2 \n");
+						bWaitEnq = false;
+						HandleReceivedEnq();
 					}
 					else {
-						// Read completed successfully.
-						if (readChar == 0x05) {//ENQ
-							LOGMESSAGE(L"GOT ENQ2 \n");
-							HandleReceivedEnq();
-						}
-						else {
-							//ack not received
-						}
+						//ack not received
 					}
-					//  Reset flag so that another opertion can be issued.
-					fWaitingOnRead = FALSE;
-
-					break;
-
-				case WAIT_TIMEOUT:
-					LOGMESSAGE(L"WAIT_TIMEOUT\n");
-
-					idle_create_write_thread();
-					break;
-
-				default:
-					break;
 				}
+				//  Reset flag so that another opertion can be issued.
+				fWaitingOnRead = FALSE;
+
+				break;
+
+			case WAIT_TIMEOUT:
+				LOGMESSAGE(L"WAIT_TIMEOUT\n");
+
+				idle_create_write_thread();
+				break;
+
+			default:
+				break;
 			}
 		}
 		ResetEvent(osReader.hEvent);
@@ -210,7 +205,6 @@ DWORD WINAPI idle_wait(LPVOID pData) {
 
 void HandleReceivedEnq()
 {
-	GlobalVar::g_bWaitENQ = FALSE;
 	SetEvent(GlobalVar::g_hEnqEvent);
 }
 
@@ -222,8 +216,8 @@ DWORD WINAPI idle_send_enq(LPVOID tData_) {
 	case WAIT_OBJECT_0:
 
 		LOGMESSAGE(L"GOING TO TRANSMISSION \n");
-		GlobalVar::g_bWaitENQ = FALSE;
 		TerminateThread(GlobalVar::g_hReceivingThread, 0);
+		CloseHandle(GlobalVar::g_hReceivingThread);
 		GlobalVar::g_hReceivingThread = CreateThread(NULL, 0, send_ack, NULL, 0, 0);
 		break;
 
@@ -234,14 +228,12 @@ DWORD WINAPI idle_send_enq(LPVOID tData_) {
 			bSendingFile = true;
 			idle_send_enq(NULL);
 		} else {
-			GlobalVar::g_bWaitENQ = FALSE;
 			idle_create_write_thread();
 
 		}
 		break;
 
 	default:
-		GlobalVar::g_bWaitENQ = FALSE;
 		break;
 	}
 
@@ -291,6 +283,7 @@ void idle_create_write_thread() {
 
 	//make new thread for reading
 	TerminateThread(GlobalVar::g_hReadThread, 0);
+	CloseHandle(GlobalVar::g_hReadThread);
 	GlobalVar::g_hReadThread = CreateThread(
 		NULL,
 		0,

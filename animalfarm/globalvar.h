@@ -4,6 +4,8 @@ namespace GlobalVar
 {
 	extern HWND g_hWnd;
 	extern HWND g_hMainDlg;
+	extern HANDLE g_hComm;
+	extern COMMCONFIG g_cc;
 
 	/*Thread handles*/
 	extern HANDLE g_hReadThread;
@@ -20,15 +22,4 @@ namespace GlobalVar
 	extern HANDLE g_hEnqEvent;
 	extern HANDLE g_hAckEvent;
 	extern HANDLE g_hRXSynEvent;
-
-
-	extern BOOL g_bWaitENQ;
-	
-	extern BOOL g_bWaitACK;
-	
-	extern BOOL g_bWaitSYN;
-
-	extern HANDLE g_hComm;
-
-	extern COMMCONFIG g_cc;
 }

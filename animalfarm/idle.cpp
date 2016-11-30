@@ -25,7 +25,6 @@ std::wstring sendFileName = L"";
 
 struct EnqParams
 {
-	HWND hWnd;
 	int timer;
 };
 EnqParams enqParam;
@@ -38,7 +37,7 @@ Create Rand Timer duration
 Create / set Idle Sequence timer duration
 Go to IDLE Wait State
 */
-void idle_setup(HWND& hWnd, LPCWSTR lpszCommName) {
+void idle_setup(LPCWSTR lpszCommName) {
 	LOGMESSAGE(L"\n");
 	LOGMESSAGE(L"Entering: idle_setup()\n");
 
@@ -46,7 +45,7 @@ void idle_setup(HWND& hWnd, LPCWSTR lpszCommName) {
 	idle_rand_timeout_reset();
 
 	try {
-		if (!is_open_port(hWnd, lpszCommName))
+		if (!is_open_port(lpszCommName))
 			return;
 	}
 	catch (std::exception const& e) {
@@ -55,11 +54,11 @@ void idle_setup(HWND& hWnd, LPCWSTR lpszCommName) {
 	}
 }
 
-void idle_go_to_idle_wait(HWND& hWnd)
+void idle_go_to_idle_wait()
 {
 	if (GlobalVar::g_hComm == NULL)
 	{
-		MessageBoxW(hWnd, L"COM setting is not set up yet.", 0, 0);
+		MessageBoxW(GlobalVar::g_hWnd, L"COM setting is not set up yet.", 0, 0);
 		return;
 	}
 	LOGMESSAGE(L"ENQ_COUNTER assigned value: ");
@@ -67,7 +66,7 @@ void idle_go_to_idle_wait(HWND& hWnd)
 	LOGMESSAGE(L"Entering: idle_setup()\n");
 
 	TerminateThread(GlobalVar::g_hIdleWaitThread, 0);
-	GlobalVar::g_hIdleWaitThread = CreateThread(NULL, 0, idle_wait, (LPVOID)hWnd, 0, 0);
+	GlobalVar::g_hIdleWaitThread = CreateThread(NULL, 0, idle_wait, NULL, 0, 0);
 }
 
 /*
@@ -96,9 +95,7 @@ void idle_go_to_idle() {
 /*
 IDLE Wait
 */
-DWORD WINAPI idle_wait(LPVOID _hWnd) {
-	HWND hWnd = (HWND)_hWnd;
-
+DWORD WINAPI idle_wait(LPVOID pData) {
 	LOGMESSAGE(L"\n");
 	LOGMESSAGE(L"Entering: idle_wait()\n");
 	
@@ -118,7 +115,6 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 		idle_create_event();
 
 		// Initialize _all_ fields of the struct (malloc won't zero fill)
-		enqParam.hWnd = hWnd;
 		enqParam.timer = IDLE_SEQ_TIMEOUT;
 
 		TerminateThread(GlobalVar::g_hIdleSendENQThread, 0);
@@ -195,7 +191,7 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 			case WAIT_TIMEOUT:
 				LOGMESSAGE(L"WAIT_TIMEOUT\n");
 
-				idle_create_write_thread(hWnd);
+				idle_create_write_thread();
 				break;
 
 			default:
@@ -236,7 +232,7 @@ DWORD WINAPI idle_send_enq(LPVOID tData_) {
 			idle_send_enq(NULL);
 		} else {
 			GlobalVar::g_bWaitENQ = FALSE;
-			idle_create_write_thread(enqParam.hWnd);
+			idle_create_write_thread();
 
 		}
 		break;
@@ -286,7 +282,7 @@ Get file name(if Not sequence timer timeout)
 Send ENQ
 Got to Wait for Connect WFC Wait State
 */
-void idle_create_write_thread(HWND& hWnd) {
+void idle_create_write_thread() {
 	LOGMESSAGE(L"\n");
 	LOGMESSAGE(L"Entering: idle_create_write_thread\n");
 
@@ -296,7 +292,7 @@ void idle_create_write_thread(HWND& hWnd) {
 		NULL,
 		0,
 		write_thread_entry_point,
-		(LPVOID)hWnd,
+		NULL,
 		0,
 		NULL
 	);
@@ -309,7 +305,7 @@ DWORD WINAPI write_thread_entry_point(LPVOID pData) {
 
 	ipc_send_enq();
 
-	WaitForConnectAck((HWND&)pData, GlobalVar::g_hComm, ENQ_COUNTER, sendFileName);
+	WaitForConnectAck(ENQ_COUNTER, sendFileName);
 
 	return TRUE;
 

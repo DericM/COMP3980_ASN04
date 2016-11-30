@@ -13,8 +13,6 @@
 #define MAX_LOADSTRING 100
 
 // Global Variables:
-HWND hWnd;
-HWND hMainDlg;
 HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
@@ -111,18 +109,18 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // Store instance handle in our global variable
 
-  hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+  GlobalVar::g_hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
       CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
 
-   if (!hWnd)
+   if (!GlobalVar::g_hWnd)
    {
       return FALSE;
    }
 
-   hMainDlg = CreateDialogW(hInst, MAKEINTRESOURCE(IDD_MAIN_DLG), hWnd, MainDlg);
-   ShowWindow(hMainDlg, SW_SHOW);
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
+   GlobalVar::g_hMainDlg = CreateDialogW(hInst, MAKEINTRESOURCE(IDD_MAIN_DLG), GlobalVar::g_hWnd, MainDlg);
+   ShowWindow(GlobalVar::g_hMainDlg, SW_SHOW);
+   ShowWindow(GlobalVar::g_hWnd, nCmdShow);
+   UpdateWindow(GlobalVar::g_hWnd);
 
    return TRUE;
 }
@@ -151,27 +149,27 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             {
 			case ID_CONFIG_COM1:
 				cName = L"Com1";
-				idle_setup(hWnd, cName);
+				idle_setup(cName);
 				break;
 			case ID_CONFIG_COM2:
 				cName = L"Com2";
-				idle_setup(hWnd, cName);
+				idle_setup(cName);
 				break;
 			case ID_CONFIG_COM3:
 				cName = L"Com3";
-				idle_setup(hWnd, cName);
+				idle_setup(cName);
 				break;
 			case ID_CONFIG_COM4:
 				cName = L"Com4";
-				idle_setup(hWnd, cName);
+				idle_setup(cName);
 				break;
 			case ID_CONFIG_COM5:
 				cName = L"Com5";
-				idle_setup(hWnd, cName);
+				idle_setup(cName);
 				break;
 			case ID_CONFIG_COM6:
 				cName = L"Com6";
-				idle_setup(hWnd, cName);
+				idle_setup(cName);
 				break;
             case IDM_ABOUT:
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
@@ -231,7 +229,7 @@ INT_PTR CALLBACK MainDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		switch (wmId)
 		{
 		case IDC_CONNECT:
-			idle_go_to_idle_wait(hWnd);
+			idle_go_to_idle_wait();
 			break;
 		case IDC_SENDFILE:
 			wchar_t filenameBuff[128];

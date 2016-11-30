@@ -3,6 +3,9 @@
 
 namespace GlobalVar
 {
+	HWND g_hWnd;
+	HWND g_hMainDlg;
+
 	/*Thread handles*/
 	HANDLE g_hReadThread;
 	HANDLE g_hWriteThread;

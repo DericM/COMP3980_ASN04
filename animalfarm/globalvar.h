@@ -2,6 +2,9 @@
 
 namespace GlobalVar
 {
+	extern HWND g_hWnd;
+	extern HWND g_hMainDlg;
+
 	/*Thread handles*/
 	extern HANDLE g_hReadThread;
 	extern HANDLE g_hWriteThread;

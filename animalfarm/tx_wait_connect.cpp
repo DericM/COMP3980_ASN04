@@ -10,8 +10,6 @@
 
 struct ConnectParams
 {
-	HWND hWnd;
-	HANDLE hcomm;
 	int enqCounter;
 	int timer;
 	OVERLAPPED reader;
@@ -20,13 +18,12 @@ ConnectParams conParam;
 
 struct AckParams
 {
-	HWND hWnd;
 	int timer;
 	std::wstring filename;
 };
 AckParams ackParam;
 
-BOOL WaitForConnectAck(HWND& hWnd, HANDLE& hcomm, int& enqCounter, const std::wstring& fileName) {
+BOOL WaitForConnectAck(int& enqCounter, const std::wstring& fileName) {
 
 	LOGMESSAGE(L"\n");
 	LOGMESSAGE(L"Entering: WaitForConnectAck\n");
@@ -51,13 +48,10 @@ BOOL WaitForConnectAck(HWND& hWnd, HANDLE& hcomm, int& enqCounter, const std::ws
 		NULL    // object name
 	);
 
-	conParam.hWnd = hWnd;
-	conParam.hcomm = hcomm;
 	conParam.enqCounter = enqCounter;
 	conParam.reader = reader;
 	conParam.timer = ACK_TIMER;
 
-	ackParam.hWnd = hWnd;
 	ackParam.timer = ACK_TIMER;
 	ackParam.filename = fileName;
 	GlobalVar::g_bWaitACK = TRUE;
@@ -86,7 +80,7 @@ DWORD WINAPI tx_wait_connect(LPVOID pData_)
 			}
 			if (!fWaitingOnRead) {
 				// Issue read operation.
-				if (!ReadFile(conParam.hcomm, &readChar, 1, &eventRet, &conParam.reader)) {
+				if (!ReadFile(GlobalVar::g_hComm, &readChar, 1, &eventRet, &conParam.reader)) {
 					if (GetLastError() != ERROR_IO_PENDING) {
 					}
 					else {
@@ -108,7 +102,7 @@ DWORD WINAPI tx_wait_connect(LPVOID pData_)
 
 				switch (eventRet) {
 				case WAIT_OBJECT_0:
-					if (!GetOverlappedResult(conParam.hcomm, &conParam.reader, &eventRet, FALSE)) {
+					if (!GetOverlappedResult(GlobalVar::g_hComm, &conParam.reader, &eventRet, FALSE)) {
 						//do something here
 					}
 					else {

@@ -2,6 +2,7 @@
 #include "globalvar.h"
 #include "tx_wait_connect.h"
 #include "idle.h"
+#include "tx_get_data.h"
 
 #include <stdexcept>
 #include <memory>
@@ -152,6 +153,7 @@ DWORD WINAPI tx_wait_ack(LPVOID pData_)
 	{
 	case WAIT_OBJECT_0:
 		GlobalVar::g_bWaitACK = FALSE;
+		openFile(L"FILE", pData_);
 		// Received ack;
 		break;
 

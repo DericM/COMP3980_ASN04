@@ -2,5 +2,5 @@
 
 #include "stdafx.h"
 
-DWORD WINAPI openFile(LPCWSTR pFile, OVERLAPPED osReader);
+DWORD WINAPI openFile(LPCWSTR pFile);
 

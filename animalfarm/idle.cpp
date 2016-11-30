@@ -6,6 +6,7 @@
 #include "tx_wait_connect.h"
 #include "rx_connect.h"
 #include "send.h"
+#include "receive.h"
 #include "idle_session.h"
 
 /*Counters*/
@@ -16,7 +17,7 @@ int RAND_TIMEOUT;
 int IDLE_SEQ_TIMEOUT = 500;
 
 /*events*/
-OVERLAPPED osReader = { 0 };
+//OVERLAPPED osReader = { 0 };
 
 /*Flags*/
 bool bSendingFile = false;
@@ -116,7 +117,7 @@ DWORD WINAPI idle_wait(LPVOID pData) {
 		GlobalVar::g_hIdleSendENQThread = CreateThread(NULL, 0, idle_send_enq, NULL, 0, 0);
 
 		if (ENQ_COUNTER > 3) {
-			CloseHandle(osReader.hEvent);
+			//CloseHandle(osReader.hEvent);
 			is_close_port();
 
 			return 0;
@@ -127,10 +128,18 @@ DWORD WINAPI idle_wait(LPVOID pData) {
 		throw std::runtime_error("Failed in Idle Wait");
 	}
 
-	if (osReader.hEvent == NULL) {
+	/*if (osReader.hEvent == NULL) {
 		throw std::runtime_error("Reader Event is NULL");
+	}*/
+
+	if (ipc_recieve_enq(timeout)) {
+
+	}
+	else {
+		idle_create_write_thread();
 	}
 
+	/*
 	LOGMESSAGE(L"Entering: idle_wait loop\n");
 
 	bool bWaitEnq = true;
@@ -199,6 +208,7 @@ DWORD WINAPI idle_wait(LPVOID pData) {
 		}
 		ResetEvent(osReader.hEvent);
 	}
+	*/
 
 	return 0;
 }
@@ -248,7 +258,7 @@ DWORD WINAPI idle_send_enq(LPVOID tData_) {
 void idle_create_event() {
 	LOGMESSAGE(L"Entering: idle_create_event()\n");
 
-	osReader.hEvent = CreateEvent(
+	/*osReader.hEvent = CreateEvent(
 		NULL,               // default security attributes
 		TRUE,               // manual-reset event
 		FALSE,              // initial state is nonsignaled
@@ -257,7 +267,7 @@ void idle_create_event() {
 
 	if (osReader.hEvent == NULL) {
 		throw std::runtime_error("Failed to create event");
-	}
+	}*/
 
 	GlobalVar::g_hEnqEvent = CreateEvent(
 		NULL,               // default security attributes
@@ -315,7 +325,7 @@ Read char
 Check if character is ENQ
 If character is ENQ stop timers go to Rx Connected State
 */
-
+/*
 BOOL read_from_port(HANDLE hcomm, OVERLAPPED reader, int timout) {
 	char readChar;
 	BOOL fWaitingOnRead = false;
@@ -372,6 +382,7 @@ BOOL read_from_port(HANDLE hcomm, OVERLAPPED reader, int timout) {
 	}
 
 }
+*/
 
 void idle_go_to_sendfile(const std::wstring& fileName)
 {

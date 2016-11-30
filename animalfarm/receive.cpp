@@ -13,7 +13,6 @@ bool ipc_recieve_ack() {
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
 		LOGMESSAGE(L"Successfuly recieved: " + target);
-		GlobalVar::g_bWaitACK = FALSE;
 		SetEvent(GlobalVar::g_hAckEvent);
 		return TRUE;
 	}
@@ -30,7 +29,6 @@ bool ipc_recieve_enq(int timeout) {
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
 		LOGMESSAGE(L"Successfuly recieved: " + target);
-		GlobalVar::g_bWaitENQ = FALSE;
 		SetEvent(GlobalVar::g_hEnqEvent);
 		return TRUE;
 	}

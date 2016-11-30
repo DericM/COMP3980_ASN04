@@ -16,6 +16,7 @@ char SYN = 0x16;
 //opens and connects to file 
 
 DWORD WINAPI openFile(LPCWSTR pFile) {
+	LOGMESSAGE(L"IN GET DATA");
 	OVERLAPPED osReader = {0};
 	try {
 		//returns handle to the file to be read

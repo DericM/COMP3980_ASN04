@@ -153,7 +153,7 @@ DWORD WINAPI tx_wait_ack(LPVOID pData_)
 	{
 	case WAIT_OBJECT_0:
 		GlobalVar::g_bWaitACK = FALSE;
-		openFile(L"FILE");
+		openFile(L"FILE", pData_);
 		// Received ack;
 		break;
 

@@ -152,42 +152,45 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 				else {
 					// read completed immediately
 					if (readChar == 0x05) { //ENQ
-						LOGMESSAGE(L"GOT ENQ");
+						LOGMESSAGE(L"GOT ENQ1 \n");
 						HandleReceivedEnq();
 					}
 				}
 			}
 
-			dwRes = WaitForSingleObject(osReader.hEvent, timeout);
-			switch (dwRes)
+			if (fWaitingOnRead)
 			{
-			case WAIT_OBJECT_0:
-				if (!GetOverlappedResult(GlobalVar::g_hComm, &osReader, &eventRet, FALSE)) {
-					//do something here
-				}
-				else {
-					// Read completed successfully.
-					if (readChar == 0x05) {//ENQ
-						LOGMESSAGE(L"GOT ENQ");
-						HandleReceivedEnq();
+				dwRes = WaitForSingleObject(osReader.hEvent, timeout);
+				switch (dwRes)
+				{
+				case WAIT_OBJECT_0:
+					if (!GetOverlappedResult(GlobalVar::g_hComm, &osReader, &eventRet, FALSE)) {
+						//do something here
 					}
 					else {
-						//ack not received
+						// Read completed successfully.
+						if (readChar == 0x05) {//ENQ
+							LOGMESSAGE(L"GOT ENQ2 \n");
+							HandleReceivedEnq();
+						}
+						else {
+							//ack not received
+						}
 					}
+					//  Reset flag so that another opertion can be issued.
+					fWaitingOnRead = FALSE;
+
+					break;
+
+				case WAIT_TIMEOUT:
+					LOGMESSAGE(L"WAIT_TIMEOUT\n");
+
+					idle_create_write_thread(hWnd);
+					break;
+
+				default:
+					break;
 				}
-				//  Reset flag so that another opertion can be issued.
-				fWaitingOnRead = FALSE;
-
-				break;
-
-			case WAIT_TIMEOUT:
-				LOGMESSAGE(L"WAIT_TIMEOUT\n");
-
-				idle_create_write_thread(hWnd);
-				break;
-
-			default:
-				break;
 			}
 		}
 		ResetEvent(osReader.hEvent);
@@ -211,16 +214,15 @@ DWORD WINAPI idle_send_enq(LPVOID tData_) {
 	{
 	case WAIT_OBJECT_0:
 
-		LOGMESSAGE(L"GOING TO TRANSMISSION");
+		LOGMESSAGE(L"GOING TO TRANSMISSION \n");
 		GlobalVar::g_bWaitENQ = FALSE;
-
 		TerminateThread(GlobalVar::g_hReceivingThread, 0);
 		GlobalVar::g_hReceivingThread = CreateThread(NULL, 0, send_ack, NULL, 0, 0);
 		break;
 
 	case WAIT_TIMEOUT:
 		if (!bSendingFile) {
-			LOGMESSAGE(L"SETTING RANDTIMER");
+			LOGMESSAGE(L"SETTING RANDTIMER \n");
 			tData->timer = RAND_TIMEOUT;
 			bSendingFile = true;
 			idle_send_enq(tData);

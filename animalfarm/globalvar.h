@@ -11,14 +11,20 @@ namespace GlobalVar
 	extern HANDLE g_hWaitForACKThread;
 
 	extern HANDLE g_hReceivingThread;
-	extern HANDLE g_hReceivingWaitForACK;
+	extern HANDLE g_hWaitForSYNThread;
+	extern HANDLE g_hReadForSYNThread;
 
 	extern HANDLE g_hEnqEvent;
 	extern HANDLE g_hAckEvent;
 	extern HANDLE g_hRXSynEvent;
 
+
 	extern BOOL g_bWaitENQ;
+	
 	extern BOOL g_bWaitACK;
+	
+	extern BOOL g_bWaitSYN;
+
 	extern HANDLE g_hComm;
 
 	extern COMMCONFIG g_cc;

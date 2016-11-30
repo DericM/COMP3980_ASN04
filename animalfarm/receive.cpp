@@ -12,7 +12,7 @@ bool ipc_recieve_ack() {
 	int timeout = 500;//////////////////xxxxxxxxxxxxxxxx//////////////////////////
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
-		LOGMESSAGE(L"Successfuly recieved: " + target);
+		LOGMESSAGE(L"Successfuly recieved: " << target);
 		SetEvent(GlobalVar::g_hAckEvent);
 		return TRUE;
 	}
@@ -28,7 +28,7 @@ bool ipc_recieve_enq(int timeout) {
 	char readChar[1];
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
-		LOGMESSAGE(L"Successfuly recieved: " + target);
+		LOGMESSAGE(L"Successfuly recieved: " << target);
 		SetEvent(GlobalVar::g_hEnqEvent);
 		return TRUE;
 	}
@@ -45,7 +45,7 @@ bool ipc_recieve_snq() {
 	char timeout = 500;/////////////////////////////////////////////////////////
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
-		LOGMESSAGE(L"Successfuly recieved: " + target);
+		LOGMESSAGE(L"Successfuly recieved: " << target);
 		//GlobalVar::g_bWaitENQ = FALSE;
 		SetEvent(GlobalVar::g_hRXSynEvent);
 		return TRUE;
@@ -94,58 +94,65 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 		return FALSE;
 	}
 
-	if (!fWaitingOnRead) {
-		// Issue read operation.
-		if (!ReadFile(hComm, readChar, toReadSize, &eventRet, &osReader)) {
-			if (GetLastError() != ERROR_IO_PENDING) {
-				LOGMESSAGE(L"Error reading from port. ");
+	bool bWaitEnq = true;
+	while (bWaitEnq) {
+		LOGMESSAGE(L"BEGIN==>");
+
+		if (!fWaitingOnRead) {
+			// Issue read operation.
+			if (!ReadFile(hComm, readChar, toReadSize, &eventRet, &osReader)) {
+				if (GetLastError() != ERROR_IO_PENDING) {
+					LOGMESSAGE(L"Error reading from port. ");
+				}
+				else {
+					LOGMESSAGE(L"WAITING_TO_READ==>");
+					fWaitingOnRead = TRUE;
+				}
 			}
 			else {
-				LOGMESSAGE(L"===================WAITING TO READ=======================\n");
-				fWaitingOnRead = TRUE;
+
+				if (target == NULL || readChar[0] == target) {
+					LOGMESSAGE(L"GOT_TARGET1==>");
+					bWaitEnq = false;
+				}
+				LOGMESSAGE(L"GOT_NOTHING1==>");
 			}
 		}
-		else {
-			
-			if (target == NULL || readChar[0] == target) { 
-				LOGMESSAGE(L"" + target);
-				LOGMESSAGE(L"" + readChar[0]);
-				LOGMESSAGE(L"===================GOT TARGET1=======================\n");
-				return TRUE;
+		if (fWaitingOnRead) {
+			dwRes = WaitForSingleObject(osReader.hEvent, timeout);
+			switch (dwRes)
+			{
+			case WAIT_OBJECT_0:
+				LOGMESSAGE(L"WAIT_OBJECT_0==>");
+				if (!GetOverlappedResult(hComm, &osReader, &eventRet, FALSE)) {
+					//do something here
+				}
+				else {
+					// Read completed successfully.
+					if (target == NULL || readChar[0] == target) {
+						LOGMESSAGE(L"GOT_TARGET2==>");
+						bWaitEnq = false;
+					}
+					else {
+						LOGMESSAGE(L"GOT_NOTHING2==>");
+					}
+				}
+				//  Reset flag so that another opertion can be issued.
+				fWaitingOnRead = FALSE;
+				break;
+
+			case WAIT_TIMEOUT:
+				LOGMESSAGE(L"WAIT_TIMEOUT==>");
+				return FALSE;
+
+			default:
+				LOGMESSAGE(L"DEFAULT==>\n");
+				break;
 			}
-			LOGMESSAGE(L"===================GOT NOTHING=======================\n");
 		}
+		ResetEvent(osReader.hEvent);
+		LOGMESSAGE(L"END\n");
 	}
-
-	dwRes = WaitForSingleObject(osReader.hEvent, timeout);
-	switch (dwRes)
-	{
-	case WAIT_OBJECT_0:
-		LOGMESSAGE(L"===================WAIT_OBJECT_0=======================\n");
-		if (!GetOverlappedResult(hComm, &osReader, &eventRet, FALSE)) {
-			//do something here
-		}
-		else {
-			// Read completed successfully.
-			if (target == NULL || readChar[0] == target) {
-				LOGMESSAGE(L"===================GOT TARGET2=======================\n");
-				return TRUE;
-			}
-			else {
-				//target not received
-			}
-		}
-		//  Reset flag so that another opertion can be issued.
-		fWaitingOnRead = FALSE;
-		break;
-
-	case WAIT_TIMEOUT:
-		LOGMESSAGE(L"===================WAIT_TIMEOUT=======================\n");
-		return FALSE;
-
-	default:
-		LOGMESSAGE(L"===================DEFAULT=======================\n");
-		break;
-	}
+	return TRUE;
 
 }

@@ -45,13 +45,22 @@ void idle_setup(HWND& hWnd, LPCWSTR lpszCommName) {
 	idle_rand_timeout_reset();
 
 	try {
-		is_open_port(hWnd, lpszCommName);
+		if (!is_open_port(hWnd, lpszCommName))
+			return;
 	}
 	catch (std::exception const& e) {
 		std::cerr << e.what() << std::endl;
 		throw std::runtime_error("Failed in Idle Setup");
 	}
+}
 
+void idle_go_to_idle_wait(HWND& hWnd)
+{
+	if (GlobalVar::g_hComm == NULL)
+	{
+		MessageBoxW(hWnd, L"COM setting is not set up yet.", 0, 0);
+		return;
+	}
 	LOGMESSAGE(L"ENQ_COUNTER assigned value: ");
 	LOGMESSAGE(L"" + ENQ_COUNTER + '\n');
 	LOGMESSAGE(L"Entering: idle_setup()\n");
@@ -110,7 +119,7 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 		enqParam.timer = IDLE_SEQ_TIMEOUT;
 
 		TerminateThread(GlobalVar::g_hIdleSendENQThread, 0);
-		GlobalVar::g_hIdleSendENQThread = CreateThread(NULL, 0, idle_send_enq, &enqParam, 0, 0);
+		GlobalVar::g_hIdleSendENQThread = CreateThread(NULL, 0, idle_send_enq, NULL, 0, 0);
 
 		if (ENQ_COUNTER > 3) {
 			CloseHandle(osReader.hEvent);
@@ -160,38 +169,38 @@ DWORD WINAPI idle_wait(LPVOID _hWnd) {
 
 			if (fWaitingOnRead)
 			{
-				dwRes = WaitForSingleObject(osReader.hEvent, timeout);
-				switch (dwRes)
-				{
-				case WAIT_OBJECT_0:
-					if (!GetOverlappedResult(GlobalVar::g_hComm, &osReader, &eventRet, FALSE)) {
-						//do something here
+			dwRes = WaitForSingleObject(osReader.hEvent, timeout);
+			switch (dwRes)
+			{
+			case WAIT_OBJECT_0:
+				if (!GetOverlappedResult(GlobalVar::g_hComm, &osReader, &eventRet, FALSE)) {
+					//do something here
+				}
+				else {
+					// Read completed successfully.
+					if (readChar == 0x05) {//ENQ
+							LOGMESSAGE(L"GOT ENQ2 \n");
+						HandleReceivedEnq();
 					}
 					else {
-						// Read completed successfully.
-						if (readChar == 0x05) {//ENQ
-							LOGMESSAGE(L"GOT ENQ2 \n");
-							HandleReceivedEnq();
-						}
-						else {
-							//ack not received
-						}
+						//ack not received
 					}
-					//  Reset flag so that another opertion can be issued.
-					fWaitingOnRead = FALSE;
-
-					break;
-
-				case WAIT_TIMEOUT:
-					LOGMESSAGE(L"WAIT_TIMEOUT\n");
-
-					idle_create_write_thread(hWnd);
-					break;
-
-				default:
-					break;
 				}
+				//  Reset flag so that another opertion can be issued.
+				fWaitingOnRead = FALSE;
+
+				break;
+
+			case WAIT_TIMEOUT:
+				LOGMESSAGE(L"WAIT_TIMEOUT\n");
+
+				idle_create_write_thread(hWnd);
+				break;
+
+			default:
+				break;
 			}
+		}
 		}
 		ResetEvent(osReader.hEvent);
 	}
@@ -207,9 +216,7 @@ void HandleReceivedEnq()
 
 
 DWORD WINAPI idle_send_enq(LPVOID tData_) {
-	EnqParams* tData = static_cast<EnqParams*>(tData_);
-
-	DWORD dwRes = WaitForSingleObject(GlobalVar::g_hEnqEvent, tData->timer);
+	DWORD dwRes = WaitForSingleObject(GlobalVar::g_hEnqEvent, enqParam.timer);
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
@@ -222,13 +229,13 @@ DWORD WINAPI idle_send_enq(LPVOID tData_) {
 
 	case WAIT_TIMEOUT:
 		if (!bSendingFile) {
-			LOGMESSAGE(L"SETTING RANDTIMER \n");
-			tData->timer = RAND_TIMEOUT;
+			LOGMESSAGE(L"SETTING RANDTIMER");
+			enqParam.timer = RAND_TIMEOUT;
 			bSendingFile = true;
-			idle_send_enq(tData);
+			idle_send_enq(NULL);
 		} else {
 			GlobalVar::g_bWaitENQ = FALSE;
-			idle_create_write_thread(tData->hWnd);
+			idle_create_write_thread(enqParam.hWnd);
 
 		}
 		break;

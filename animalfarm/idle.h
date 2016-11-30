@@ -10,6 +10,7 @@ void idle_setup(HWND& hWnd, LPCWSTR lpszCommName);
 //void idle_wait(HWND& hWnd);
 DWORD WINAPI idle_wait(LPVOID);
 DWORD WINAPI idle_send_enq(LPVOID);
+void idle_go_to_idle_wait(HWND& hWnd);
 
 void idle_go_to_idle();
 

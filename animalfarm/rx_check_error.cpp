@@ -58,3 +58,8 @@ uint16_t crcReceive(const uint8_t *data, uint16_t size)
 		if (i & out) crc |= j;
 	}
 }
+
+//if remainder == 0000..
+//error found and go to wait for packet setup
+
+//else start process thread

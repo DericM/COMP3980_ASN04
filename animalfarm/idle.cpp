@@ -75,6 +75,7 @@ void idle_rand_timeout_reset() {
 void idle_go_to_idle() {
 	idle_rand_timeout_reset();
 	GlobalVar::g_bWaitENQ = TRUE;
+	bSendingFile = false;
 
 	TerminateThread(GlobalVar::g_hIdleSendENQThread, 0);
 	GlobalVar::g_hIdleSendENQThread = CreateThread(NULL, 0, idle_send_enq, &enqParam, 0, 0);

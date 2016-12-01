@@ -30,17 +30,9 @@ struct EnqParams
 };
 EnqParams enqParam;
 
-/*
-Open port
-Set Baud rate
-Create ENQ counter
-Create Rand Timer duration
-Create / set Idle Sequence timer duration
-Go to IDLE Wait State
-*/
+
 void idle_setup(LPCWSTR lpszCommName) {
-	LOGMESSAGE(L"\n");
-	LOGMESSAGE(L"Entering: idle_setup()\n");
+	LOGMESSAGE(L"\nEntering: idle_setup()\n");
 
 	ENQ_COUNTER = 0;
 	idle_rand_timeout_reset();
@@ -55,16 +47,11 @@ void idle_setup(LPCWSTR lpszCommName) {
 	}
 }
 
-void idle_go_to_idle()
-{
-	if (GlobalVar::g_hComm == NULL)
-	{
+void idle_go_to_idle() {
+	if (GlobalVar::g_hComm == NULL){
 		MessageBoxW(GlobalVar::g_hWnd, L"COM setting is not set up yet.", 0, 0);
 		return;
 	}
-	LOGMESSAGE(L"ENQ_COUNTER assigned value: ");
-	LOGMESSAGE(L"" + ENQ_COUNTER + '\n');
-	LOGMESSAGE(L"Entering: idle_setup()\n");
 
 	idle_rand_timeout_reset();
 	bSendingFile = false;
@@ -79,144 +66,48 @@ void idle_go_to_idle()
 * Resets randTimeout to a value between 0-100
 */
 void idle_rand_timeout_reset() {
-	LOGMESSAGE(L"\nEntering: idle_rand_timeout_reset() ");
-
 	RAND_TIMEOUT = rand() % 101; //0-100
-
-	LOGMESSAGE(L"RAND_TIMEOUT assigned value: ");
-	LOGMESSAGE(L"" + RAND_TIMEOUT + '\n');
+	LOGMESSAGE(L"RAND_TIMEOUT assigned value: " << RAND_TIMEOUT << "\n");
 }
 
 /*
 IDLE Wait
 */
 DWORD WINAPI idle_wait(LPVOID pData) {
-	LOGMESSAGE(L"\n");
-	LOGMESSAGE(L"Entering: idle_wait()\n");
+	LOGMESSAGE(L"\nEntering: idle_wait()\n");
 	
 	int timeout = IDLE_SEQ_TIMEOUT;
 	idle_rand_timeout_reset();
 	if (bSendingFile) {
-		LOGMESSAGE(L"fSendingFile TRUE\n");
 		LOGMESSAGE(L"Switching to RAND_TIMEOUT\n");
 		timeout = RAND_TIMEOUT;
 	}
+	LOGMESSAGE(L"timeout value: " << timeout << "\n");
 
-	LOGMESSAGE(L"timeout value: ");
-	LOGMESSAGE(L"" + timeout + '\n');
-
-
-	try {
-		idle_create_event();
-
-		// Initialize _all_ fields of the struct (malloc won't zero fill)
-		enqParam.timer = IDLE_SEQ_TIMEOUT;
-
-		TerminateThread(GlobalVar::g_hIdleSendENQThread, 0);
-		CloseHandle(GlobalVar::g_hIdleSendENQThread);
-		GlobalVar::g_hIdleSendENQThread = CreateThread(NULL, 0, idle_send_enq, NULL, 0, 0);
-
-		if (ENQ_COUNTER > 3) {
-			//CloseHandle(osReader.hEvent);
-			is_close_port();
-
-			return 0;
-		}
-	}
-	catch (std::exception const& e) {
-		std::cerr << e.what() << std::endl;
-		throw std::runtime_error("Failed in Idle Wait");
+	LOGMESSAGE(L"Creating g_hEnqEvent\n");
+	GlobalVar::g_hEnqEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (GlobalVar::g_hEnqEvent == NULL) {
+		throw std::runtime_error("Failed to create event");
 	}
 
-	/*if (osReader.hEvent == NULL) {
-		throw std::runtime_error("Reader Event is NULL");
-	}*/
+	enqParam.timer = IDLE_SEQ_TIMEOUT;
 
-	if (ipc_recieve_enq(timeout)) {
+	TerminateThread(GlobalVar::g_hIdleSendENQThread, 0);
+	CloseHandle(GlobalVar::g_hIdleSendENQThread);
+	GlobalVar::g_hIdleSendENQThread = CreateThread(NULL, 0, idle_send_enq, NULL, 0, 0);
 
+	if (ENQ_COUNTER > 3) {
+		is_close_port();
+		return 0;
 	}
-	else {
+
+	if (!ipc_recieve_enq(timeout)) {
 		idle_create_write_thread();
 	}
-
-	/*
-	LOGMESSAGE(L"Entering: idle_wait loop\n");
-
-	bool bWaitEnq = true;
-	while (bWaitEnq) {
-		DWORD dwRes;
-
-		char readChar;
-		BOOL fWaitingOnRead = FALSE;
-		DWORD eventRet;
-
-		if (!fWaitingOnRead) {
-			// Issue read operation.
-			if (!ReadFile(GlobalVar::g_hComm, &readChar, 1, &eventRet, &osReader)) {
-				if (GetLastError() != ERROR_IO_PENDING) {
-					throw std::runtime_error("Error reading from port.");
-				}
-				else {
-					fWaitingOnRead = TRUE;
-				}
-
-			}
-			else {
-				// read completed immediately
-				if (readChar == 0x05) { //ENQ
-					LOGMESSAGE(L"GOT ENQ1 \n");
-					bWaitEnq = false;
-					HandleReceivedEnq();
-				}
-			}
-		}
-
-		if (fWaitingOnRead)
-		{
-			dwRes = WaitForSingleObject(osReader.hEvent, timeout);
-			switch (dwRes)
-			{
-			case WAIT_OBJECT_0:
-				if (!GetOverlappedResult(GlobalVar::g_hComm, &osReader, &eventRet, FALSE)) {
-					//do something here
-				}
-				else {
-					// Read completed successfully.
-					if (readChar == 0x05) {//ENQ
-						LOGMESSAGE(L"GOT ENQ2 \n");
-						bWaitEnq = false;
-						HandleReceivedEnq();
-					}
-					else {
-						//ack not received
-					}
-				}
-				//  Reset flag so that another opertion can be issued.
-				fWaitingOnRead = FALSE;
-
-				break;
-
-			case WAIT_TIMEOUT:
-				LOGMESSAGE(L"WAIT_TIMEOUT\n");
-
-				idle_create_write_thread();
-				break;
-
-			default:
-				break;
-			}
-		}
-		ResetEvent(osReader.hEvent);
-	}
-	*/
 
 	return 0;
 }
 
-void HandleReceivedEnq()
-{
-	SetEvent(GlobalVar::g_hEnqEvent);
-}
 
 
 DWORD WINAPI idle_send_enq(LPVOID tData_) {
@@ -224,25 +115,22 @@ DWORD WINAPI idle_send_enq(LPVOID tData_) {
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
-
 		LOGMESSAGE(L"GOING TO TRANSMISSION \n");
 		TerminateThread(GlobalVar::g_hReceivingThread, 0);
 		CloseHandle(GlobalVar::g_hReceivingThread);
 		GlobalVar::g_hReceivingThread = CreateThread(NULL, 0, send_ack, NULL, 0, 0);
 		break;
-
 	case WAIT_TIMEOUT:
 		if (!bSendingFile) {
 			LOGMESSAGE(L"SETTING RANDTIMER");
 			enqParam.timer = RAND_TIMEOUT;
 			bSendingFile = true;
 			idle_send_enq(NULL);
-		} else {
+		} 
+		else {
 			idle_create_write_thread();
-
 		}
 		break;
-
 	default:
 		break;
 	}
@@ -252,46 +140,9 @@ DWORD WINAPI idle_send_enq(LPVOID tData_) {
 	return 0;
 }
 
-
-
-
-void idle_create_event() {
-	LOGMESSAGE(L"Entering: idle_create_event()\n");
-
-	/*osReader.hEvent = CreateEvent(
-		NULL,               // default security attributes
-		TRUE,               // manual-reset event
-		FALSE,              // initial state is nonsignaled
-		NULL    // object name
-	);
-
-	if (osReader.hEvent == NULL) {
-		throw std::runtime_error("Failed to create event");
-	}*/
-
-	GlobalVar::g_hEnqEvent = CreateEvent(
-		NULL,               // default security attributes
-		TRUE,               // manual-reset event
-		FALSE,              // initial state is nonsignaled
-		NULL    // object name
-	);
-
-	if (GlobalVar::g_hEnqEvent == NULL) {
-		throw std::runtime_error("Failed to create event");
-	}
-}
-
-/*
-IDLE Write
-Get file name(if Not sequence timer timeout)
-Send ENQ
-Got to Wait for Connect WFC Wait State
-*/
 void idle_create_write_thread() {
-	LOGMESSAGE(L"\n");
-	LOGMESSAGE(L"Entering: idle_create_write_thread\n");
+	LOGMESSAGE(L"Create write thread\n");
 
-	//make new thread for reading
 	TerminateThread(GlobalVar::g_hReadThread, 0);
 	CloseHandle(GlobalVar::g_hReadThread);
 	GlobalVar::g_hReadThread = CreateThread(
@@ -306,83 +157,12 @@ void idle_create_write_thread() {
 
 
 DWORD WINAPI write_thread_entry_point(LPVOID pData) {
-
 	LOGMESSAGE(L"\nEntering: write_thread_entry_point\n");
-
 	ipc_send_enq();
-
 	WaitForConnectAck(ENQ_COUNTER, sendFileName);
-
 	return TRUE;
-
 }
 
-
-
-/*
-IDLE Read
-Read char
-Check if character is ENQ
-If character is ENQ stop timers go to Rx Connected State
-*/
-/*
-BOOL read_from_port(HANDLE hcomm, OVERLAPPED reader, int timout) {
-	char readChar;
-	BOOL fWaitingOnRead = false;
-	DWORD eventRet;
-
-	if (reader.hEvent == NULL) {
-		throw std::runtime_error("Reader Event is NULL");
-	}
-
-
-
-	if (!fWaitingOnRead) {
-		// Issue read operation.
-		if (!ReadFile(hcomm, &readChar, 1, &eventRet, &reader)) {
-			if (GetLastError() != ERROR_IO_PENDING) {
-				throw std::runtime_error("Error reading from port.");
-			}
-			else {
-				fWaitingOnRead = TRUE;
-			}
-
-		}
-		else {
-			// read completed immediately
-			//HandleASuccessfulRead(readChar, hwnd);
-		}
-	}
-
-	if (fWaitingOnRead) {
-		eventRet = WaitForSingleObject(reader.hEvent, timout);
-
-		switch (eventRet) {
-		case WAIT_OBJECT_0:
-			if (!GetOverlappedResult(hcomm, &reader, &eventRet, FALSE)) {
-				//do something here
-			}
-			else {
-				// Read completed successfully.
-				if (readChar == 0x05) {//ENQ
-					//
-				}
-				else {
-					MessageBox(NULL, L"NON ACK CHARACTER RECEIVED", L"", MB_OK);
-					//ack not received
-				}
-			}
-			//  Reset flag so that another opertion can be issued.
-			fWaitingOnRead = FALSE;
-			break;
-		case WAIT_TIMEOUT:
-
-			break;
-		}
-	}
-
-}
-*/
 
 void idle_go_to_sendfile(const std::wstring& fileName)
 {

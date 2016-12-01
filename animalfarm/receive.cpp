@@ -46,7 +46,6 @@ bool ipc_recieve_snq() {
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
 		LOGMESSAGE(L"Successfuly recieved: " << target);
-		//GlobalVar::g_bWaitENQ = FALSE;
 		SetEvent(GlobalVar::g_hRXSynEvent);
 		return TRUE;
 	}
@@ -64,8 +63,6 @@ bool ipc_recieve_packet() {
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
 		LOGMESSAGE(L"Successfuly recieved: packet");
-		//GlobalVar::g_bWaitENQ = FALSE;
-		//SetEvent(GlobalVar::g_hEnqEvent);
 		return TRUE;
 	}
 	else {
@@ -84,7 +81,6 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 	HANDLE& hComm = GlobalVar::g_hComm;
 	DWORD dwRes;
 	OVERLAPPED osReader = { 0 };
-	 
 	BOOL fWaitingOnRead = FALSE;
 	DWORD eventRet;
 
@@ -97,9 +93,7 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 	bool bWaitEnq = true;
 	while (bWaitEnq) {
 		LOGMESSAGE(L"BEGIN==>");
-
 		if (!fWaitingOnRead) {
-			// Issue read operation.
 			if (!ReadFile(hComm, readChar, toReadSize, &eventRet, &osReader)) {
 				if (GetLastError() != ERROR_IO_PENDING) {
 					LOGMESSAGE(L"Error reading from port. ");
@@ -125,10 +119,9 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 			case WAIT_OBJECT_0:
 				LOGMESSAGE(L"WAIT_OBJECT_0==>");
 				if (!GetOverlappedResult(hComm, &osReader, &eventRet, FALSE)) {
-					//do something here
+					LOGMESSAGE(L"!GetOverlappedResult()");
 				}
 				else {
-					// Read completed successfully.
 					if (target == NULL || readChar[0] == target) {
 						LOGMESSAGE(L"GOT_TARGET2==>");
 						bWaitEnq = false;
@@ -137,10 +130,8 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 						LOGMESSAGE(L"GOT_NOTHING2==>");
 					}
 				}
-				//  Reset flag so that another opertion can be issued.
 				fWaitingOnRead = FALSE;
 				break;
-
 			case WAIT_TIMEOUT:
 				LOGMESSAGE(L"WAIT_TIMEOUT==>");
 				return FALSE;

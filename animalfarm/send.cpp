@@ -2,42 +2,33 @@
 #include "globalvar.h"
 #include "send.h"
 
-/*
-	Send an ACK through ipc_send_to_port
-*/
 bool ipc_send_ack() {
 	LOGMESSAGE(L"Entering: ipc_send_ack() -> ");
 	DWORD dwToWrite = 1;
 	char ACK = 0x06;
-	if (!ipc_send_to_port(GlobalVar::g_hComm, &ACK, dwToWrite)) {
-		LOGMESSAGE(L"Failed to send ACK.");
+	if (!ipc_send_data_to_port(&ACK, dwToWrite)) {
+		LOGMESSAGE(L"ERROR: Failed to send ACK.");
 		return FALSE;
 	}
 	return TRUE;
 }
 
-/*
-	Send an ENQ through ipc_send_to_port
-*/
 bool ipc_send_enq() {
 	LOGMESSAGE(L"Entering: ipc_send_enq() -> ");
 	DWORD dwToWrite = 1;
 	char ENQ = 0x05;
-	if (!ipc_send_to_port(GlobalVar::g_hComm, &ENQ, dwToWrite)) {
-		LOGMESSAGE(L"Failed to send ENQ.");
+	if (!ipc_send_data_to_port(&ENQ, dwToWrite)) {
+		LOGMESSAGE(L"ERROR: Failed to send ENQ.");
 		return FALSE;
 	}
 	return TRUE;
 }
 
-/*
-	Send a packet through ipc_send_to_port
-*/
 bool ipc_send_packet(char packet[1027]) {
 	LOGMESSAGE(L"Entering: ipc_send_enq() -> ");
 	DWORD dwToWrite = sizeof(packet);
-	if (!ipc_send_to_port(GlobalVar::g_hComm, packet, dwToWrite)) {
-		LOGMESSAGE(L"Failed to send packet.");
+	if (!ipc_send_data_to_port(packet, dwToWrite)) {
+		LOGMESSAGE(L"ERROR: Failed to send packet.");
 		return FALSE;
 	}
 	return TRUE;
@@ -47,9 +38,9 @@ bool ipc_send_packet(char packet[1027]) {
 /*
 	Send data to the port
 */
-bool ipc_send_to_port(HANDLE hComm, char* data, DWORD dwToWrite)
-{
-	LOGMESSAGE(L"Entering: ipc_send_to_port()\n");
+bool ipc_send_data_to_port(char* data, DWORD dwToWrite) {
+	LOGMESSAGE(L"ipc_send_data_to_port()\n");
+	HANDLE& hComm = GlobalVar::g_hComm;
 	OVERLAPPED osWrite = { 0 };
 	DWORD dwWritten;
 	bool fRes;

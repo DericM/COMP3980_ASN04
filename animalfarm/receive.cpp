@@ -4,8 +4,6 @@
 
 int TERMINATE_THREAD_TIMEOUT = 500;
 
-
-
 bool ipc_recieve_ack(int timeout) {
 	char target = 0x06;
 	DWORD toReadSize = 1;
@@ -17,10 +15,10 @@ bool ipc_recieve_ack(int timeout) {
 		return TRUE;
 	}
 	else {
+		//ACK timeout
 		return FALSE;
 	}
 }
-
 
 bool ipc_recieve_enq(int timeout) {
 	char target = 0x05;
@@ -33,10 +31,10 @@ bool ipc_recieve_enq(int timeout) {
 		return TRUE;
 	}
 	else {
+		//ENQ timeout
 		return FALSE;
 	}
 }
-
 
 bool ipc_recieve_syn(int timeout) {
 	char target = 0x16;
@@ -49,15 +47,14 @@ bool ipc_recieve_syn(int timeout) {
 		return TRUE;
 	}
 	else {
+		//SYN timeout
 		return FALSE;
 	}
 }
 
-
-bool ipc_recieve_packet() {
+bool ipc_recieve_packet(char * readChar) {
 	char target = NULL;
 	DWORD toReadSize = 1026;
-	char readChar[1026];
 	int timeout = 500;
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
@@ -65,12 +62,11 @@ bool ipc_recieve_packet() {
 		return TRUE;
 	}
 	else {
+		//packet timeout
 		LOGMESSAGE(L"PACKET TIMED OUT BAD BAD BAD" << std::endl);
 		return FALSE;
 	}
 }
-
-
 
 
 

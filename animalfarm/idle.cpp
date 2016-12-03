@@ -8,9 +8,10 @@
 #include "send.h"
 #include "receive.h"
 #include "session.h"
+#include <random>
 
 /*Counters*/
-int ENQ_COUNTER;
+std::random_device rnd;
 
 /*timeouts*/
 int RAND_TIMEOUT;
@@ -34,7 +35,7 @@ EnqParams enqParam;
 void idle_setup(LPCWSTR lpszCommName) {
 	LOGMESSAGE(L"\nEntering: idle_setup()\n");
 
-	ENQ_COUNTER = 0;
+	GlobalVar::g_ENQsSent = 0;
 	idle_rand_timeout_reset();
 
 	try {
@@ -66,7 +67,12 @@ void idle_go_to_idle() {
 * Resets randTimeout to a value between 0-100
 */
 void idle_rand_timeout_reset() {
-	RAND_TIMEOUT = rand() % 101; //0-100
+
+	std::mt19937 rng(rnd());
+	std::uniform_int_distribution<int> uni(1, 100);
+
+	RAND_TIMEOUT = uni(rng);
+	//RAND_TIMEOUT = rand() % 101; //0-100
 	LOGMESSAGE(L"RAND_TIMEOUT assigned value: " << RAND_TIMEOUT << "\n");
 }
 
@@ -96,13 +102,13 @@ DWORD WINAPI idle_wait(LPVOID pData) {
 	//CloseHandle(GlobalVar::g_hIdleSendENQThread);
 	GlobalVar::g_hIdleSendENQThread = CreateThread(NULL, 0, idle_send_enq, NULL, 0, 0);
 
-	if (ENQ_COUNTER > 3) {
+	/*if (GlobalVar::g_ENQsSent > 3) {
 		is_close_port();
 		return 0;
-	}
+	}*/
 
 	if (!ipc_recieve_enq(timeout)) {
-		idle_create_write_thread();
+		//idle_create_write_thread();
 	}
 
 	return 0;
@@ -160,7 +166,7 @@ void idle_create_write_thread() {
 DWORD WINAPI write_thread_entry_point(LPVOID pData) {
 	LOGMESSAGE(L"\nEntering: write_thread_entry_point\n");
 	ipc_send_enq();
-	txwc_setup(ENQ_COUNTER, sendFileName);
+	txwc_setup(sendFileName);
 	return TRUE;
 }
 

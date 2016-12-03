@@ -29,9 +29,9 @@ AckParams ackParam;
 int ACK_TIMER;
 
 
-BOOL txwc_setup(int& enqCounter, const std::wstring& fileName) {
-
-	LOGMESSAGE(L"\nEntering: txwc_setup==>");
+BOOL txwc_setup(const std::wstring& fileName) {
+	GlobalVar::g_ENQsSent++;
+	LOGMESSAGE(L"\nEntering: txwc_setup\n");
 	ACK_TIMER = (ceil(16.0 / GlobalVar::g_cc.dcb.BaudRate * 1000));
 
 
@@ -74,23 +74,21 @@ DWORD WINAPI txwc_receive_ack_event(LPVOID pData_)
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
-		LOGMESSAGE(L"RECEIVED : tx_wait_ack" << std::endl);
 		if (ackParam.filename.length() == 0)
 			idle_go_to_idle();
 		else
+			GlobalVar::g_ENQsSent = 0;
 			openFile(L"FILE");
 		// Received ack;
 		break;
 
 	case WAIT_TIMEOUT:
 		// Not receieved ack.
-		LOGMESSAGE(L"TIMEOUT : tx_wait_ack" << std::endl);
 		ipc_terminate_read_thread(GlobalVar::g_hWaitConnectThread);
 		idle_go_to_idle();
 		break;
 
 	default:
-		LOGMESSAGE(L"default???" << std::endl);
 		break;
 	}
 

@@ -160,7 +160,7 @@ void idle_create_write_thread() {
 DWORD WINAPI write_thread_entry_point(LPVOID pData) {
 	LOGMESSAGE(L"\nEntering: write_thread_entry_point\n");
 	ipc_send_enq();
-	WaitForConnectAck(ENQ_COUNTER, sendFileName);
+	txwc_setup(ENQ_COUNTER, sendFileName);
 	return TRUE;
 }
 

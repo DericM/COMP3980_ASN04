@@ -54,10 +54,9 @@ bool ipc_recieve_syn(int timeout) {
 }
 
 
-bool ipc_recieve_packet() {
+bool ipc_recieve_packet(char * readChar) {
 	char target = NULL;
 	DWORD toReadSize = 1026;
-	char readChar[1026];
 	int timeout = 500;
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {

@@ -22,6 +22,27 @@
     <Filter Include="Source Files\physical">
       <UniqueIdentifier>{422c4f43-98c2-4414-87d0-368266a4012e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\rx">
+      <UniqueIdentifier>{2de5aae0-cd93-47d0-95f7-9be06c01cf6a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\tx">
+      <UniqueIdentifier>{28fdbd6f-352d-460a-9c1e-0a9e2171ce2e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\command">
+      <UniqueIdentifier>{8cb060c3-4103-4a11-83ef-f05feaf64589}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\tx">
+      <UniqueIdentifier>{5cb4a961-0ead-4d6f-9646-6e3a5da5249d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\rx">
+      <UniqueIdentifier>{b7952118-39f8-45b6-8277-86d644eb0cbd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\physical">
+      <UniqueIdentifier>{25fdf7e8-ae84-4a38-ae86-0844f1266b25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\session">
+      <UniqueIdentifier>{9d00fd08-205f-4e0a-9385-fb925bd2b068}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -36,88 +57,88 @@
     <ClInclude Include="Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="animalfarm.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="rx_connect.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="idle.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tx_wait_connect.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="rx_wait_packet.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tx_wait_ack.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="globalvar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="receive.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="send.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="idle.h">
+      <Filter>Header Files\command</Filter>
     </ClInclude>
     <ClInclude Include="tx_get_data.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\tx</Filter>
     </ClInclude>
-    <ClInclude Include="idle_session.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="tx_wait_ack.h">
+      <Filter>Header Files\tx</Filter>
+    </ClInclude>
+    <ClInclude Include="tx_wait_connect.h">
+      <Filter>Header Files\tx</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_connect.h">
+      <Filter>Header Files\rx</Filter>
+    </ClInclude>
+    <ClInclude Include="rx_wait_packet.h">
+      <Filter>Header Files\rx</Filter>
+    </ClInclude>
+    <ClInclude Include="animalfarm.h">
+      <Filter>Header Files\command</Filter>
+    </ClInclude>
+    <ClInclude Include="receive.h">
+      <Filter>Header Files\physical</Filter>
+    </ClInclude>
+    <ClInclude Include="send.h">
+      <Filter>Header Files\physical</Filter>
+    </ClInclude>
+    <ClInclude Include="session.h">
+      <Filter>Header Files\session</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="animalfarm.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="idle.cpp">
       <Filter>Source Files\command</Filter>
     </ClCompile>
-    <ClCompile Include="tx_wait_ack.cpp">
-      <Filter>Source Files\physical</Filter>
-    </ClCompile>
-    <ClCompile Include="tx_wait_connect.cpp">
-      <Filter>Source Files\session</Filter>
-    </ClCompile>
-    <ClCompile Include="tx_send_data.cpp">
-      <Filter>Source Files\physical</Filter>
-    </ClCompile>
-    <ClCompile Include="rx_connect.cpp">
-      <Filter>Source Files\session</Filter>
-    </ClCompile>
-    <ClCompile Include="rx_wait_packet.cpp">
-      <Filter>Source Files\physical</Filter>
-    </ClCompile>
-    <ClCompile Include="rx_parse_packet.cpp">
-      <Filter>Source Files\physical</Filter>
-    </ClCompile>
-    <ClCompile Include="rx_check_error.cpp">
-      <Filter>Source Files\physical</Filter>
-    </ClCompile>
-    <ClCompile Include="rx_process_data.cpp">
-      <Filter>Source Files\physical</Filter>
-    </ClCompile>
-    <ClCompile Include="tx_get_data.cpp">
-      <Filter>Source Files\physical</Filter>
-    </ClCompile>
     <ClCompile Include="globalvar.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="idle_session.cpp">
-      <Filter>Source Files\session</Filter>
     </ClCompile>
     <ClCompile Include="send.cpp">
       <Filter>Source Files\physical</Filter>
     </ClCompile>
     <ClCompile Include="receive.cpp">
       <Filter>Source Files\physical</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_check_error.cpp">
+      <Filter>Source Files\rx</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_parse_packet.cpp">
+      <Filter>Source Files\rx</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_process_data.cpp">
+      <Filter>Source Files\rx</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_wait_packet.cpp">
+      <Filter>Source Files\rx</Filter>
+    </ClCompile>
+    <ClCompile Include="tx_get_data.cpp">
+      <Filter>Source Files\tx</Filter>
+    </ClCompile>
+    <ClCompile Include="tx_send_data.cpp">
+      <Filter>Source Files\tx</Filter>
+    </ClCompile>
+    <ClCompile Include="tx_wait_ack.cpp">
+      <Filter>Source Files\tx</Filter>
+    </ClCompile>
+    <ClCompile Include="tx_wait_connect.cpp">
+      <Filter>Source Files\tx</Filter>
+    </ClCompile>
+    <ClCompile Include="rx_connect.cpp">
+      <Filter>Source Files\rx</Filter>
+    </ClCompile>
+    <ClCompile Include="session.cpp">
+      <Filter>Source Files\session</Filter>
+    </ClCompile>
+    <ClCompile Include="animalfarm.cpp">
+      <Filter>Source Files\command</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

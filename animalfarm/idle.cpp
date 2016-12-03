@@ -108,7 +108,7 @@ DWORD WINAPI idle_wait(LPVOID pData) {
 	}*/
 
 	if (!ipc_recieve_enq(timeout)) {
-		idle_create_write_thread();
+		//idle_create_write_thread();
 	}
 
 	return 0;

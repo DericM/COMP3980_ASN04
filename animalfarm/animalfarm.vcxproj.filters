@@ -90,6 +90,9 @@
     <ClInclude Include="session.h">
       <Filter>Header Files\session</Filter>
     </ClInclude>
+    <ClInclude Include="tx_send_data.h">
+      <Filter>Header Files\tx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

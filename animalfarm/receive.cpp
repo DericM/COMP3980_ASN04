@@ -90,9 +90,9 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 		return FALSE;
 	}
 
-	bool bWaitEnq = true;
-	while (bWaitEnq) {
-		LOGMESSAGE(L"BEGIN==>");
+	bool bWait = true;
+	while (bWait) {
+		//LOGMESSAGE(L"READ_BEGIN==>");
 		if (!fWaitingOnRead) {
 			if (!ReadFile(hComm, readChar, toReadSize, &eventRet, &osReader)) {
 				if (GetLastError() != ERROR_IO_PENDING) {
@@ -107,9 +107,9 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 
 				if (target == NULL || readChar[0] == target) {
 					LOGMESSAGE(L"GOT_TARGET1==>");
-					bWaitEnq = false;
+					bWait = false;
 				}
-				LOGMESSAGE(L"GOT_NOTHING1==>");
+				//LOGMESSAGE(L"GOT_NOTHING1==>");
 			}
 		}
 		if (fWaitingOnRead) {
@@ -124,10 +124,10 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 				else {
 					if (target == NULL || readChar[0] == target) {
 						LOGMESSAGE(L"GOT_TARGET2==>");
-						bWaitEnq = false;
+						bWait = false;
 					}
 					else {
-						LOGMESSAGE(L"GOT_NOTHING2==>");
+						//LOGMESSAGE(L"GOT_NOTHING2==>");
 					}
 				}
 				fWaitingOnRead = FALSE;
@@ -142,7 +142,7 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 			}
 		}
 		ResetEvent(osReader.hEvent);
-		LOGMESSAGE(L"END\n");
+		//LOGMESSAGE(L"END\n");
 	}
 	return TRUE;
 

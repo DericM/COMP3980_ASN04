@@ -58,7 +58,7 @@ void idle_go_to_idle() {
 	sendFileName = L"";
 
 	TerminateThread(GlobalVar::g_hIdleWaitThread, 0);
-	CloseHandle(GlobalVar::g_hIdleWaitThread);
+	//CloseHandle(GlobalVar::g_hIdleWaitThread);
 	GlobalVar::g_hIdleWaitThread = CreateThread(NULL, 0, idle_wait, NULL, 0, 0);
 }
 
@@ -93,7 +93,7 @@ DWORD WINAPI idle_wait(LPVOID pData) {
 	enqParam.timer = IDLE_SEQ_TIMEOUT;
 
 	TerminateThread(GlobalVar::g_hIdleSendENQThread, 0);
-	CloseHandle(GlobalVar::g_hIdleSendENQThread);
+	//CloseHandle(GlobalVar::g_hIdleSendENQThread);
 	GlobalVar::g_hIdleSendENQThread = CreateThread(NULL, 0, idle_send_enq, NULL, 0, 0);
 
 	if (ENQ_COUNTER > 3) {
@@ -117,7 +117,7 @@ DWORD WINAPI idle_send_enq(LPVOID tData_) {
 	case WAIT_OBJECT_0:
 		LOGMESSAGE(L"GOING TO TRANSMISSION \n");
 		TerminateThread(GlobalVar::g_hReceivingThread, 0);
-		CloseHandle(GlobalVar::g_hReceivingThread);
+		//CloseHandle(GlobalVar::g_hReceivingThread);
 		GlobalVar::g_hReceivingThread = CreateThread(NULL, 0, send_ack, NULL, 0, 0);
 		break;
 	case WAIT_TIMEOUT:
@@ -145,7 +145,7 @@ void idle_create_write_thread() {
 	LOGMESSAGE(L"Create write thread\n");
 
 	TerminateThread(GlobalVar::g_hReadThread, 0);
-	CloseHandle(GlobalVar::g_hReadThread);
+	//CloseHandle(GlobalVar::g_hReadThread);
 	GlobalVar::g_hReadThread = CreateThread(
 		NULL,
 		0,

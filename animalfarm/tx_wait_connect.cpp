@@ -27,8 +27,8 @@ AckParams ackParam;
 int ACK_TIMER;
 
 
-BOOL WaitForConnectAck(int& enqCounter, const std::wstring& fileName) {
-
+BOOL WaitForConnectAck(const std::wstring& fileName) {
+	GlobalVar::g_ENQsSent++;
 	LOGMESSAGE(L"\nEntering: WaitForConnectAck\n");
 	ACK_TIMER = (ceil(16.0 / GlobalVar::g_cc.dcb.BaudRate * 1000));
 
@@ -174,6 +174,7 @@ DWORD WINAPI tx_wait_ack(LPVOID pData_)
 		if (ackParam.filename.length() == 0)
 			idle_go_to_idle();
 		else
+			GlobalVar::g_ENQsSent = 0;
 			openFile(L"FILE");
 		// Received ack;
 		break;

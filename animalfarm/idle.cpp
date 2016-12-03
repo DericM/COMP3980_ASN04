@@ -7,7 +7,7 @@
 #include "rx_connect.h"
 #include "send.h"
 #include "receive.h"
-#include "idle_session.h"
+#include "session.h"
 
 /*Counters*/
 int ENQ_COUNTER;

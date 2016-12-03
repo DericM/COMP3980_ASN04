@@ -4,5 +4,4 @@
 
 BOOL txwc_setup(int &enqCounter, const std::wstring& fileName);
 DWORD WINAPI txwc_receive_ack(LPVOID);
-DWORD WINAPI tx_wait_ack(LPVOID);
-void HandleReceivedAck();
+DWORD WINAPI txwc_receive_ack_event(LPVOID);

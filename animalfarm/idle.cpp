@@ -128,6 +128,7 @@ DWORD WINAPI idle_send_enq(LPVOID tData_) {
 			idle_send_enq(NULL);
 		} 
 		else {
+			ipc_terminate_read_thread(GlobalVar::g_hIdleWaitThread);
 			idle_create_write_thread();
 		}
 		break;

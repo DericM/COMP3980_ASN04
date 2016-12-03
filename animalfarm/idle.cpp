@@ -57,7 +57,7 @@ void idle_go_to_idle() {
 	bSendingFile = false;
 	sendFileName = L"";
 
-	TerminateThread(GlobalVar::g_hIdleWaitThread, 0);
+	//TerminateThread(GlobalVar::g_hIdleWaitThread, 0);
 	//CloseHandle(GlobalVar::g_hIdleWaitThread);
 	GlobalVar::g_hIdleWaitThread = CreateThread(NULL, 0, idle_wait, NULL, 0, 0);
 }
@@ -144,7 +144,7 @@ DWORD WINAPI idle_send_enq(LPVOID tData_) {
 void idle_create_write_thread() {
 	LOGMESSAGE(L"Create write thread\n");
 
-	TerminateThread(GlobalVar::g_hReadThread, 0);
+	//TerminateThread(GlobalVar::g_hReadThread, 0);
 	//CloseHandle(GlobalVar::g_hReadThread);
 	GlobalVar::g_hReadThread = CreateThread(
 		NULL,

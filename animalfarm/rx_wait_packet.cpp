@@ -64,8 +64,8 @@ BOOL rxwp_setUp() {
 
 	synParam.timer = SYN_TIMER;
 
-	TerminateThread(GlobalVar::g_hWaitForSYNThread, 0);
-	TerminateThread(GlobalVar::g_hReadForSYNThread, 0);
+	//TerminateThread(GlobalVar::g_hWaitForSYNThread, 0);
+	//TerminateThread(GlobalVar::g_hReadForSYNThread, 0);
 	CloseHandle(GlobalVar::g_hWaitForSYNThread);
 	CloseHandle(GlobalVar::g_hReadForSYNThread);
 	GlobalVar::g_hWaitForSYNThread = CreateThread(NULL, 0, rx_wait_syn, NULL, 0, 0);

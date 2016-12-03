@@ -4,11 +4,12 @@
 
 int TERMINATE_THREAD_TIMEOUT = 500;
 
-bool ipc_recieve_ack() {
+
+
+bool ipc_recieve_ack(int timeout) {
 	char target = 0x06;
 	DWORD toReadSize = 1;
 	char readChar[1];
-	int timeout = 500;//////////////////xxxxxxxxxxxxxxxx//////////////////////////
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
 		LOGMESSAGE(L"Successfuly recieved: " << target);
@@ -37,15 +38,14 @@ bool ipc_recieve_enq(int timeout) {
 }
 
 
-bool ipc_recieve_snq() {
+bool ipc_recieve_syn(int timeout) {
 	char target = 0x16;
 	DWORD toReadSize = 1;
 	char readChar[1];
-	char timeout = 500;/////////////////////////////////////////////////////////
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
 		LOGMESSAGE(L"Successfuly recieved: " << target);
-		SetEvent(GlobalVar::g_hRXSynEvent);
+		//SetEvent(GlobalVar::g_hRXSynEvent);
 		return TRUE;
 	}
 	else {
@@ -97,14 +97,14 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 
 	GlobalVar::g_hRunReadThread = TRUE;
 	while (GlobalVar::g_hRunReadThread) {
-		LOGMESSAGE(L"BEGIN==>");
+		//LOGMESSAGE(L"BEGIN==>");
 		if (!fWaitingOnRead) {
 			if (!ReadFile(hComm, readChar, toReadSize, &eventRet, &osReader)) {
 				if (GetLastError() != ERROR_IO_PENDING) {
 					LOGMESSAGE(L"Error reading from port. ");
 				}
 				else {
-					LOGMESSAGE(L"WAITING_TO_READ==>");
+					//LOGMESSAGE(L"WAITING_TO_READ==>");
 					fWaitingOnRead = TRUE;
 				}
 			}
@@ -114,7 +114,7 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 					LOGMESSAGE(L"GOT_TARGET1==>");
 					GlobalVar::g_hRunReadThread = FALSE;
 				}
-				LOGMESSAGE(L"GOT_NOTHING1==>");
+				//LOGMESSAGE(L"GOT_NOTHING1==>");
 			}
 		}
 		if (fWaitingOnRead) {
@@ -132,7 +132,7 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 						GlobalVar::g_hRunReadThread = FALSE;
 					}
 					else {
-						LOGMESSAGE(L"GOT_NOTHING2==>");
+						//LOGMESSAGE(L"GOT_NOTHING2==>");
 					}
 				}
 				fWaitingOnRead = FALSE;
@@ -147,7 +147,7 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 			}
 		}
 		ResetEvent(osReader.hEvent);
-		LOGMESSAGE(L"END\n");
+		//LOGMESSAGE(L"END\n");
 	}
 
 	SetEvent(GlobalVar::g_hTerminateThreadEvent);

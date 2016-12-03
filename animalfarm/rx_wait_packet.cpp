@@ -9,6 +9,7 @@
 #include <memory>
 #include <math.h>
 
+/*
 struct SParams
 {
 	HWND hWnd;
@@ -17,6 +18,7 @@ struct SParams
 	OVERLAPPED reader;
 };
 SParams sParam;
+*/
 
 struct SynParams
 {
@@ -25,12 +27,15 @@ struct SynParams
 };
 SynParams synParam;
 
+int SYN_TIMER;
+
 BOOL rxwp_setUp() {
 
-	LOGMESSAGE(L"\n");
-	LOGMESSAGE(L"Entering: rxwp_setUP\n");
-	DWORD SYN_TIMER = (DWORD)(ceil(8216 / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3);
+	LOGMESSAGE(L"\nEntering: rxwp_setUP\n");
+	SYN_TIMER = (ceil(8216 / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3);
 
+
+	/*
 	OVERLAPPED reader = { 0 };
 	reader.hEvent = CreateEvent(
 		NULL,               // default security attributes
@@ -42,6 +47,7 @@ BOOL rxwp_setUp() {
 	if (reader.hEvent == NULL) {
 		throw std::runtime_error("Failed to create event");
 	}
+	*/
 
 	GlobalVar::g_hAckEvent = CreateEvent(
 		NULL,               // default security attributes
@@ -50,9 +56,11 @@ BOOL rxwp_setUp() {
 		NULL    // object name
 		);
 
-	sParam.hcomm = GlobalVar::g_hComm;
-	sParam.reader = reader;
-	sParam.timer = SYN_TIMER;
+	
+	//sParam.hcomm = GlobalVar::g_hComm;
+	//sParam.reader = reader;
+	//sParam.timer = SYN_TIMER;
+	
 
 	synParam.timer = SYN_TIMER;
 
@@ -60,12 +68,22 @@ BOOL rxwp_setUp() {
 	TerminateThread(GlobalVar::g_hReadForSYNThread, 0);
 	CloseHandle(GlobalVar::g_hWaitForSYNThread);
 	CloseHandle(GlobalVar::g_hReadForSYNThread);
-	GlobalVar::g_hWaitForSYNThread = CreateThread(NULL, 0, rx_wait_syn, &sParam, 0, 0);
-	GlobalVar::g_hReadForSYNThread = CreateThread(NULL, 0, rx_read_for_syn, &synParam, 0, 0);
+	GlobalVar::g_hWaitForSYNThread = CreateThread(NULL, 0, rx_wait_syn, NULL, 0, 0);
+	GlobalVar::g_hReadForSYNThread = CreateThread(NULL, 0, rx_read_for_syn, NULL, 0, 0);
 }
 
 DWORD WINAPI rx_read_for_syn(LPVOID pData_)
 {
+
+	if (!ipc_recieve_syn(SYN_TIMER)) {
+		//timeout
+	}
+	else {
+		SetEvent(GlobalVar::g_hReadForSYNThread);
+		//success
+	}
+	
+	/*
 	bool bWaitSyn = true;
 	while (bWaitSyn)
 	{
@@ -135,6 +153,7 @@ DWORD WINAPI rx_read_for_syn(LPVOID pData_)
 
 		ResetEvent(sParam.reader.hEvent);
 	}
+	*/
 
 	return 0;
 }

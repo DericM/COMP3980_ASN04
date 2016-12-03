@@ -1,9 +1,24 @@
 #include "stdafx.h"
 #include "tx_wait_ack.h"
+#include "receive.h"
 
 int TRANSMISSION_TIMER = 1000;
 BOOL WaitForReceivedAck(HANDLE hwnd, HANDLE hcomm, OVERLAPPED reader) {
 
+
+	if (!ipc_recieve_ack(TRANSMISSION_TIMER)) {
+		//timeout
+	}
+	else {
+		//success
+	}
+
+
+
+
+
+
+	/*
 	char readChar;
 	BOOL receivedAck = false;
 	BOOL fWaitingOnRead = false;
@@ -60,5 +75,6 @@ BOOL WaitForReceivedAck(HANDLE hwnd, HANDLE hcomm, OVERLAPPED reader) {
 			break;
 		}
 	}
+	*/
 
 }

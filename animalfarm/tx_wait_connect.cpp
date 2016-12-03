@@ -24,12 +24,16 @@ struct AckParams
 };
 AckParams ackParam;
 
+int ACK_TIMER;
+
+
 BOOL WaitForConnectAck(int& enqCounter, const std::wstring& fileName) {
 
-	LOGMESSAGE(L"\n");
-	LOGMESSAGE(L"Entering: WaitForConnectAck\n");
-	DWORD ACK_TIMER = (DWORD)(ceil(16.0 / GlobalVar::g_cc.dcb.BaudRate * 1000));
+	LOGMESSAGE(L"\nEntering: WaitForConnectAck\n");
+	ACK_TIMER = (ceil(16.0 / GlobalVar::g_cc.dcb.BaudRate * 1000));
 
+
+	/*/
 	OVERLAPPED reader = { 0 };
 	reader.hEvent = CreateEvent(
 		NULL,               // default security attributes
@@ -40,7 +44,7 @@ BOOL WaitForConnectAck(int& enqCounter, const std::wstring& fileName) {
 
 	if (reader.hEvent == NULL) {
 		throw std::runtime_error("Failed to create event");
-	}
+	}*/
 
 	GlobalVar::g_hAckEvent = CreateEvent(
 		NULL,               // default security attributes
@@ -48,10 +52,12 @@ BOOL WaitForConnectAck(int& enqCounter, const std::wstring& fileName) {
 		FALSE,              // initial state is nonsignaled
 		NULL    // object name
 	);
-
+	
+	/*
 	conParam.enqCounter = enqCounter;
 	conParam.reader = reader;
 	conParam.timer = ACK_TIMER;
+	*/
 
 	ackParam.timer = ACK_TIMER;
 	ackParam.filename = fileName;
@@ -66,6 +72,18 @@ BOOL WaitForConnectAck(int& enqCounter, const std::wstring& fileName) {
 
 DWORD WINAPI tx_wait_connect(LPVOID pData_)
 {
+
+
+	if (!ipc_recieve_ack(ACK_TIMER)) {
+		//timeout
+	}
+	else {
+		//success?
+	}
+	
+
+
+	/*
 	bool bWaitAck = true;
 	while (bWaitAck)
 	{
@@ -134,14 +152,17 @@ DWORD WINAPI tx_wait_connect(LPVOID pData_)
 
 		ResetEvent(conParam.reader.hEvent);
 	}
+	*/
 
 	return 0;
 }
 
+/*
 void HandleReceivedAck()
 {
 	SetEvent(GlobalVar::g_hAckEvent);
 }
+*/
 
 DWORD WINAPI tx_wait_ack(LPVOID pData_)
 {

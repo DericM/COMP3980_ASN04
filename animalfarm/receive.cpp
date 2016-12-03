@@ -4,6 +4,8 @@
 
 int TERMINATE_THREAD_TIMEOUT = 500;
 
+
+
 bool ipc_recieve_ack(int timeout) {
 	char target = 0x06;
 	DWORD toReadSize = 1;
@@ -36,15 +38,14 @@ bool ipc_recieve_enq(int timeout) {
 }
 
 
-bool ipc_recieve_snq() {
+bool ipc_recieve_syn(int timeout) {
 	char target = 0x16;
 	DWORD toReadSize = 1;
 	char readChar[1];
-	char timeout = 500;/////////////////////////////////////////////////////////
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
 		LOGMESSAGE(L"Successfuly recieved: " << target);
-		SetEvent(GlobalVar::g_hRXSynEvent);
+		//SetEvent(GlobalVar::g_hRXSynEvent);
 		return TRUE;
 	}
 	else {

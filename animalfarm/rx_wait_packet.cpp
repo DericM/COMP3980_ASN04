@@ -177,7 +177,7 @@ DWORD WINAPI rx_wait_syn(LPVOID pData_)
 	case WAIT_TIMEOUT:
 		// Not receieved SYN.
 		LOGMESSAGE(L"TIMED OUT IN WAIT FOR PACKET /n");
-		ipc_terminate_read_thread(GlobalVar::g_hWaitForSYNThread);
+		ipc_terminate_read_thread(GlobalVar::g_hReadForSYNThread);
 		idle_go_to_idle();
 		break;
 

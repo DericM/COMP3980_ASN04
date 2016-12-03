@@ -18,12 +18,20 @@
 #include <malloc.h>
 #include <memory.h>
 #include <tchar.h>
+#include <sstream>
 
 #ifdef _DEBUG
-#define LOGMESSAGE( str ) OutputDebugString( str );
+#define LOGMESSAGE( s )						\
+{											\
+   std::wostringstream os_;					\
+   os_ << s;								\
+   OutputDebugString( os_.str().c_str() );	\
+}
 #else
 #define LOGMESSAGE( str )
 #endif
+
+
 
 
 

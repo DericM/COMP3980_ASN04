@@ -2,7 +2,7 @@
 
 #include <string>
 
-BOOL WaitForConnectAck(int &enqCounter, const std::wstring& fileName);
-DWORD WINAPI tx_wait_connect(LPVOID);
-DWORD WINAPI tx_wait_ack(LPVOID);
-void HandleReceivedAck();
+BOOL txwc_setup(const std::wstring& fileName);
+DWORD WINAPI txwc_receive_ack(LPVOID);
+DWORD WINAPI txwc_receive_ack_event(LPVOID);
+//void HandleReceivedAck();

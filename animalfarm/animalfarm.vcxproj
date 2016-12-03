@@ -149,7 +149,7 @@
     <ClInclude Include="animalfarm.h" />
     <ClInclude Include="globalvar.h" />
     <ClInclude Include="idle.h" />
-    <ClInclude Include="idle_session.h" />
+    <ClInclude Include="session.h" />
     <ClInclude Include="receive.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="rx_connect.h" />
@@ -158,6 +158,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="tx_get_data.h" />
+    <ClInclude Include="tx_send_data.h" />
     <ClInclude Include="tx_wait_ack.h" />
     <ClInclude Include="tx_wait_connect.h" />
   </ItemGroup>
@@ -165,7 +166,7 @@
     <ClCompile Include="animalfarm.cpp" />
     <ClCompile Include="globalvar.cpp" />
     <ClCompile Include="idle.cpp" />
-    <ClCompile Include="idle_session.cpp" />
+    <ClCompile Include="session.cpp" />
     <ClCompile Include="receive.cpp" />
     <ClCompile Include="rx_check_error.cpp" />
     <ClCompile Include="rx_connect.cpp" />

@@ -15,30 +15,8 @@ using namespace std;
 
 
 DWORD WINAPI send_ack(LPVOID var) {
+
 	ipc_send_ack();
-	/*int result;
-	char ACK = 0x06;
-	int sendlen = strlen(&ACK);
-
-
-
-	SOCKET ConnectSocket = INVALID_SOCKET;	//initialize to a non-valid socket first
-
-	ConnectSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);	//AF: The Internet Protocol version 4 (IPv4) address family.
-
-																//SOCK_STREAM: A socket type that provides sequenced, reliable, two-way, 
-																//connection-based byte streams with an OOB data transmission mechanism. 
-	
-	if (ConnectSocket == INVALID_SOCKET) {
-		wprintf(L"socket failed with error: %ld\n", WSAGetLastError());
-		WSACleanup();
-	}
-
-	
-	result = send(ConnectSocket, &ACK, sendlen, 0);			//send ACK through socket
-	//string result1 = to_string(3);
-	//MessageBox(NULL, result1.c_str, L"asdf", MB_OK);
-	*/
 	rxwp_setUp();
 
 	return 0;

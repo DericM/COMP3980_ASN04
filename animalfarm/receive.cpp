@@ -2,25 +2,23 @@
 #include "receive.h"
 #include "globalvar.h"
 
+int TERMINATE_THREAD_TIMEOUT = 500;
 
-
-
-bool ipc_recieve_ack() {
+bool ipc_recieve_ack(int timeout) {
 	char target = 0x06;
 	DWORD toReadSize = 1;
 	char readChar[1];
-	int timeout = 500;//////////////////xxxxxxxxxxxxxxxx//////////////////////////
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
-		LOGMESSAGE(L"Successfuly recieved: " + target);
+		LOGMESSAGE(L"Successfuly receieved: ACK" << std::endl);
 		SetEvent(GlobalVar::g_hAckEvent);
 		return TRUE;
 	}
 	else {
+		//ACK timeout
 		return FALSE;
 	}
 }
-
 
 bool ipc_recieve_enq(int timeout) {
 	char target = 0x05;
@@ -28,53 +26,47 @@ bool ipc_recieve_enq(int timeout) {
 	char readChar[1];
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
-		LOGMESSAGE(L"Successfuly recieved: " + target);
+		LOGMESSAGE(L"Successfuly receieved: ENQ" << std::endl);
 		SetEvent(GlobalVar::g_hEnqEvent);
 		return TRUE;
 	}
 	else {
+		//ENQ timeout
 		return FALSE;
 	}
 }
 
-
-bool ipc_recieve_snq() {
+bool ipc_recieve_syn(int timeout) {
 	char target = 0x16;
 	DWORD toReadSize = 1;
 	char readChar[1];
-	char timeout = 500;/////////////////////////////////////////////////////////
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
-		LOGMESSAGE(L"Successfuly recieved: " + target);
-		//GlobalVar::g_bWaitENQ = FALSE;
+		LOGMESSAGE(L"Successfuly receieved: SYN" << std::endl);
 		SetEvent(GlobalVar::g_hRXSynEvent);
 		return TRUE;
 	}
 	else {
+		//SYN timeout
 		return FALSE;
 	}
 }
 
-
-bool ipc_recieve_packet() {
+bool ipc_recieve_packet(char * readChar) {
 	char target = NULL;
 	DWORD toReadSize = 1026;
-	char readChar[1026];
 	int timeout = 500;
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
-		LOGMESSAGE(L"Successfuly recieved: packet");
-		//GlobalVar::g_bWaitENQ = FALSE;
-		//SetEvent(GlobalVar::g_hEnqEvent);
+		LOGMESSAGE(L"Successfuly receieved: packet" << std::endl);
 		return TRUE;
 	}
 	else {
-		LOGMESSAGE(L"PACKET TIMED OUT BAD BAD BAD");
+		//packet timeout
+		LOGMESSAGE(L"PACKET TIMED OUT BAD BAD BAD" << std::endl);
 		return FALSE;
 	}
 }
-
-
 
 
 
@@ -84,9 +76,14 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 	HANDLE& hComm = GlobalVar::g_hComm;
 	DWORD dwRes;
 	OVERLAPPED osReader = { 0 };
-	 
 	BOOL fWaitingOnRead = FALSE;
 	DWORD eventRet;
+
+	GlobalVar::g_hTerminateThreadEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (GlobalVar::g_hTerminateThreadEvent == NULL) {
+		LOGMESSAGE(L"Failed to create hEvent. ");
+		return FALSE;
+	}
 
 	osReader.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	if (osReader.hEvent == NULL) {
@@ -94,51 +91,89 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 		return FALSE;
 	}
 
-	if (!fWaitingOnRead) {
-		// Issue read operation.
-		if (!ReadFile(hComm, readChar, toReadSize, &eventRet, &osReader)) {
-			if (GetLastError() != ERROR_IO_PENDING) {
-				LOGMESSAGE(L"Error reading from port. ");
+	BOOL bResult = FALSE;
+	GlobalVar::g_hRunReadThread = TRUE;
+	while (GlobalVar::g_hRunReadThread) {
+		//LOGMESSAGE(L"BEGIN==>");
+		if (!fWaitingOnRead) {
+			if (!ReadFile(hComm, readChar, toReadSize, &eventRet, &osReader)) {
+				if (GetLastError() != ERROR_IO_PENDING) {
+					LOGMESSAGE(L"Error reading from port. ");
+				}
+				else {
+					//LOGMESSAGE(L"WAITING_TO_READ==>");
+					fWaitingOnRead = TRUE;
+				}
 			}
 			else {
-				fWaitingOnRead = TRUE;
+
+				if (target == NULL || readChar[0] == target) {
+					LOGMESSAGE(L"GOT_TARGET1==>");
+					GlobalVar::g_hRunReadThread = FALSE;
+					bResult = TRUE;
+				}
+				//LOGMESSAGE(L"GOT_NOTHING1==>");
 			}
 		}
-		else {
-			// read completed immediately
-			if (target == NULL || readChar[0] == target) { 
-				return TRUE;
+		if (fWaitingOnRead) {
+			dwRes = WaitForSingleObject(osReader.hEvent, timeout);
+			switch (dwRes)
+			{
+			case WAIT_OBJECT_0:
+				LOGMESSAGE(L"WAIT_OBJECT_0==>");
+				if (!GetOverlappedResult(hComm, &osReader, &eventRet, FALSE)) {
+					LOGMESSAGE(L"!GetOverlappedResult()");
+				}
+				else {
+					if (target == NULL || readChar[0] == target) {
+						LOGMESSAGE(L"GOT_TARGET2==>");
+						GlobalVar::g_hRunReadThread = FALSE;
+						bResult = TRUE;
+					}
+					else {
+						//LOGMESSAGE(L"GOT_NOTHING2==>");
+					}
+				}
+				fWaitingOnRead = FALSE;
+				break;
+			case WAIT_TIMEOUT:
+				LOGMESSAGE(L"WAIT_TIMEOUT==>");
+				return FALSE;
+
+			default:
+				LOGMESSAGE(L"DEFAULT==>\n");
+				break;
 			}
 		}
+		ResetEvent(osReader.hEvent);
+		//LOGMESSAGE(L"END\n");
 	}
 
-	dwRes = WaitForSingleObject(osReader.hEvent, timeout);
+	SetEvent(GlobalVar::g_hTerminateThreadEvent);
+
+	return bResult;
+
+}
+
+bool ipc_terminate_read_thread(HANDLE& hThread)
+{
+	GlobalVar::g_hRunReadThread = FALSE;
+
+	DWORD dwRes = WaitForSingleObject(GlobalVar::g_hTerminateThreadEvent, TERMINATE_THREAD_TIMEOUT);
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
-		if (!GetOverlappedResult(hComm, &osReader, &eventRet, FALSE)) {
-			//do something here
-		}
-		else {
-			// Read completed successfully.
-			if (target == NULL || readChar[0] == target) {
-				return TRUE;
-			}
-			else {
-				//target not received
-			}
-		}
-		//  Reset flag so that another opertion can be issued.
-		fWaitingOnRead = FALSE;
-		break;
+		//CloseHandle(hThread);
+		return true;
 
 	case WAIT_TIMEOUT:
-		LOGMESSAGE(L"WAIT_TIMEOUT\n");
-		return FALSE;
+		TerminateThread(hThread, 0);
+		//CloseHandle(hThread);
+		return false;
 
 	default:
-		LOGMESSAGE(L"Default Case(This should never happen)\n");
-		break;
+		TerminateThread(hThread, 0);
+		//CloseHandle(hThread);
+		return false;
 	}
-
 }

@@ -3,10 +3,14 @@
 #include "tx_wait_connect.h"
 #include "idle.h"
 #include "tx_get_data.h"
+#include "send.h"
 
+#include <string>
 #include <stdexcept>
 #include <memory>
 #include <math.h>
+
+std::string packet;
 
 struct ConnectParams
 {
@@ -94,6 +98,23 @@ DWORD WINAPI tx_wait_connect(LPVOID pData_)
 					LOGMESSAGE(L"Received ACK.\n");
 					bWaitAck = false;
 					HandleReceivedAck();
+					//go to tx_get_Data
+					/*LOGMESSAGE(L"entered sending PACKET");
+
+					char buff[1024];
+					for (int i = 0; i < 1024; i++) {
+						if (buff[i] == '\0') {
+							buff[i] = 'a';
+						}
+
+					}
+					packet = makePacket(buff);
+					char packetize[1027];
+					strcpy_s(packetize, packet.c_str());
+					ipc_send_packet(packetize);
+					LOGMESSAGE(L"PACKET SENT");
+					HandleReceivedAck();*/
+
 				}
 			}
 		}
@@ -109,9 +130,8 @@ DWORD WINAPI tx_wait_connect(LPVOID pData_)
 				else {
 					// Read completed successfully.
 					if (readChar == 0x06) {//ACK
-						LOGMESSAGE(L"Received ACK.\n");
-						bWaitAck = false;
-						HandleReceivedAck();
+						LOGMESSAGE(L"Received ACK2.\n");
+						
 					}
 					else {
 						LOGMESSAGE(L"NON ACK CHARACTER RECEIVED");
@@ -148,10 +168,11 @@ DWORD WINAPI tx_wait_ack(LPVOID pData_)
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
-		if (ackParam.filename.length() == 0)
+		/*if (ackParam.filename.length() == 0)
 			idle_go_to_idle();
-		else
-			openFile(L"FILE");
+		else {*/
+		openFile(&GlobalVar::g_hSendBox, L"test.txt");
+		//}
 		// Received ack;
 		break;
 

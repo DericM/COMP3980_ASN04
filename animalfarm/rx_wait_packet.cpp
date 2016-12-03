@@ -68,7 +68,7 @@ DWORD WINAPI rx_read_for_syn(LPVOID pData_)
 	bool bWaitSyn = true;
 	while (bWaitSyn)
 	{
-		LOGMESSAGE(L"Entered READ_FOR_SYN \n");
+		//LOGMESSAGE(L"Entered READ_FOR_SYN \n");
 		char readChar;
 		BOOL fWaitingOnRead = false;
 		DWORD eventRet;

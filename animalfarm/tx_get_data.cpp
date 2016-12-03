@@ -1,5 +1,12 @@
 #include "stdafx.h"
+#include "tx_get_data.h"
 #include "animalfarm.h"
+#include "idle.h"
+#include <string>
+#include <fstream>
+#include "GlobalVar.h"
+#include "tx_wait_connect.h"
+#include "send.h"
 
 
 using namespace std;
@@ -8,31 +15,44 @@ char buff[1024];
 DWORD dwBytesRead;
 HANDLE hdlF;
 int counter;
-uint8_t		 packet[1027];
+string packets;
+char syn = 0x16;
+char packetize [1024];
 
-char SYN = 0x16;
+/*void getData() {
+	openFile(TEXT("\\TEST.TXT"));
+}*/
 
+DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile) {
 
-//opens and connects to file 
+	LOGMESSAGE(L"IN GET DATA \n");
+	//idle_go_to_idle();		???
 
-DWORD WINAPI openFile(LPCWSTR pFile) {
-	LOGMESSAGE(L"IN GET DATA");
-	OVERLAPPED osReader = {0};
-	try {
-		//returns handle to the file to be read
-		hdlF = CreateFile(pFile, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	}
-	catch (exception e) {
-		cerr << "Unable to create a file";
-	}
+	LOGMESSAGE(L"starting to open file\n");
+	int sendLines;
+	int idx;
+	string tmp;
+	ifstream file("C:\\Users\\Yiaoping\\Desktop\\test3.txt");
+
 	
-	
-	if (hasSpecialChars(pFile) || pFile == NULL) {
-		throw "file name is null or has special chars";
-		return 0;
-	}
-	else
-		readFile(osReader);
+	SendMessageA(*box, EM_SETREADONLY, (LPARAM)FALSE, NULL);
+
+	if (file.is_open()) {
+		LOGMESSAGE(L"FILE IS OPEN\n");
+		while (getline(file, tmp)) {
+			tmp += '\r\n';
+			idx = GetWindowTextLength(*box);
+			SendMessageA(*box, EM_SETSEL, (LPARAM)idx, (LPARAM)idx);
+			SendMessageA(*box, EM_REPLACESEL, 0, (LPARAM)(tmp.c_str()));
+		}
+		sendLines = SendMessageA(*box, EM_GETLINECOUNT, NULL, NULL);
+	}else
+		LOGMESSAGE(L"FILE NOT ABLE TO OPEN");
+
+	file.read(buff, 1024);
+	readFile(buff);
+	file.close();
+
 	return 0;
 }
 
@@ -46,41 +66,63 @@ bool hasSpecialChars(LPCWSTR pFile) {
 
 //if last packet was successfully sent (LastPacketACK Bool == true && FinalPacketSent == False)
 //
-int readFile(OVERLAPPED osReader) {
-	char data[1024];
+int readFile(char* buff) {
 
+	//while(1){
 	//reads and checks for end of file
-	if (!ReadFile(hdlF, buff, 1024, &dwBytesRead, &osReader))
-		return 0;				//end of file
+	//if flag==true
+	//if (!ReadFile(hdlF, buff, 1024, &dwBytesRead, &osReader))
+		//return 0;				//end of file
 		//set data to all null?
 
 
-	if (LastPacketAck && FinalPacketSent) {
-		counter++;
-		//increment  counter
+
+	if (dwBytesRead != sizeof(1024)) {
+		char *nulls = 0;
+		int numb;
+
+		numb = 1024 - dwBytesRead;
+
+		nulls[numb];
+
+		for (int i = 0; i < numb; i++) {
+			nulls[i] = '\0';
+		}
+		strcpy_s(buff, 1024, nulls);
 	}
 
-	//getFilePosition(buff);
+	packets = makePacket(buff);
+	strcpy_s(packetize, packets.c_str());
 
-	createPacket(buff);
+
+	if (!ipc_send_packet(packetize)) {
+		//break;
+		return 0;
+	}
+	
 	return 0;
 }
 
-//Function NOT USED
-void getFilePosition()
-{
-	int data[1024];
+string makePacket(char buff[])
+{	
 
-	int startPacket = 1024 * counter;
-	int endPacket = 1024 * (counter+1);
-
-	data[endPacket - startPacket];
+	std::string rtn;
+	rtn.push_back(syn);
+	rtn.append(buff);
+	uint16_t crc = calculateCRC16(buff);
+	rtn.push_back(crc >> 8);
+	rtn.push_back(0x00FF & crc);
+	//append null characters IF EOF;
+	return rtn;
 
 }
 
+//check for EOF
 
 
-uint8_t* createPacket(char data[]) {
+
+
+/*char* createPacket(char data[]) {
 
 
 	uint16_t crc = gen_crc16(packet, sizeof(packet));
@@ -90,62 +132,52 @@ uint8_t* createPacket(char data[]) {
 	memcpy_s(packet + 1024, 2, &crc, sizeof(uint16_t));
 	return packet;
 
-}
+}*/
 
-//pass in dataword and size of data word to create crc codeword
-uint16_t gen_crc16(const uint8_t *data, uint16_t size)
-{
+
+
+uint16_t calculateCRC16(const std::string& data) {
+	static constexpr auto poly = 0x8005;
+	auto size = data.size();
 	uint16_t out = 0;
-	int bits_read = 0, bit_flag;
+	int bits_read = 0;
+	bool bit_flag;
 
+	std::vector<char> bytes(data.begin(), data.end());
 
-	// test
-	printf("buffer in function %s\n", data);
-
-	/* Sanity check: */
-	if (data == NULL)
-		return 0;
-
-	while (size > 0)
-	{
-		bit_flag = out >> 15;
+	int i = 0;
+	while (size > 0) {
+		bit_flag = (out >> 15) != 0;
 
 		/* Get next bit: */
-		out <<= 1;
-		out |= (*data >> bits_read) & 1; // item a) work from the least significant bits
+		// item a) work from the least significant bits
+		out = (out << 1) | ((bytes[i] >> bits_read) & 1);
 
-										 /* Increment bit counter: */
-		bits_read++;
-		if (bits_read > 7)
-		{
+		/* Increment bit counter: */
+		if (++bits_read > 7) {
 			bits_read = 0;
-			data++;
+			i++;
 			size--;
 		}
 
 		/* Cycle check: */
-		if (bit_flag)
-			out ^= CRC16;
-
+		if (bit_flag) {
+			out ^= poly;
+		}
 	}
 
 	// item b) "push out" the last 16 bits
-	int i;
-	for (i = 0; i < 16; ++i) {
-		bit_flag = out >> 15;
-		out <<= 1;
-		if (bit_flag)
-			out ^= CRC16;
+	for (int i = 0; i < 16; ++i) {
+		out = (out << 1) ^ (poly * ((out >> 15) != 0));
 	}
 
 	// item c) reverse the bits
 	uint16_t crc = 0;
-	i = 0x8000;
-	int j = 0x0001;
-	for (; i != 0; i >>= 1, j <<= 1) {
-		if (i & out) crc |= j;
+	for (int i = 0x8000, j = 0x001; i; i >>= 1, j <<= 1) {
+		if (i & out) {
+			crc |= j;
+		}
 	}
-
 	return crc;
 }
 

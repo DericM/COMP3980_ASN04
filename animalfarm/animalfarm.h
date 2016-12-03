@@ -10,10 +10,8 @@
 
 //functions for tx_Get_Data
 bool hasSpecialChars(LPCWSTR pFile);
-int readFile(OVERLAPPED osReader);
+int readFile(char* buff);
 void getFilePosition();
-uint8_t* createPacket(char data[]);
-uint16_t gen_crc16(const uint8_t *data, uint16_t size);
 
 static bool LastPacketAck = true;
 static bool FinalPacketSent = false;

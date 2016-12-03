@@ -3,6 +3,7 @@
 #include "tx_wait_connect.h"
 #include "idle.h"
 #include "tx_get_data.h"
+#include "receive.h"
 
 #include <stdexcept>
 #include <memory>
@@ -157,6 +158,7 @@ DWORD WINAPI tx_wait_ack(LPVOID pData_)
 
 	case WAIT_TIMEOUT:
 		// Not receieved ack.
+		ipc_terminate_read_thread(GlobalVar::g_hWaitConnectThread);
 		idle_go_to_idle();
 		break;
 

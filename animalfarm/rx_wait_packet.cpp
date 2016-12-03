@@ -70,6 +70,8 @@ BOOL rxwp_setUp() {
 	CloseHandle(GlobalVar::g_hReadForSYNThread);
 	GlobalVar::g_hWaitForSYNThread = CreateThread(NULL, 0, rx_wait_syn, NULL, 0, 0);
 	GlobalVar::g_hReadForSYNThread = CreateThread(NULL, 0, rx_read_for_syn, NULL, 0, 0);
+
+	return TRUE;
 }
 
 DWORD WINAPI rx_read_for_syn(LPVOID pData_)

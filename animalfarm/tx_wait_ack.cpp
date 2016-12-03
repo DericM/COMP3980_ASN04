@@ -77,4 +77,6 @@ BOOL WaitForReceivedAck(HANDLE hwnd, HANDLE hcomm, OVERLAPPED reader) {
 	}
 	*/
 
+	return TRUE;
+
 }

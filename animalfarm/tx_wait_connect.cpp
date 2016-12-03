@@ -68,6 +68,8 @@ BOOL WaitForConnectAck(int& enqCounter, const std::wstring& fileName) {
 	//CloseHandle(GlobalVar::g_hWaitForACKThread);
 	GlobalVar::g_hWaitConnectThread = CreateThread(NULL, 0, tx_wait_connect, NULL, 0, 0);
 	GlobalVar::g_hWaitForACKThread = CreateThread(NULL, 0, tx_wait_ack, NULL, 0, 0);
+
+	return TRUE;
 }
 
 DWORD WINAPI tx_wait_connect(LPVOID pData_)

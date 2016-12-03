@@ -29,7 +29,7 @@ AckParams ackParam;
 int ACK_TIMER;
 
 
-BOOL txwc_setup(int& enqCounter, const std::wstring& fileName) {
+BOOL txwc_setup(const std::wstring& fileName) {
 	GlobalVar::g_ENQsSent++;
 	LOGMESSAGE(L"\nEntering: txwc_setup\n");
 	ACK_TIMER = (ceil(16.0 / GlobalVar::g_cc.dcb.BaudRate * 1000));

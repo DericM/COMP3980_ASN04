@@ -11,7 +11,6 @@
 #include <random>
 
 /*Counters*/
-int ENQ_COUNTER;
 std::random_device rnd;
 
 /*timeouts*/
@@ -167,7 +166,7 @@ void idle_create_write_thread() {
 DWORD WINAPI write_thread_entry_point(LPVOID pData) {
 	LOGMESSAGE(L"\nEntering: write_thread_entry_point\n");
 	ipc_send_enq();
-	txwc_setup(ENQ_COUNTER, sendFileName);
+	txwc_setup(sendFileName);
 	return TRUE;
 }
 

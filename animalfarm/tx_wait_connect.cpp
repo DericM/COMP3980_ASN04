@@ -170,7 +170,6 @@ DWORD WINAPI tx_wait_ack(LPVOID pData_)
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
-		LOGMESSAGE(L"RECEIVED : tx_wait_ack" << std::endl);
 		if (ackParam.filename.length() == 0)
 			idle_go_to_idle();
 		else
@@ -180,13 +179,11 @@ DWORD WINAPI tx_wait_ack(LPVOID pData_)
 
 	case WAIT_TIMEOUT:
 		// Not receieved ack.
-		LOGMESSAGE(L"TIMEOUT : tx_wait_ack" << std::endl);
 		ipc_terminate_read_thread(GlobalVar::g_hWaitConnectThread);
 		idle_go_to_idle();
 		break;
 
 	default:
-		LOGMESSAGE(L"default???" << std::endl);
 		break;
 	}
 

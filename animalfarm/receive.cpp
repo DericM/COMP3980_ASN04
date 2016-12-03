@@ -45,7 +45,7 @@ bool ipc_recieve_syn(int timeout) {
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
 		LOGMESSAGE(L"Successfuly receieved: SYN" << std::endl);
-		//SetEvent(GlobalVar::g_hRXSynEvent);
+		SetEvent(GlobalVar::g_hRXSynEvent);
 		return TRUE;
 	}
 	else {
@@ -95,6 +95,7 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 		return FALSE;
 	}
 
+	BOOL bResult = FALSE;
 	GlobalVar::g_hRunReadThread = TRUE;
 	while (GlobalVar::g_hRunReadThread) {
 		//LOGMESSAGE(L"BEGIN==>");
@@ -113,6 +114,7 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 				if (target == NULL || readChar[0] == target) {
 					LOGMESSAGE(L"GOT_TARGET1==>");
 					GlobalVar::g_hRunReadThread = FALSE;
+					bResult = TRUE;
 				}
 				//LOGMESSAGE(L"GOT_NOTHING1==>");
 			}
@@ -130,6 +132,7 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 					if (target == NULL || readChar[0] == target) {
 						LOGMESSAGE(L"GOT_TARGET2==>");
 						GlobalVar::g_hRunReadThread = FALSE;
+						bResult = TRUE;
 					}
 					else {
 						//LOGMESSAGE(L"GOT_NOTHING2==>");
@@ -152,7 +155,7 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 
 	SetEvent(GlobalVar::g_hTerminateThreadEvent);
 
-	return TRUE;
+	return bResult;
 
 }
 
@@ -164,17 +167,17 @@ bool ipc_terminate_read_thread(HANDLE& hThread)
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
-		CloseHandle(hThread);
+		//CloseHandle(hThread);
 		return true;
 
 	case WAIT_TIMEOUT:
 		TerminateThread(hThread, 0);
-		CloseHandle(hThread);
+		//CloseHandle(hThread);
 		return false;
 
 	default:
 		TerminateThread(hThread, 0);
-		CloseHandle(hThread);
+		//CloseHandle(hThread);
 		return false;
 	}
 }

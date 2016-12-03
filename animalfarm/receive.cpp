@@ -12,7 +12,7 @@ bool ipc_recieve_ack(int timeout) {
 	char readChar[1];
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
-		LOGMESSAGE(L"Successfuly recieved: " << target);
+		LOGMESSAGE(L"Successfuly receieved: ACK" << std::endl);
 		SetEvent(GlobalVar::g_hAckEvent);
 		return TRUE;
 	}
@@ -28,7 +28,7 @@ bool ipc_recieve_enq(int timeout) {
 	char readChar[1];
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
-		LOGMESSAGE(L"Successfuly recieved: " << target);
+		LOGMESSAGE(L"Successfuly receieved: ENQ" << std::endl);
 		SetEvent(GlobalVar::g_hEnqEvent);
 		return TRUE;
 	}
@@ -44,7 +44,7 @@ bool ipc_recieve_syn(int timeout) {
 	char readChar[1];
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
-		LOGMESSAGE(L"Successfuly recieved: " << target);
+		LOGMESSAGE(L"Successfuly receieved: SYN" << std::endl);
 		//SetEvent(GlobalVar::g_hRXSynEvent);
 		return TRUE;
 	}
@@ -60,11 +60,11 @@ bool ipc_recieve_packet(char * readChar) {
 	int timeout = 500;
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
-		LOGMESSAGE(L"Successfuly recieved: packet");
+		LOGMESSAGE(L"Successfuly receieved: packet" << std::endl);
 		return TRUE;
 	}
 	else {
-		LOGMESSAGE(L"PACKET TIMED OUT BAD BAD BAD");
+		LOGMESSAGE(L"PACKET TIMED OUT BAD BAD BAD" << std::endl);
 		return FALSE;
 	}
 }

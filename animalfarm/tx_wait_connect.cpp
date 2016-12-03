@@ -45,13 +45,6 @@ BOOL WaitForConnectAck(int& enqCounter, const std::wstring& fileName) {
 	if (reader.hEvent == NULL) {
 		throw std::runtime_error("Failed to create event");
 	}*/
-
-	GlobalVar::g_hAckEvent = CreateEvent(
-		NULL,               // default security attributes
-		TRUE,               // manual-reset event
-		FALSE,              // initial state is nonsignaled
-		NULL    // object name
-	);
 	
 	/*
 	conParam.enqCounter = enqCounter;
@@ -59,11 +52,18 @@ BOOL WaitForConnectAck(int& enqCounter, const std::wstring& fileName) {
 	conParam.timer = ACK_TIMER;
 	*/
 
+	GlobalVar::g_hAckEvent = CreateEvent(
+		NULL,               // default security attributes
+		TRUE,               // manual-reset event
+		FALSE,              // initial state is nonsignaled
+		NULL    // object name
+	);
+
 	ackParam.timer = ACK_TIMER;
 	ackParam.filename = fileName;
 
-	TerminateThread(GlobalVar::g_hWaitConnectThread, 0);
-	TerminateThread(GlobalVar::g_hWaitForACKThread, 0);
+	//TerminateThread(GlobalVar::g_hWaitConnectThread, 0);
+	//TerminateThread(GlobalVar::g_hWaitForACKThread, 0);
 	//CloseHandle(GlobalVar::g_hWaitConnectThread);
 	//CloseHandle(GlobalVar::g_hWaitForACKThread);
 	GlobalVar::g_hWaitConnectThread = CreateThread(NULL, 0, tx_wait_connect, NULL, 0, 0);
@@ -74,8 +74,6 @@ BOOL WaitForConnectAck(int& enqCounter, const std::wstring& fileName) {
 
 DWORD WINAPI tx_wait_connect(LPVOID pData_)
 {
-
-
 	if (!ipc_recieve_ack(ACK_TIMER)) {
 		//timeout
 	}
@@ -172,6 +170,7 @@ DWORD WINAPI tx_wait_ack(LPVOID pData_)
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
+		LOGMESSAGE(L"RECEIVED : tx_wait_ack" << std::endl);
 		if (ackParam.filename.length() == 0)
 			idle_go_to_idle();
 		else
@@ -181,11 +180,13 @@ DWORD WINAPI tx_wait_ack(LPVOID pData_)
 
 	case WAIT_TIMEOUT:
 		// Not receieved ack.
+		LOGMESSAGE(L"TIMEOUT : tx_wait_ack" << std::endl);
 		ipc_terminate_read_thread(GlobalVar::g_hWaitConnectThread);
 		idle_go_to_idle();
 		break;
 
 	default:
+		LOGMESSAGE(L"default???" << std::endl);
 		break;
 	}
 

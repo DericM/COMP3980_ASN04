@@ -33,7 +33,7 @@ int SYN_TIMER;
 BOOL rxwp_setUp() {
 
 	LOGMESSAGE(L"\nEntering: rxwp_setUP\n");
-	SYN_TIMER = (ceil(8216 / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3);
+	SYN_TIMER = (ceil(8216.0 / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3);
 
 
 	/*
@@ -167,13 +167,13 @@ void HandleReceivedSYN()
 
 DWORD WINAPI rx_wait_syn(LPVOID pData_)
 {
-	DWORD dwRes = WaitForSingleObject(GlobalVar::g_hRXSynEvent, synParam.timer);
+	DWORD dwRes = WaitForSingleObject(GlobalVar::g_hRXSynEvent, SYN_TIMER);
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
 		// Received SYN;
 		char pack[1026];
-		ipc_recieve_packet(&pack[0]);
+		ipc_recieve_packet(pack);
 		rx_pp_parse(pack);
 		break;
 

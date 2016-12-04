@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include "stdafx.h"
 
 //void getData();
 DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile);

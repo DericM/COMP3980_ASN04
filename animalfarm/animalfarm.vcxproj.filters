@@ -99,6 +99,9 @@
     <ClInclude Include="rx_parse_packet.h">
       <Filter>Header Files\rx</Filter>
     </ClInclude>
+    <ClInclude Include="packetDefine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -148,6 +151,9 @@
     </ClCompile>
     <ClCompile Include="animalfarm.cpp">
       <Filter>Source Files\command</Filter>
+    </ClCompile>
+    <ClCompile Include="packetDefine.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

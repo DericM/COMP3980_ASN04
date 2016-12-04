@@ -136,6 +136,12 @@ DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile) {
 		std::istreambuf_iterator<char>(file)),
 		(std::istreambuf_iterator<char>()));
 
+	if (buffer.size() == 0)
+	{
+		MessageBox(GlobalVar::g_hWnd, L"Cannot open the file or the file is empty.", 0, 0);
+		return 0;
+	}
+
 	static size_t packetCounter = 0;
 	size_t curFilePos = packetCounter * DATA_SIZE;
 	char packetBuffer[DATA_SIZE];

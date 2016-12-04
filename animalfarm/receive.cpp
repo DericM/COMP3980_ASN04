@@ -53,7 +53,7 @@ bool ipc_recieve_syn(int timeout, HANDLE* hThread, LPTHREAD_START_ROUTINE routin
 	}
 }
 
-bool ipc_recieve_packet(char * readChar, HANDLE* hThread, LPTHREAD_START_ROUTINE routine) {
+bool ipc_recieve_packet(char* readChar, int timeout, HANDLE* hThread, LPTHREAD_START_ROUTINE routine) {
 	GlobalVar::g_hRXPackEvent = CreateEvent(
 		NULL,               // default security attributes
 		TRUE,               // manual-reset event
@@ -61,9 +61,8 @@ bool ipc_recieve_packet(char * readChar, HANDLE* hThread, LPTHREAD_START_ROUTINE
 		NULL    // object name
 	);
 
-	char target = NULL;
-	DWORD toReadSize = DATA_SIZE + CRC_SIZE;
-	int timeout = 500;
+	char target = 0x16;
+	DWORD toReadSize = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout, hThread, routine)) {
 		LOGMESSAGE(L"Successfuly receieved: packet" << std::endl);
@@ -81,7 +80,7 @@ bool ipc_recieve_packet(char * readChar, HANDLE* hThread, LPTHREAD_START_ROUTINE
 
 
 
-bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int timeout, HANDLE* hThread, LPTHREAD_START_ROUTINE routine) {
+bool ipc_read_from_port(char* readChar, DWORD toReadSize, char target, int timeout, HANDLE* hThread, LPTHREAD_START_ROUTINE routine) {
 	HANDLE& hComm = GlobalVar::g_hComm;
 	DWORD dwRes;
 	OVERLAPPED osReader = { 0 };

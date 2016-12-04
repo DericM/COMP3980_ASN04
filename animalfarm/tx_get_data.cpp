@@ -20,7 +20,7 @@ DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile) {
 
 	char packet_flag = 's';
 
-	ifstream file("C:\\Users\\knome\\workspace\\test\\test.txt", std::ios::binary);
+	ifstream file(ExePathA() + "\\test3.txt", std::ios::binary);
 
 	std::vector<char> buffer((
 		std::istreambuf_iterator<char>(file)),

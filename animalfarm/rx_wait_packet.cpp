@@ -19,7 +19,7 @@ struct SynParams
 SynParams synParam;
 
 int SYN_TIMER;
-char pack[DATA_SIZE + CRC_SIZE];
+char pack[HEADER_SIZE + DATA_SIZE + CRC_SIZE];
 
 BOOL rxwp_setUp() {
 	SYN_TIMER = (ceil(8216.0 / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3);
@@ -45,13 +45,19 @@ BOOL rxwp_setUp() {
 
 DWORD WINAPI rx_read_for_syn(LPVOID pData_)
 {
-
-	if (!ipc_recieve_syn(SYN_TIMER, &GlobalVar::g_hWaitForSYNThread, rx_wait_syn)) {
+	if (!ipc_recieve_packet(pack, synParam.timer, &GlobalVar::g_hReadForPACKThread, rx_wait_pack)) {
 		//timeout
 	}
 	else {
 		//success
 	}
+
+	//if (!ipc_recieve_syn(SYN_TIMER, &GlobalVar::g_hWaitForSYNThread, rx_wait_syn)) {
+	//	//timeout
+	//}
+	//else {
+	//	//success
+	//}
 
 	return 0;
 }
@@ -68,7 +74,7 @@ DWORD WINAPI rx_wait_syn(LPVOID pData_)
 	{
 	case WAIT_OBJECT_0:
 		// Received SYN;
-		if (!ipc_recieve_packet(pack, &GlobalVar::g_hReadForPACKThread, rx_wait_pack)) {
+		if (!ipc_recieve_packet(pack, synParam.timer, &GlobalVar::g_hReadForPACKThread, rx_wait_pack)) {
 			//timeout
 		} else {
 			//success
@@ -93,7 +99,7 @@ DWORD WINAPI rx_wait_syn(LPVOID pData_)
 
 
 DWORD WINAPI rx_wait_pack(LPVOID pData_) {
-	DWORD dwRes = WaitForSingleObject(GlobalVar::g_hRXPackEvent, 10000);
+	DWORD dwRes = WaitForSingleObject(GlobalVar::g_hRXPackEvent, synParam.timer);
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:

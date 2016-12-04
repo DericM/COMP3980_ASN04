@@ -54,6 +54,13 @@ bool ipc_recieve_syn(int timeout, HANDLE* hThread, LPTHREAD_START_ROUTINE routin
 }
 
 bool ipc_recieve_packet(char * readChar, HANDLE* hThread, LPTHREAD_START_ROUTINE routine) {
+	GlobalVar::g_hRXPackEvent = CreateEvent(
+		NULL,               // default security attributes
+		TRUE,               // manual-reset event
+		FALSE,              // initial state is nonsignaled
+		NULL    // object name
+	);
+
 	char target = NULL;
 	DWORD toReadSize = DATA_SIZE + CRC_SIZE;
 	int timeout = 500;

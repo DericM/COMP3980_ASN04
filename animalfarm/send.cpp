@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "globalvar.h"
 #include "send.h"
+#include "packetDefine.h"
 
 bool ipc_send_ack() {
 	LOGMESSAGE(L"Entering: ipc_send_ack() -> ");
@@ -24,9 +25,9 @@ bool ipc_send_enq() {
 	return TRUE;
 }
 
-bool ipc_send_packet(char packet[]) {
+bool ipc_send_packet(char* packet) {
 	LOGMESSAGE(L"Entering: ipc_send_enq() -> ");
-	DWORD dwToWrite = strlen(packet);
+	DWORD dwToWrite = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
 	if (!ipc_send_data_to_port(packet, dwToWrite)) {
 		LOGMESSAGE(L"ERROR: Failed to send packet.");
 		return FALSE;

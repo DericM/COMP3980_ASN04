@@ -42,12 +42,18 @@ DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile) {
 	int sendLines;
 	int idx;
 	string tmp;
-	ifstream file("C:\\Users\\Maitiu\\Desktop\\test3.txt", std::ios::binary);
+	ifstream file(pFile, std::ios::binary);
+
+	/*while (getline(file, tmp)) {
+		tmp += '\r\n';
+		idx = GetWindowTextLength(*box);
+		SendMessageA(*box, EM_SETSEL, (LPARAM)idx, (LPARAM)idx);
+		SendMessageA(*box, EM_REPLACESEL, 0, (LPARAM)(tmp.c_str()));
+	}*/
 
 	std::vector<char> buffer((
 		std::istreambuf_iterator<char>(file)),
 		(std::istreambuf_iterator<char>()));
-
 	static size_t packetCounter = 0;
 	size_t curFilePos = packetCounter * 1024;
 	char packetBuffer[1024];

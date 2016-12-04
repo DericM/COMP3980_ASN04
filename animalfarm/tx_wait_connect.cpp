@@ -9,8 +9,7 @@
 #include <memory>
 #include <math.h>
 
-/*
-struct ConnectParams
+/*struct ConnectParams
 {
 	int enqCounter;
 	int timer;
@@ -74,11 +73,12 @@ DWORD WINAPI txwc_receive_ack_event(LPVOID pData_)
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
-		if (ackParam.filename.length() == 0)
+		/*if (ackParam.filename.length() == 0)
 			idle_go_to_idle();
-		else
+		else*/
+			
 			GlobalVar::g_ENQsSent = 0;
-			openFile(L"FILE");
+			openFile(&GlobalVar::g_hSendBox, L"Test.txt");
 		// Received ack;
 		break;
 
@@ -94,5 +94,6 @@ DWORD WINAPI txwc_receive_ack_event(LPVOID pData_)
 
 	ResetEvent(GlobalVar::g_hAckEvent);
 
-	return 0;
+		return 0;
 }
+

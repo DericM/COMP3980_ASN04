@@ -1,10 +1,17 @@
 #include "stdafx.h"
-#include "animalfarm.h"
-#include "tx_send_data.h"
 #include "tx_get_data.h"
-#include <iostream>
+#include "animalfarm.h"
+#include "idle.h"
+#include <string>
 #include <fstream>
-#include <algorithm>
+#include "GlobalVar.h"
+#include "tx_wait_connect.h"
+#include "send.h"
+
+#define HEADER_SIZE 1
+#define DATA_SIZE 5
+#define CRC_SIZE 2
+
 
 using namespace std;
 
@@ -12,122 +19,66 @@ char buff[1024];
 DWORD dwBytesRead;
 HANDLE hdlF;
 int counter;
-uint8_t		 packet[1027];
+string packets;
+char syn = 0x16;
+char packetize [1027];
 
-char SYN = 0x16;
+/*void getData() {
+	openFile(TEXT("\\TEST.TXT"));
+}*/
 
+DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile) {
 
+	LOGMESSAGE(L"IN GET DATA \n");
+	//idle_go_to_idle();		???
 
-bool txgd_setup() {
+	LOGMESSAGE(L"starting to open file\n");
+	int sendLines;
+	int idx;
+	string tmp;
+	ifstream file("C:\\Users\\luxes\\Source\\Repos\\COMP3980_ASN04\\x64\\Debug\\test.txt", std::ios::binary);
 
-	string fileName = "testinput.txt";
+	std::vector<char> buffer((
+		std::istreambuf_iterator<char>(file)),
+		(std::istreambuf_iterator<char>()));
 
+	static size_t packetCounter = 0;
+	size_t curFilePos = packetCounter * 1024;
+	char packetBuffer[1024];
+	size_t remain = buffer.size() - curFilePos - 1;
+	memcpy_s(packetBuffer, 1024, &buffer[curFilePos], remain < 1024 ? remain : 1024);
+	uint16_t crc = calculateCRC16(packetBuffer);
 
-	ifstream file;
-	file.open(fileName);
+	memcpy_s(packetize, HEADER_SIZE, &syn, HEADER_SIZE);
+	memcpy_s(packetize + HEADER_SIZE, DATA_SIZE, packetBuffer, DATA_SIZE);
+	memcpy_s(packetize + HEADER_SIZE + DATA_SIZE, CRC_SIZE, &crc, CRC_SIZE);
 
-	string file_string;
-
-	string line;
-	if (file.is_open())
-	{
-		while (getline(file, line))
-		{
-			file_string += line + '\n';
-		}
-		file.close();
-	}
-	else {
-		cout << "Unable to open file";
-	}
-
-	txgd_get_packets(file_string);
-}
-
-
-bool txgd_get_packets(std::string file) {
-	bool start = true;
-	bool end = false;
-	int filepointer = 0;
-
-	stringstream ss;
-	ss.width(1024);
-
-	ss << file;
-
-	char syn = 0x16;
-	char data[1024];
-
-	char frame[1027];
-
-	while (true) {
-		if (start) {
-			fill(data, data+1024, 0x11);
-		}
-		else if(end) {
-			fill(data, data + 1024, 0x00);
-		}
-		else {
-			//ss.seekg(ios::cur, ios::end);
-			//int remaining_char = ss.tellg();
-			//ss.seekg(ios::cur, ios::end);
-			/*if (remaining_char < 1024) {
-				for (int i=0; i<1024; i++) {
-
-				}
-				copy(data, data + 1024, frame + 1);
-			}*/
-			//else {
-				ss.seekg(filepointer * 1024, ios::beg);
-
-			//}
-
-			
-
-			ss >> data;
-		}
-		
-		frame[0] = syn;
-		std::copy(data, data+1024, frame+1);
-		frame[1025] = 'x';
-		frame[1026] = 'x';
-
-		if (!txsd_setup(frame)) {
-			return false;
-		}
-		filepointer++;
-	}
-}
-
-
-
-
-
-
-
-
-
-
-//opens and connects to file 
-
-DWORD WINAPI openFile(LPCWSTR pFile) {
-	LOGMESSAGE(L"IN GET DATA");
-	OVERLAPPED osReader = {0};
-	try {
-		//returns handle to the file to be read
-		hdlF = CreateFile(pFile, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	}
-	catch (exception e) {
-		cerr << "Unable to create a file";
-	}
-	
-	
-	if (hasSpecialChars(pFile) || pFile == NULL) {
-		throw "file name is null or has special chars";
+	if (!ipc_send_packet(packetize)) {
+		//break;
 		return 0;
 	}
-	else
-		readFile(osReader);
+
+	file.close();
+
+	
+	/*SendMessageA(*box, EM_SETREADONLY, (LPARAM)FALSE, NULL);
+
+	//if (file.is_open()) {
+		//LOGMESSAGE(L"FILE IS OPEN\n");
+		/*while (getline(file, tmp)) {
+			tmp += '\r\n';
+			idx = GetWindowTextLength(*box);
+			SendMessageA(*box, EM_SETSEL, (LPARAM)idx, (LPARAM)idx);
+			SendMessageA(*box, EM_REPLACESEL, 0, (LPARAM)(tmp.c_str()));
+		}
+		sendLines = SendMessageA(*box, EM_GETLINECOUNT, NULL, NULL);
+	} else
+		LOGMESSAGE(L"FILE NOT ABLE TO OPEN");
+
+	file.read(buff, 1024);
+	readFile(buff);
+	file.close();*/
+
 	return 0;
 }
 
@@ -141,41 +92,62 @@ bool hasSpecialChars(LPCWSTR pFile) {
 
 //if last packet was successfully sent (LastPacketACK Bool == true && FinalPacketSent == False)
 //
-int readFile(OVERLAPPED osReader) {
-	char data[1024];
+int readFile(char* buff) {
 
+	//while(1){
 	//reads and checks for end of file
-	if (!ReadFile(hdlF, buff, 1024, &dwBytesRead, &osReader))
-		return 0;				//end of file
+	//if flag==true
+	//if (!ReadFile(hdlF, buff, 1024, &dwBytesRead, &osReader))
+		//return 0;				//end of file
 		//set data to all null?
 
 
-	if (LastPacketAck && FinalPacketSent) {
-		counter++;
-		//increment  counter
+
+	/*if (dwBytesRead != sizeof(1024)) {
+		char *nulls = 0;
+		int numb;
+
+		numb = 1024 - dwBytesRead;
+
+		nulls[numb];
+
+		for (int i = 0; i < numb; i++) {
+			nulls[i] = '\0';
+		}
+		strcpy_s(buff, 1024, nulls);
+	}*/
+
+	packets = makePacket(buff);
+	strcpy_s(packetize, packets.c_str());
+
+
+	if (!ipc_send_packet(packetize)) {
+		//break;
+		return 0;
 	}
-
-	//getFilePosition(buff);
-
-	createPacket(buff);
+	
 	return 0;
 }
 
-//Function NOT USED
-void getFilePosition()
-{
-	int data[1024];
-
-	int startPacket = 1024 * counter;
-	int endPacket = 1024 * (counter+1);
-
-	data[endPacket - startPacket];
+string makePacket(char buff[])
+{	
+	std::string rtn;
+	rtn.push_back(syn);
+	rtn.append(buff);
+	uint16_t crc = calculateCRC16(buff);
+	rtn.push_back(crc >> 8);
+	rtn.push_back(0x00FF & crc);
+	//append null characters IF EOF;
+	return rtn;
 
 }
 
+//check for EOF
 
 
-uint8_t* createPacket(char data[]) {
+
+
+/*char* createPacket(char data[]) {
 
 
 	uint16_t crc = gen_crc16(packet, sizeof(packet));
@@ -185,63 +157,59 @@ uint8_t* createPacket(char data[]) {
 	memcpy_s(packet + 1024, 2, &crc, sizeof(uint16_t));
 	return packet;
 
-}
+}*/
 
-//pass in dataword and size of data word to create crc codeword
-uint16_t gen_crc16(const uint8_t *data, uint16_t size)
-{
+
+
+uint16_t calculateCRC16(const std::string& data) {
+	static constexpr auto poly = 0x8005;
+	auto size = data.size();
 	uint16_t out = 0;
-	int bits_read = 0, bit_flag;
+	int bits_read = 0;
+	bool bit_flag;
 
+	std::vector<char> bytes(data.begin(), data.end());
 
-	// test
-	printf("buffer in function %s\n", data);
-
-	/* Sanity check: */
-	if (data == NULL)
-		return 0;
-
-	while (size > 0)
-	{
-		bit_flag = out >> 15;
+	int i = 0;
+	while (size > 0) {
+		bit_flag = (out >> 15) != 0;
 
 		/* Get next bit: */
-		out <<= 1;
-		out |= (*data >> bits_read) & 1; // item a) work from the least significant bits
+		// item a) work from the least significant bits
+		out = (out << 1) | ((bytes[i] >> bits_read) & 1);
 
-										 /* Increment bit counter: */
-		bits_read++;
-		if (bits_read > 7)
-		{
+		/* Increment bit counter: */
+		if (++bits_read > 7) {
 			bits_read = 0;
-			data++;
+			i++;
 			size--;
 		}
 
 		/* Cycle check: */
-		if (bit_flag)
-			out ^= CRC16;
-
+		if (bit_flag) {
+			out ^= poly;
+		}
 	}
 
 	// item b) "push out" the last 16 bits
-	int i;
-	for (i = 0; i < 16; ++i) {
-		bit_flag = out >> 15;
-		out <<= 1;
-		if (bit_flag)
-			out ^= CRC16;
+	for (int i = 0; i < 16; ++i) {
+		out = (out << 1) ^ (poly * ((out >> 15) != 0));
 	}
 
 	// item c) reverse the bits
 	uint16_t crc = 0;
-	i = 0x8000;
-	int j = 0x0001;
-	for (; i != 0; i >>= 1, j <<= 1) {
-		if (i & out) crc |= j;
+	for (int i = 0x8000, j = 0x001; i; i >>= 1, j <<= 1) {
+		if (i & out) {
+			crc |= j;
+		}
 	}
-
 	return crc;
 }
 
-
+std::wstring ExePath()
+{
+	wchar_t buffer[MAX_PATH];
+	GetModuleFileNameW(NULL, buffer, MAX_PATH);
+	std::wstring::size_type pos = std::wstring(buffer).find_last_of(L"\\/");
+	return std::wstring(buffer).substr(0, pos);
+}

@@ -24,9 +24,9 @@ bool ipc_send_enq() {
 	return TRUE;
 }
 
-bool ipc_send_packet(char packet[1027]) {
+bool ipc_send_packet(char packet[]) {
 	LOGMESSAGE(L"Entering: ipc_send_enq() -> ");
-	DWORD dwToWrite = sizeof(packet);
+	DWORD dwToWrite = strlen(packet);
 	if (!ipc_send_data_to_port(packet, dwToWrite)) {
 		LOGMESSAGE(L"ERROR: Failed to send packet.");
 		return FALSE;

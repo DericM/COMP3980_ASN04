@@ -1,9 +1,12 @@
 #pragma once
 
+#include <string>
 #include "stdafx.h"
 
-DWORD WINAPI openFile(LPCWSTR pFile);
+//void getData();
+DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile);
+std::string makePacket(char buff[]);
 
-bool txgd_setup();
-bool txgd_get_packets(std::string file);
+uint16_t calculateCRC16(const std::string& data);
 
+std::wstring ExePath();

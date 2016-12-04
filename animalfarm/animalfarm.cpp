@@ -6,6 +6,7 @@
 #include "animalfarm.h"
 #include "tx_wait_connect.h"
 #include "idle.h"
+#include "tx_get_data.h"
 
 
 
@@ -121,6 +122,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    ShowWindow(GlobalVar::g_hMainDlg, SW_SHOW);
    ShowWindow(GlobalVar::g_hWnd, nCmdShow);
    UpdateWindow(GlobalVar::g_hWnd);
+
+   GlobalVar::g_hSendBox = GetDlgItem(GlobalVar::g_hMainDlg, IDC_EDIT2);
 
    return TRUE;
 }

@@ -88,7 +88,7 @@ DWORD WINAPI rx_read_for_syn(LPVOID pData_)
 	bool bWaitSyn = true;
 	while (bWaitSyn)
 	{
-		LOGMESSAGE(L"Entered READ_FOR_SYN \n");
+		//LOGMESSAGE(L"Entered READ_FOR_SYN \n");
 		char readChar;
 		BOOL fWaitingOnRead = false;
 		DWORD eventRet;
@@ -171,6 +171,10 @@ DWORD WINAPI rx_wait_syn(LPVOID pData_)
 	{
 	case WAIT_OBJECT_0:
 		// Received SYN;
+		char pack[1026];
+		ipc_recieve_packet(&pack[0]);
+
+
 		break;
 
 	case WAIT_TIMEOUT:
@@ -189,3 +193,5 @@ DWORD WINAPI rx_wait_syn(LPVOID pData_)
 
 	return 0;
 }
+
+

@@ -5,6 +5,7 @@ namespace GlobalVar
 {
 	HWND g_hWnd;
 	HWND g_hMainDlg;
+	HWND g_hSendBox;
 	HANDLE g_hComm;
 	COMMCONFIG g_cc;
 

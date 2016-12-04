@@ -17,7 +17,7 @@ HANDLE hdlF;
 int counter;
 string packets;
 char syn = 0x16;
-char packetize [1024];
+char packetize [1027];
 
 /*void getData() {
 	openFile(TEXT("\\TEST.TXT"));
@@ -32,27 +32,27 @@ DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile) {
 	int sendLines;
 	int idx;
 	string tmp;
-	ifstream file("C:\\Users\\Yiaoping\\Desktop\\test3.txt");
+	ifstream file("C:\\Users\\Maitiu\\Desktop\\test3.txt");
 
 	
 	SendMessageA(*box, EM_SETREADONLY, (LPARAM)FALSE, NULL);
 
-	if (file.is_open()) {
-		LOGMESSAGE(L"FILE IS OPEN\n");
-		while (getline(file, tmp)) {
+	//if (file.is_open()) {
+		//LOGMESSAGE(L"FILE IS OPEN\n");
+		/*while (getline(file, tmp)) {
 			tmp += '\r\n';
 			idx = GetWindowTextLength(*box);
 			SendMessageA(*box, EM_SETSEL, (LPARAM)idx, (LPARAM)idx);
 			SendMessageA(*box, EM_REPLACESEL, 0, (LPARAM)(tmp.c_str()));
 		}
 		sendLines = SendMessageA(*box, EM_GETLINECOUNT, NULL, NULL);
-	}else
-		LOGMESSAGE(L"FILE NOT ABLE TO OPEN");
+	}else*/
+		//LOGMESSAGE(L"FILE NOT ABLE TO OPEN");
 
 	file.read(buff, 1024);
 	readFile(buff);
 	file.close();
-
+	SendMessageA(*box, EM_REPLACESEL, 0, (LPARAM)buff);
 	return 0;
 }
 
@@ -85,10 +85,10 @@ int readFile(char* buff) {
 
 		nulls[numb];
 
-		for (int i = 0; i < numb; i++) {
+		/*for (int i = 0; i < numb; i++) {
 			nulls[i] = '\0';
 		}
-		strcpy_s(buff, 1024, nulls);
+		strcpy_s(buff, 1024, nulls);*/
 	}
 
 	packets = makePacket(buff);

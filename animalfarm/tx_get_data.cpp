@@ -12,125 +12,15 @@
 
 using namespace std;
 
-char buff[1024];
-char buffer[];
-DWORD dwBytesRead;
-HANDLE hdlF;
-int counter;
-string packets;
 char syn = 0x16;
 char packetize [HEADER_SIZE + DATA_SIZE + CRC_SIZE];
 
 
-
-
-
-bool txgd_setup() {
-
-	string fileName = "test.txt";
-
-
-	ifstream file;
-	file.open("C:\\Users\\luxes\\Source\\Repos\\COMP3980_ASN04\\x64\\Debug\\test.txt", std::ios::binary);
-
-	string file_string;
-
-	string line;
-	if (file.is_open())
-	{
-		while (getline(file, line))
-		{
-			file_string += line + '\n';
-		}
-		file.close();
-	}
-	else {
-		cout << "Unable to open file";
-	}
-
-	if (!txgd_get_packets(file_string)) {
-		return false;
-	}
-	return true;
-
-}
-
-
-bool txgd_get_packets(std::string file) {
-	bool start = true;
-	bool end = false;
-	int filepointer = 0;
-
-	stringstream ss;
-	ss.width(1024);
-
-	ss << file;
-
-	char syn = 0x16;
-	char data[1024];
-
-	char frame[1027];
-
-	while (true) {
-		if (start) {
-			fill(data, data + 1024, 0x11);
-		}
-		else if (end) {
-			fill(data, data + 1024, 0x00);
-		}
-		else {
-			//ss.seekg(ios::cur, ios::end);
-			//int remaining_char = ss.tellg();
-			//ss.seekg(ios::cur, ios::end);
-			/*if (remaining_char < 1024) {
-			for (int i=0; i<1024; i++) {
-
-			}
-			copy(data, data + 1024, frame + 1);
-			}*/
-			//else {
-			ss.seekg(filepointer * 1024, ios::beg);
-
-			//}
-
-
-
-			ss >> data;
-		}
-
-		frame[0] = syn;
-		memcpy_s(frame + 1, 1027, data, 1024);
-		//std::copy(data, data + 1024, frame + 1);
-		frame[1025] = 'x';
-		frame[1026] = 'x';
-
-		if (!txsd_setup(frame)) {
-			return false;
-		}
-		filepointer++;
-	}
-}
-
-
-
-/*void getData() {
-	openFile(TEXT("\\TEST.TXT"));
-}*/
-
-string data;
-vector <string> v;
-
-
 DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile) {
 
-	LOGMESSAGE(L"IN GET DATA \n");
-	//idle_go_to_idle();		???
+	char packet_flag = 's';
 
-	LOGMESSAGE(L"starting to open file\n");
-	int sendLines;
-	int idx;
-	string tmp;
-	ifstream file("C:\\Users\\luxes\\Source\\Repos\\COMP3980_ASN04\\x64\\Debug\\test.txt", std::ios::binary);
+	ifstream file("C:\\Users\\knome\\workspace\\test\\test.txt", std::ios::binary);
 
 	std::vector<char> buffer((
 		std::istreambuf_iterator<char>(file)),
@@ -138,127 +28,58 @@ DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile) {
 
 	if (buffer.size() == 0)
 	{
-		MessageBox(GlobalVar::g_hWnd, L"Cannot open the file or the file is empty.", 0, 0);
 		return 0;
 	}
 
 	static size_t packetCounter = 0;
-	size_t curFilePos = packetCounter * DATA_SIZE;
-	char packetBuffer[DATA_SIZE + 1];
-	size_t remain = buffer.size() - curFilePos - 1;
-	memcpy_s(packetBuffer, DATA_SIZE, &buffer[curFilePos], remain < DATA_SIZE ? remain : DATA_SIZE);
-	packetBuffer[DATA_SIZE] = '\0';
-	std::string strData(packetBuffer);
-	uint16_t crc = calculateCRC16(strData);
 
-	memcpy_s(packetize, HEADER_SIZE, &syn, HEADER_SIZE);
-	memcpy_s(packetize + HEADER_SIZE, DATA_SIZE, packetBuffer, DATA_SIZE);
-	memcpy_s(packetize + HEADER_SIZE + DATA_SIZE, CRC_SIZE, &crc, CRC_SIZE);
+	while (packet_flag != 'x') {
+		size_t curFilePos = packetCounter * DATA_SIZE;
+		char packetBuffer[DATA_SIZE + 1];
 
-	if (!ipc_send_packet(packetize)) {
-		//break;
-		return 0;
-	}
+		size_t remain = buffer.size() - curFilePos - 1;
 
-	file.close();
 
-	
-	/*SendMessageA(*box, EM_SETREADONLY, (LPARAM)FALSE, NULL);
-
-	//if (file.is_open()) {
-		//LOGMESSAGE(L"FILE IS OPEN\n");
-		/*while (getline(file, tmp)) {
-			tmp += '\r\n';
-			idx = GetWindowTextLength(*box);
-			SendMessageA(*box, EM_SETSEL, (LPARAM)idx, (LPARAM)idx);
-			SendMessageA(*box, EM_REPLACESEL, 0, (LPARAM)(tmp.c_str()));
+		switch (packet_flag) {
+		case 's':
+			memset(packetBuffer, 's', sizeof(packetBuffer));
+			packet_flag = 'm';
+			break;
+		case 'm':
+			if (remain < DATA_SIZE) {
+				memset(packetBuffer, '\0', sizeof(packetBuffer));
+				memcpy_s(packetBuffer, DATA_SIZE, &buffer[curFilePos], remain);
+				packet_flag = 'e';
+			}
+			else {
+				memcpy_s(packetBuffer, DATA_SIZE, &buffer[curFilePos], DATA_SIZE);
+			}
+			packetCounter++;
+			break;
+		case 'e':
+			memset(packetBuffer, 'x', sizeof(packetBuffer));
+			packet_flag = 'x';
+			break;
 		}
-		sendLines = SendMessageA(*box, EM_GETLINECOUNT, NULL, NULL);
-	} else
-		LOGMESSAGE(L"FILE NOT ABLE TO OPEN");
 
-	file.read(buff, 1024);*/
+		packetBuffer[DATA_SIZE] = '\0';
+		std::string strData(packetBuffer);
+		uint16_t crc = calculateCRC16(strData);
 
-	readFile(buff);
+		memcpy_s(packetize, HEADER_SIZE, &syn, HEADER_SIZE);
+		memcpy_s(packetize + HEADER_SIZE, DATA_SIZE, packetBuffer, DATA_SIZE);
+		memcpy_s(packetize + HEADER_SIZE + DATA_SIZE, CRC_SIZE, &crc, CRC_SIZE);
+
+		/*if (!ipc_send_packet(packetize)) {
+			break;
+		}*/
+
+		if (!txsd_setup(packetize)) {
+			break;
+		}
+	}
 	file.close();
-
-
 	return 0;
 }
 
-//returns true if it can find a special character
-bool hasSpecialChars(LPCWSTR pFile) {
-	//if (pFile(""))		
-		//return true;
-	//else 
-		return false;
-}
 
-//if last packet was successfully sent (LastPacketACK Bool == true && FinalPacketSent == False)
-//
-int readFile(char* buff) {
-
-	//while(1){
-	//reads and checks for end of file
-	//if flag==true
-	//if (!ReadFile(hdlF, buff, 1024, &dwBytesRead, &osReader))
-		//return 0;				//end of file
-		//set data to all null?
-
-
-
-	/*if (dwBytesRead != sizeof(1024)) {
-		char *nulls = 0;
-		int numb;
-
-		numb = 1024 - dwBytesRead;
-
-		nulls[numb];
-
-		for (int i = 0; i < numb; i++) {
-			nulls[i] = '\0';
-		}
-		strcpy_s(buff, 1024, nulls);
-	}*/
-
-	packets = makePacket(buff);
-	strcpy_s(packetize, packets.c_str());
-
-
-	if (!ipc_send_packet(packetize)) {
-		//break;
-		return 0;
-	}
-	
-	return 0;
-}
-
-string makePacket(char buff[])
-{	
-	std::string rtn;
-	rtn.push_back(syn);
-	rtn.append(buff);
-	uint16_t crc = calculateCRC16(buff);
-	rtn.push_back(crc >> 8);
-	rtn.push_back(0x00FF & crc);
-	//append null characters IF EOF;
-	return rtn;
-
-}
-
-//check for EOF
-
-
-
-
-/*char* createPacket(char data[]) {
-
-
-	uint16_t crc = gen_crc16(packet, sizeof(packet));
-	char temp = (char)SYN;
-	memcpy_s(packet, 1, &temp, sizeof(temp));
-	memcpy_s(packet + 1, 1024, data, 1024);
-	memcpy_s(packet + 1024, 2, &crc, sizeof(uint16_t));
-	return packet;
-
-}*/

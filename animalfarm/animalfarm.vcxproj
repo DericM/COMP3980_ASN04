@@ -148,6 +148,7 @@
   <ItemGroup>
     <ClInclude Include="animalfarm.h" />
     <ClInclude Include="globalvar.h" />
+    <ClInclude Include="packetDefine.h" />
     <ClInclude Include="rx_parse_packet.h" />
     <ClInclude Include="idle.h" />
     <ClInclude Include="session.h" />
@@ -167,6 +168,7 @@
     <ClCompile Include="animalfarm.cpp" />
     <ClCompile Include="globalvar.cpp" />
     <ClCompile Include="idle.cpp" />
+    <ClCompile Include="packetDefine.cpp" />
     <ClCompile Include="session.cpp" />
     <ClCompile Include="receive.cpp" />
     <ClCompile Include="rx_check_error.cpp" />

@@ -1,6 +1,10 @@
 #include "stdafx.h"
 #include "animalfarm.h"
-
+#include "tx_send_data.h"
+#include "tx_get_data.h"
+#include <iostream>
+#include <fstream>
+#include <algorithm>
 
 using namespace std;
 
@@ -11,6 +15,97 @@ int counter;
 uint8_t		 packet[1027];
 
 char SYN = 0x16;
+
+
+
+bool txgd_setup() {
+
+	string fileName = "testinput.txt";
+
+
+	ifstream file;
+	file.open(fileName);
+
+	string file_string;
+
+	string line;
+	if (file.is_open())
+	{
+		while (getline(file, line))
+		{
+			file_string += line + '\n';
+		}
+		file.close();
+	}
+	else {
+		cout << "Unable to open file";
+	}
+
+	txgd_get_packets(file_string);
+}
+
+
+bool txgd_get_packets(std::string file) {
+	bool start = true;
+	bool end = false;
+	int filepointer = 0;
+
+	stringstream ss;
+	ss.width(1024);
+
+	ss << file;
+
+	char syn = 0x16;
+	char data[1024];
+
+	char frame[1027];
+
+	while (true) {
+		if (start) {
+			fill(data, data+1024, 0x11);
+		}
+		else if(end) {
+			fill(data, data + 1024, 0x00);
+		}
+		else {
+			//ss.seekg(ios::cur, ios::end);
+			//int remaining_char = ss.tellg();
+			//ss.seekg(ios::cur, ios::end);
+			/*if (remaining_char < 1024) {
+				for (int i=0; i<1024; i++) {
+
+				}
+				copy(data, data + 1024, frame + 1);
+			}*/
+			//else {
+				ss.seekg(filepointer * 1024, ios::beg);
+
+			//}
+
+			
+
+			ss >> data;
+		}
+		
+		frame[0] = syn;
+		std::copy(data, data+1024, frame+1);
+		frame[1025] = 'x';
+		frame[1026] = 'x';
+
+		if (!txsd_setup(frame)) {
+			return false;
+		}
+		filepointer++;
+	}
+}
+
+
+
+
+
+
+
+
 
 
 //opens and connects to file 

@@ -22,6 +22,7 @@ namespace GlobalVar
 	HANDLE g_hWaitConnectThread;
 	HANDLE g_hWaitForACKThread;
 	HANDLE g_hReadForSYNThread;
+	HANDLE g_hReadForPACKThread;
 
 	//receiving threads
 	HANDLE g_hReceivingThread;
@@ -31,4 +32,5 @@ namespace GlobalVar
 	HANDLE g_hEnqEvent;
 	HANDLE g_hRXSynEvent;
 	HANDLE g_hAckEvent;
+	HANDLE g_hRXPackEvent;
 }

@@ -101,8 +101,9 @@ DWORD WINAPI idle_wait(LPVOID pData) {
 
 	TerminateThread(GlobalVar::g_hIdleSendENQThread, 0);
 	//CloseHandle(GlobalVar::g_hIdleSendENQThread);
-
-	/*if (GlobalVar::g_ENQsSent > 3) {
+	//LOGMESSAGE(L"ENQS Sent " << GlobalVar::g_ENQsSent << "\n");
+	/*if (GlobalVar::g_ENQsSent == 3) {
+		//LOGMESSAGE(L"SENT ENQS 3 TIMES\nn");
 		is_close_port();
 		return 0;
 	}*/

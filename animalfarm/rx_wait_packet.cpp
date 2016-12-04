@@ -19,6 +19,7 @@ struct SynParams
 SynParams synParam;
 
 int SYN_TIMER;
+char pack[DATA_SIZE + CRC_SIZE];
 
 BOOL rxwp_setUp() {
 
@@ -69,9 +70,11 @@ DWORD WINAPI rx_wait_syn(LPVOID pData_)
 	{
 	case WAIT_OBJECT_0:
 		// Received SYN;
-		char pack[DATA_SIZE + CRC_SIZE];
-		ipc_recieve_packet(pack);
-		rx_pp_parse(pack);
+		if (!ipc_recieve_packet(pack, &GlobalVar::g_hReadForPACKThread, rx_wait_pack)) {
+			//timeout
+		} else {
+			//success
+		}
 		break;
 
 	case WAIT_TIMEOUT:
@@ -87,6 +90,33 @@ DWORD WINAPI rx_wait_syn(LPVOID pData_)
 	}
 
 	ResetEvent(GlobalVar::g_hReadForSYNThread);
+
+	return 0;
+}
+
+
+DWORD WINAPI rx_wait_pack(LPVOID pData_) {
+	DWORD dwRes = WaitForSingleObject(GlobalVar::g_hRXPackEvent, 10000);
+	switch (dwRes)
+	{
+	case WAIT_OBJECT_0:
+		// Received Packet;
+		rx_pp_parse(pack);
+		break;
+
+	case WAIT_TIMEOUT:
+		// Not receieved Packet.
+		LOGMESSAGE(L"TIMED OUT IN WAIT FOR PACKET" << std::endl);
+		ipc_terminate_read_thread(GlobalVar::g_hReadForPACKThread);
+		idle_go_to_idle();
+		break;
+
+	default:
+		idle_go_to_idle();
+		break;
+	}
+
+	ResetEvent(GlobalVar::g_hReadForPACKThread);
 
 	return 0;
 }

@@ -22,9 +22,11 @@ namespace GlobalVar
 	extern HANDLE g_hReceivingThread;
 	extern HANDLE g_hWaitForSYNThread;
 	extern HANDLE g_hReadForSYNThread;
+	extern HANDLE g_hReadForPACKThread;
 
 	extern HANDLE g_hTerminateThreadEvent;
 	extern HANDLE g_hEnqEvent;
 	extern HANDLE g_hAckEvent;
 	extern HANDLE g_hRXSynEvent;
+	extern HANDLE g_hRXPackEvent;
 }

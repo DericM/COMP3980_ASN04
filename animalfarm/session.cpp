@@ -7,8 +7,6 @@
 * Open the comm port.
 */
 bool is_open_port( LPCWSTR& lpszCommName) {
-	LOGMESSAGE(L"Entering: idle_open_port()\n");
-
 	//set comm settings
 	GlobalVar::g_cc.dwSize = sizeof(COMMCONFIG);
 	GlobalVar::g_cc.wVersion = 0x100;
@@ -46,8 +44,6 @@ bool is_open_port( LPCWSTR& lpszCommName) {
 * close port.
 */
 void is_close_port() {
-	LOGMESSAGE(L"Entering: idle_close_port()\n");
-
 	//CloseHandle(osReader.hEvent);
 	CloseHandle(GlobalVar::g_hComm);
 }

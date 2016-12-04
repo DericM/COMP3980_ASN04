@@ -119,7 +119,6 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 			else {
 
 				if (target == NULL || readChar[0] == target) {
-					LOGMESSAGE(L"GOT_TARGET1==>");
 					GlobalVar::g_hRunReadThread = FALSE;
 					bResult = TRUE;
 				}
@@ -131,12 +130,9 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 			switch (dwRes)
 			{
 			case WAIT_OBJECT_0:
-				LOGMESSAGE(L"WAIT_OBJECT_0==>");
 				if (!GetOverlappedResult(hComm, &osReader, &eventRet, FALSE)) {
-					LOGMESSAGE(L"!GetOverlappedResult()");
 				} else {
 					if (target == NULL || readChar[0] == target) {
-						LOGMESSAGE(L"GOT_TARGET2==>");
 						GlobalVar::g_hRunReadThread = FALSE;
 						bResult = TRUE;
 					} else {
@@ -146,11 +142,9 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 				fWaitingOnRead = FALSE;
 				break;
 			case WAIT_TIMEOUT:
-				LOGMESSAGE(L"WAIT_TIMEOUT==>");
 				return FALSE;
 
 			default:
-				LOGMESSAGE(L"DEFAULT==>\n");
 				break;
 			}
 		}

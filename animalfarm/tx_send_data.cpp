@@ -21,8 +21,6 @@ bool txsd_setup(char frame[1027]) {
 
 
 bool txsd_send(char frame[1027]) {
-	LOGMESSAGE(L"\nEntering: txsd_send() - ");
-
 	//send packet
 	if (!ipc_send_packet(frame)) {
 		return false;//resend packet

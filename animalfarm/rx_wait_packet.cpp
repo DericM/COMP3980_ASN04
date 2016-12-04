@@ -22,8 +22,6 @@ int SYN_TIMER;
 char pack[DATA_SIZE + CRC_SIZE];
 
 BOOL rxwp_setUp() {
-
-	LOGMESSAGE(L"\nEntering: rxwp_setUP\n");
 	SYN_TIMER = (ceil(8216.0 / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3);
 
 	GlobalVar::g_hRXSynEvent = CreateEvent(
@@ -79,7 +77,6 @@ DWORD WINAPI rx_wait_syn(LPVOID pData_)
 
 	case WAIT_TIMEOUT:
 		// Not receieved SYN.
-		LOGMESSAGE(L"TIMED OUT IN WAIT FOR PACKET" << std::endl);
 		ipc_terminate_read_thread(GlobalVar::g_hReadForSYNThread);
 		idle_go_to_idle();
 		break;
@@ -106,7 +103,6 @@ DWORD WINAPI rx_wait_pack(LPVOID pData_) {
 
 	case WAIT_TIMEOUT:
 		// Not receieved Packet.
-		LOGMESSAGE(L"TIMED OUT IN WAIT FOR PACKET" << std::endl);
 		ipc_terminate_read_thread(GlobalVar::g_hReadForPACKThread);
 		idle_go_to_idle();
 		break;

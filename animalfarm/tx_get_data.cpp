@@ -122,15 +122,12 @@ vector <string> v;
 
 
 DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile) {
-
-	LOGMESSAGE(L"IN GET DATA \n");
 	//idle_go_to_idle();		???
 
-	LOGMESSAGE(L"starting to open file\n");
 	int sendLines;
 	int idx;
 	string tmp;
-	ifstream file("C:\\Users\\Maitiu\\Desktop\\test3.txt", std::ios::binary);
+	ifstream file("C:\\Users\\luxes\\Desktop\\test3.txt", std::ios::binary);
 
 	std::vector<char> buffer((
 		std::istreambuf_iterator<char>(file)),

@@ -7,21 +7,27 @@
 #include "GlobalVar.h"
 #include "tx_wait_connect.h"
 #include "send.h"
+#include <vector>
 
 
 using namespace std;
 
 char buff[1024];
+char buffer[];
 DWORD dwBytesRead;
 HANDLE hdlF;
 int counter;
 string packets;
 char syn = 0x16;
-char packetize [1024];
+char packetize [1027];
 
 /*void getData() {
 	openFile(TEXT("\\TEST.TXT"));
 }*/
+
+string data;
+vector <string> v;
+
 
 DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile) {
 
@@ -32,7 +38,9 @@ DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile) {
 	int sendLines;
 	int idx;
 	string tmp;
-	ifstream file("C:\\Users\\Yiaoping\\Desktop\\test3.txt");
+	string myfile;
+	myfile = "C:\\Users\\Yiaoping\\Desktop\\test3.txt";
+	/*ifstream file(myfile);
 
 	
 	SendMessageA(*box, EM_SETREADONLY, (LPARAM)FALSE, NULL);
@@ -49,9 +57,10 @@ DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile) {
 	}else
 		LOGMESSAGE(L"FILE NOT ABLE TO OPEN");
 
-	file.read(buff, 1024);
+	file.read(buff, 1024);*/
+
 	readFile(buff);
-	file.close();
+
 
 	return 0;
 }
@@ -67,29 +76,6 @@ bool hasSpecialChars(LPCWSTR pFile) {
 //if last packet was successfully sent (LastPacketACK Bool == true && FinalPacketSent == False)
 //
 int readFile(char* buff) {
-
-	//while(1){
-	//reads and checks for end of file
-	//if flag==true
-	//if (!ReadFile(hdlF, buff, 1024, &dwBytesRead, &osReader))
-		//return 0;				//end of file
-		//set data to all null?
-
-
-
-	if (dwBytesRead != sizeof(1024)) {
-		char *nulls = 0;
-		int numb;
-
-		numb = 1024 - dwBytesRead;
-
-		nulls[numb];
-
-		for (int i = 0; i < numb; i++) {
-			nulls[i] = '\0';
-		}
-		strcpy_s(buff, 1024, nulls);
-	}
 
 	packets = makePacket(buff);
 	strcpy_s(packetize, packets.c_str());

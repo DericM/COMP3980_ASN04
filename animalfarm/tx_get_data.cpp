@@ -63,9 +63,9 @@ DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile) {
 	
 	/*SendMessageA(*box, EM_SETREADONLY, (LPARAM)FALSE, NULL);
 
-	if (file.is_open()) {
-		LOGMESSAGE(L"FILE IS OPEN\n");
-		while (getline(file, tmp)) {
+	//if (file.is_open()) {
+		//LOGMESSAGE(L"FILE IS OPEN\n");
+		/*while (getline(file, tmp)) {
 			tmp += '\r\n';
 			idx = GetWindowTextLength(*box);
 			SendMessageA(*box, EM_SETSEL, (LPARAM)idx, (LPARAM)idx);

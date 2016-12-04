@@ -93,7 +93,8 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 
 	BOOL bResult = FALSE;
 	GlobalVar::g_hRunReadThread = TRUE;
-	*hThread = CreateThread(NULL, 0, routine, NULL, 0, 0);
+	if (hThread)
+		*hThread = CreateThread(NULL, 0, routine, NULL, 0, 0);
 	while (GlobalVar::g_hRunReadThread) {
 		//LOGMESSAGE(L"BEGIN==>");
 		if (!fWaitingOnRead) {

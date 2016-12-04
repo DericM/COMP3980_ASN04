@@ -9,6 +9,7 @@
 #include "receive.h"
 #include "session.h"
 #include <random>
+#include "tx_get_data.h"
 
 /*Counters*/
 std::random_device rnd;
@@ -100,14 +101,13 @@ DWORD WINAPI idle_wait(LPVOID pData) {
 
 	TerminateThread(GlobalVar::g_hIdleSendENQThread, 0);
 	//CloseHandle(GlobalVar::g_hIdleSendENQThread);
-	GlobalVar::g_hIdleSendENQThread = CreateThread(NULL, 0, idle_send_enq, NULL, 0, 0);
 
 	/*if (GlobalVar::g_ENQsSent > 3) {
 		is_close_port();
 		return 0;
 	}*/
 
-	if (!ipc_recieve_enq(timeout)) {
+	if (!ipc_recieve_enq(timeout, &GlobalVar::g_hIdleSendENQThread, idle_send_enq)) {
 		//idle_create_write_thread();
 	}
 
@@ -171,8 +171,9 @@ DWORD WINAPI write_thread_entry_point(LPVOID pData) {
 }
 
 
-void idle_go_to_sendfile(const std::wstring& fileName)
+void idle_go_to_sendfile(const LPCWSTR fileName)
 {
 	bSendingFile = true;
 	sendFileName = fileName;
+	openFile(&GlobalVar::g_hSendBox, fileName);
 }

@@ -7,13 +7,8 @@
 #include "GlobalVar.h"
 #include "tx_wait_connect.h"
 #include "send.h"
-#include <vector>
+#include "packetDefine.h"
 #include "tx_send_data.h"
-
-#define HEADER_SIZE 1
-#define DATA_SIZE 5
-#define CRC_SIZE 2
-
 
 using namespace std;
 
@@ -24,7 +19,7 @@ HANDLE hdlF;
 int counter;
 string packets;
 char syn = 0x16;
-char packetize [1027];
+char packetize [HEADER_SIZE + DATA_SIZE + CRC_SIZE];
 
 
 
@@ -135,18 +130,26 @@ DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile) {
 	int sendLines;
 	int idx;
 	string tmp;
-	ifstream file("C:\\Users\\Maitiu\\Desktop\\test3.txt", std::ios::binary);
+	ifstream file("C:\\Users\\luxes\\Source\\Repos\\COMP3980_ASN04\\x64\\Debug\\test.txt", std::ios::binary);
 
 	std::vector<char> buffer((
 		std::istreambuf_iterator<char>(file)),
 		(std::istreambuf_iterator<char>()));
 
+	if (buffer.size() == 0)
+	{
+		MessageBox(GlobalVar::g_hWnd, L"Cannot open the file or the file is empty.", 0, 0);
+		return 0;
+	}
+
 	static size_t packetCounter = 0;
-	size_t curFilePos = packetCounter * 1024;
-	char packetBuffer[1024];
+	size_t curFilePos = packetCounter * DATA_SIZE;
+	char packetBuffer[DATA_SIZE + 1];
 	size_t remain = buffer.size() - curFilePos - 1;
-	memcpy_s(packetBuffer, 1024, &buffer[curFilePos], remain < 1024 ? remain : 1024);
-	uint16_t crc = calculateCRC16(packetBuffer);
+	memcpy_s(packetBuffer, DATA_SIZE, &buffer[curFilePos], remain < DATA_SIZE ? remain : DATA_SIZE);
+	packetBuffer[DATA_SIZE] = '\0';
+	std::string strData(packetBuffer);
+	uint16_t crc = calculateCRC16(strData);
 
 	memcpy_s(packetize, HEADER_SIZE, &syn, HEADER_SIZE);
 	memcpy_s(packetize + HEADER_SIZE, DATA_SIZE, packetBuffer, DATA_SIZE);
@@ -259,58 +262,3 @@ string makePacket(char buff[])
 	return packet;
 
 }*/
-
-
-
-uint16_t calculateCRC16(const std::string& data) {
-	static constexpr auto poly = 0x8005;
-	auto size = data.size();
-	uint16_t out = 0;
-	int bits_read = 0;
-	bool bit_flag;
-
-	std::vector<char> bytes(data.begin(), data.end());
-
-	int i = 0;
-	while (size > 0) {
-		bit_flag = (out >> 15) != 0;
-
-		/* Get next bit: */
-		// item a) work from the least significant bits
-		out = (out << 1) | ((bytes[i] >> bits_read) & 1);
-
-		/* Increment bit counter: */
-		if (++bits_read > 7) {
-			bits_read = 0;
-			i++;
-			size--;
-		}
-
-		/* Cycle check: */
-		if (bit_flag) {
-			out ^= poly;
-		}
-	}
-
-	// item b) "push out" the last 16 bits
-	for (int i = 0; i < 16; ++i) {
-		out = (out << 1) ^ (poly * ((out >> 15) != 0));
-	}
-
-	// item c) reverse the bits
-	uint16_t crc = 0;
-	for (int i = 0x8000, j = 0x001; i; i >>= 1, j <<= 1) {
-		if (i & out) {
-			crc |= j;
-		}
-	}
-	return crc;
-}
-
-std::wstring ExePath()
-{
-	wchar_t buffer[MAX_PATH];
-	GetModuleFileNameW(NULL, buffer, MAX_PATH);
-	std::wstring::size_type pos = std::wstring(buffer).find_last_of(L"\\/");
-	return std::wstring(buffer).substr(0, pos);
-}

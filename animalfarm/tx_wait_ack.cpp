@@ -9,9 +9,9 @@ bool txwa_receive_ack() {
 
 	int TRANSMISSION_TIMER = 1000;
 
-	if (!ipc_recieve_ack(TRANSMISSION_TIMER)) {
+	/*if (!ipc_recieve_ack(TRANSMISSION_TIMER)) {
 		return false;
-	}
+	}*/
 	return true;
 
 }

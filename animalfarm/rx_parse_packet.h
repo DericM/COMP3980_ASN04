@@ -1,4 +1,3 @@
 #pragma once
-#include "stdafx.h"
 
-void rx_pp_parse(char packet[]);
+void rx_pp_parse(const char* packet);

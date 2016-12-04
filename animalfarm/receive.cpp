@@ -1,15 +1,16 @@
 #include "stdafx.h"
 #include "receive.h"
 #include "globalvar.h"
+#include "packetDefine.h"
 
 int TERMINATE_THREAD_TIMEOUT = 500;
 
-bool ipc_recieve_ack(int timeout) {
+bool ipc_recieve_ack(int timeout, HANDLE* hThread, LPTHREAD_START_ROUTINE routine) {
 	char target = 0x06;
 	DWORD toReadSize = 1;
 	char readChar[1];
 
-	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
+	if (ipc_read_from_port(readChar, toReadSize, target, timeout, hThread, routine)) {
 		LOGMESSAGE(L"Successfuly receieved: ACK" << std::endl);
 		SetEvent(GlobalVar::g_hAckEvent);
 		return TRUE;
@@ -20,12 +21,12 @@ bool ipc_recieve_ack(int timeout) {
 	}
 }
 
-bool ipc_recieve_enq(int timeout) {
+bool ipc_recieve_enq(int timeout, HANDLE* hThread, LPTHREAD_START_ROUTINE routine) {
 	char target = 0x05;
 	DWORD toReadSize = 1;
 	char readChar[1];
 
-	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
+	if (ipc_read_from_port(readChar, toReadSize, target, timeout, hThread, routine)) {
 		LOGMESSAGE(L"Successfuly receieved: ENQ" << std::endl);
 		SetEvent(GlobalVar::g_hEnqEvent);
 		return TRUE;
@@ -36,12 +37,12 @@ bool ipc_recieve_enq(int timeout) {
 	}
 }
 
-bool ipc_recieve_syn(int timeout) {
+bool ipc_recieve_syn(int timeout, HANDLE* hThread, LPTHREAD_START_ROUTINE routine) {
 	char target = 0x16;
 	DWORD toReadSize = 1;
 	char readChar[1];
 
-	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
+	if (ipc_read_from_port(readChar, toReadSize, target, timeout, hThread, routine)) {
 		LOGMESSAGE(L"Successfuly receieved: SYN" << std::endl);
 		SetEvent(GlobalVar::g_hRXSynEvent);
 		return TRUE;
@@ -54,10 +55,10 @@ bool ipc_recieve_syn(int timeout) {
 
 bool ipc_recieve_packet(char * readChar) {
 	char target = NULL;
-	DWORD toReadSize = 1026;
+	DWORD toReadSize = DATA_SIZE + CRC_SIZE;
 	int timeout = 500;
 
-	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
+	if (ipc_read_from_port(readChar, toReadSize, target, timeout, NULL, NULL)) {
 		LOGMESSAGE(L"Successfuly receieved: packet" << std::endl);
 		return TRUE;
 	}
@@ -72,7 +73,7 @@ bool ipc_recieve_packet(char * readChar) {
 
 
 
-bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int timeout) {
+bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int timeout, HANDLE* hThread, LPTHREAD_START_ROUTINE routine) {
 	HANDLE& hComm = GlobalVar::g_hComm;
 	DWORD dwRes;
 	OVERLAPPED osReader = { 0 };
@@ -93,6 +94,8 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 
 	BOOL bResult = FALSE;
 	GlobalVar::g_hRunReadThread = TRUE;
+	if (hThread)
+		*hThread = CreateThread(NULL, 0, routine, NULL, 0, 0);
 	while (GlobalVar::g_hRunReadThread) {
 		//LOGMESSAGE(L"BEGIN==>");
 		if (!fWaitingOnRead) {

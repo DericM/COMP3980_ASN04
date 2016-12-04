@@ -5,6 +5,7 @@
 #include "rx_wait_packet.h"
 #include "receive.h"
 #include "rx_parse_packet.h"
+#include "packetDefine.h"
 
 #include <stdexcept>
 #include <memory>
@@ -22,7 +23,7 @@ int SYN_TIMER;
 BOOL rxwp_setUp() {
 
 	LOGMESSAGE(L"\nEntering: rxwp_setUP\n");
-	SYN_TIMER = (ceil(8216 / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3);
+	SYN_TIMER = (ceil(8216.0 / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3);
 
 	GlobalVar::g_hRXSynEvent = CreateEvent(
 		NULL,               // default security attributes
@@ -38,7 +39,6 @@ BOOL rxwp_setUp() {
 	//TerminateThread(GlobalVar::g_hReadForSYNThread, 0);
 	//CloseHandle(GlobalVar::g_hWaitForSYNThread);
 	//CloseHandle(GlobalVar::g_hReadForSYNThread);
-	GlobalVar::g_hWaitForSYNThread = CreateThread(NULL, 0, rx_wait_syn, NULL, 0, 0);
 	GlobalVar::g_hReadForSYNThread = CreateThread(NULL, 0, rx_read_for_syn, NULL, 0, 0);
 
 	return TRUE;
@@ -47,7 +47,7 @@ BOOL rxwp_setUp() {
 DWORD WINAPI rx_read_for_syn(LPVOID pData_)
 {
 
-	if (!ipc_recieve_syn(SYN_TIMER)) {
+	if (!ipc_recieve_syn(SYN_TIMER, &GlobalVar::g_hWaitForSYNThread, rx_wait_syn)) {
 		//timeout
 	}
 	else {
@@ -64,13 +64,13 @@ void HandleReceivedSYN()
 
 DWORD WINAPI rx_wait_syn(LPVOID pData_)
 {
-	DWORD dwRes = WaitForSingleObject(GlobalVar::g_hRXSynEvent, synParam.timer);
+	DWORD dwRes = WaitForSingleObject(GlobalVar::g_hRXSynEvent, SYN_TIMER);
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
 		// Received SYN;
-		char pack[1026];
-		ipc_recieve_packet(&pack[0]);
+		char pack[DATA_SIZE + CRC_SIZE];
+		ipc_recieve_packet(pack);
 		rx_pp_parse(pack);
 		break;
 

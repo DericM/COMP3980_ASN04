@@ -49,14 +49,13 @@ BOOL txwc_setup(const std::wstring& fileName) {
 	//CloseHandle(GlobalVar::g_hWaitConnectThread);
 	//CloseHandle(GlobalVar::g_hWaitForACKThread);
 	GlobalVar::g_hWaitConnectThread = CreateThread(NULL, 0, txwc_receive_ack, NULL, 0, 0);
-	GlobalVar::g_hWaitForACKThread = CreateThread(NULL, 0, txwc_receive_ack_event, NULL, 0, 0);
 
 	return TRUE;
 }
 
 DWORD WINAPI txwc_receive_ack(LPVOID pData_)
 {
-	if (!ipc_recieve_ack(ACK_TIMER)) {
+	if (!ipc_recieve_ack(ACK_TIMER, &GlobalVar::g_hWaitForACKThread, txwc_receive_ack_event)) {
 		//timeout
 	}
 	else {
@@ -79,6 +78,7 @@ DWORD WINAPI txwc_receive_ack_event(LPVOID pData_)
 			
 			GlobalVar::g_ENQsSent = 0;
 			openFile(&GlobalVar::g_hSendBox, L"Test.txt");
+			//take 1024 from the buffer
 		// Received ack;
 		break;
 

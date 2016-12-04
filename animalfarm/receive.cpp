@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "receive.h"
 #include "globalvar.h"
+#include "packetDefine.h"
 
 int TERMINATE_THREAD_TIMEOUT = 500;
 
@@ -54,7 +55,7 @@ bool ipc_recieve_syn(int timeout, HANDLE* hThread, LPTHREAD_START_ROUTINE routin
 
 bool ipc_recieve_packet(char * readChar) {
 	char target = NULL;
-	DWORD toReadSize = 1026;
+	DWORD toReadSize = DATA_SIZE + CRC_SIZE;
 	int timeout = 500;
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout, NULL, NULL)) {

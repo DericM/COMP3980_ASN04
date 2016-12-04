@@ -21,6 +21,11 @@ DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile) {
 	char packet_flag = 's';
 
 	ifstream file(ExePathA() + "\\test3.txt", std::ios::binary);
+	if (!file.is_open())
+	{
+		MessageBoxW(GlobalVar::g_hWnd, L"Cannot open file!", 0, 0);
+		return 0;
+	}
 
 	std::vector<char> buffer((
 		std::istreambuf_iterator<char>(file)),
@@ -28,6 +33,7 @@ DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile) {
 
 	if (buffer.size() == 0)
 	{
+		MessageBoxW(GlobalVar::g_hWnd, L"The file is empty!", 0, 0);
 		return 0;
 	}
 

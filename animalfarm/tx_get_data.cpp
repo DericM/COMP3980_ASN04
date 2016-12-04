@@ -8,6 +8,7 @@
 #include "tx_wait_connect.h"
 #include "send.h"
 #include "packetDefine.h"
+#include "tx_send_data.h"
 
 using namespace std;
 

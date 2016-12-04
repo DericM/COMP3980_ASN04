@@ -8,6 +8,10 @@
 #include "tx_wait_connect.h"
 #include "send.h"
 
+#define HEADER_SIZE 1
+#define DATA_SIZE 5
+#define CRC_SIZE 2
+
 
 using namespace std;
 
@@ -17,7 +21,7 @@ HANDLE hdlF;
 int counter;
 string packets;
 char syn = 0x16;
-char packetize [1024];
+char packetize [1027];
 
 /*void getData() {
 	openFile(TEXT("\\TEST.TXT"));
@@ -32,10 +36,32 @@ DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile) {
 	int sendLines;
 	int idx;
 	string tmp;
-	ifstream file("C:\\Users\\Yiaoping\\Desktop\\test3.txt");
+	ifstream file("C:\\Users\\luxes\\Source\\Repos\\COMP3980_ASN04\\x64\\Debug\\test.txt", std::ios::binary);
+
+	std::vector<char> buffer((
+		std::istreambuf_iterator<char>(file)),
+		(std::istreambuf_iterator<char>()));
+
+	static size_t packetCounter = 0;
+	size_t curFilePos = packetCounter * 1024;
+	char packetBuffer[1024];
+	size_t remain = buffer.size() - curFilePos - 1;
+	memcpy_s(packetBuffer, 1024, &buffer[curFilePos], remain < 1024 ? remain : 1024);
+	uint16_t crc = calculateCRC16(packetBuffer);
+
+	memcpy_s(packetize, HEADER_SIZE, &syn, HEADER_SIZE);
+	memcpy_s(packetize + HEADER_SIZE, DATA_SIZE, packetBuffer, DATA_SIZE);
+	memcpy_s(packetize + HEADER_SIZE + DATA_SIZE, CRC_SIZE, &crc, CRC_SIZE);
+
+	if (!ipc_send_packet(packetize)) {
+		//break;
+		return 0;
+	}
+
+	file.close();
 
 	
-	SendMessageA(*box, EM_SETREADONLY, (LPARAM)FALSE, NULL);
+	/*SendMessageA(*box, EM_SETREADONLY, (LPARAM)FALSE, NULL);
 
 	if (file.is_open()) {
 		LOGMESSAGE(L"FILE IS OPEN\n");
@@ -46,12 +72,12 @@ DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile) {
 			SendMessageA(*box, EM_REPLACESEL, 0, (LPARAM)(tmp.c_str()));
 		}
 		sendLines = SendMessageA(*box, EM_GETLINECOUNT, NULL, NULL);
-	}else
+	} else
 		LOGMESSAGE(L"FILE NOT ABLE TO OPEN");
 
 	file.read(buff, 1024);
 	readFile(buff);
-	file.close();
+	file.close();*/
 
 	return 0;
 }
@@ -77,7 +103,7 @@ int readFile(char* buff) {
 
 
 
-	if (dwBytesRead != sizeof(1024)) {
+	/*if (dwBytesRead != sizeof(1024)) {
 		char *nulls = 0;
 		int numb;
 
@@ -89,7 +115,7 @@ int readFile(char* buff) {
 			nulls[i] = '\0';
 		}
 		strcpy_s(buff, 1024, nulls);
-	}
+	}*/
 
 	packets = makePacket(buff);
 	strcpy_s(packetize, packets.c_str());
@@ -105,7 +131,6 @@ int readFile(char* buff) {
 
 string makePacket(char buff[])
 {	
-
 	std::string rtn;
 	rtn.push_back(syn);
 	rtn.append(buff);

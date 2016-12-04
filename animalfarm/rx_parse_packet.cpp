@@ -18,9 +18,8 @@ void rx_pp_parse(const char* packet) {
 	if (crc != checkCrc)
 		LOGMESSAGE(L"Decode error! crc is different!" << std::endl);
 
-	size_t convertedChars = 0;
 	wchar_t wcstring[DATA_SIZE + 1];
-	mbstowcs_s(&convertedChars, wcstring, DATA_SIZE, dataBuffer, _TRUNCATE);
+	mbtowc(wcstring, dataBuffer, DATA_SIZE);
 	wcstring[DATA_SIZE] = L'\0';
 	int idx = GetWindowTextLength(GlobalVar::g_hSendBox);
 	SendMessageA(GlobalVar::g_hSendBox, EM_SETSEL, (LPARAM)idx, (LPARAM)idx);

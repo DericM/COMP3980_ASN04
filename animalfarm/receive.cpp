@@ -53,12 +53,12 @@ bool ipc_recieve_syn(int timeout, HANDLE* hThread, LPTHREAD_START_ROUTINE routin
 	}
 }
 
-bool ipc_recieve_packet(char * readChar) {
+bool ipc_recieve_packet(char * readChar, HANDLE* hThread, LPTHREAD_START_ROUTINE routine) {
 	char target = NULL;
 	DWORD toReadSize = DATA_SIZE + CRC_SIZE;
 	int timeout = 500;
 
-	if (ipc_read_from_port(readChar, toReadSize, target, timeout, NULL, NULL)) {
+	if (ipc_read_from_port(readChar, toReadSize, target, timeout, hThread, routine)) {
 		LOGMESSAGE(L"Successfuly receieved: packet" << std::endl);
 		return TRUE;
 	}

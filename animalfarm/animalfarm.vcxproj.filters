@@ -96,6 +96,9 @@
     <ClInclude Include="tx_send_data.h">
       <Filter>Header Files\tx</Filter>
     </ClInclude>
+    <ClInclude Include="rx_parse_packet.h">
+      <Filter>Header Files\rx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

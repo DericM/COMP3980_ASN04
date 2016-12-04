@@ -4,6 +4,7 @@
 #include "idle.h"
 #include "rx_wait_packet.h"
 #include "receive.h"
+#include "rx_parse_packet.h"
 
 #include <stdexcept>
 #include <memory>
@@ -173,8 +174,7 @@ DWORD WINAPI rx_wait_syn(LPVOID pData_)
 		// Received SYN;
 		char pack[1026];
 		ipc_recieve_packet(&pack[0]);
-
-
+		rx_pp_parse(pack);
 		break;
 
 	case WAIT_TIMEOUT:

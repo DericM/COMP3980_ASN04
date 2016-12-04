@@ -7,6 +7,7 @@
 #include "GlobalVar.h"
 #include "tx_wait_connect.h"
 #include "send.h"
+#include <vector>
 #include "tx_send_data.h"
 
 #define HEADER_SIZE 1
@@ -17,6 +18,7 @@
 using namespace std;
 
 char buff[1024];
+char buffer[];
 DWORD dwBytesRead;
 HANDLE hdlF;
 int counter;
@@ -120,6 +122,10 @@ bool txgd_get_packets(std::string file) {
 	openFile(TEXT("\\TEST.TXT"));
 }*/
 
+string data;
+vector <string> v;
+
+
 DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile) {
 
 	LOGMESSAGE(L"IN GET DATA \n");
@@ -129,7 +135,7 @@ DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile) {
 	int sendLines;
 	int idx;
 	string tmp;
-	ifstream file("C:\\Users\\luxes\\Source\\Repos\\COMP3980_ASN04\\x64\\Debug\\test.txt", std::ios::binary);
+	ifstream file("C:\\Users\\Maitiu\\Desktop\\test3.txt", std::ios::binary);
 
 	std::vector<char> buffer((
 		std::istreambuf_iterator<char>(file)),
@@ -168,9 +174,11 @@ DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile) {
 	} else
 		LOGMESSAGE(L"FILE NOT ABLE TO OPEN");
 
-	file.read(buff, 1024);
+	file.read(buff, 1024);*/
+
 	readFile(buff);
-	file.close();*/
+	file.close();
+
 
 	return 0;
 }

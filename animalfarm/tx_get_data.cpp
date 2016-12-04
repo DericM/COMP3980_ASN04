@@ -12,6 +12,7 @@
 using namespace std;
 
 char buff[1024];
+char buffer[];
 DWORD dwBytesRead;
 HANDLE hdlF;
 int counter;
@@ -19,9 +20,105 @@ string packets;
 char syn = 0x16;
 char packetize [HEADER_SIZE + DATA_SIZE + CRC_SIZE];
 
+
+
+
+
+bool txgd_setup() {
+
+	string fileName = "test.txt";
+
+
+	ifstream file;
+	file.open("C:\\Users\\luxes\\Source\\Repos\\COMP3980_ASN04\\x64\\Debug\\test.txt", std::ios::binary);
+
+	string file_string;
+
+	string line;
+	if (file.is_open())
+	{
+		while (getline(file, line))
+		{
+			file_string += line + '\n';
+		}
+		file.close();
+	}
+	else {
+		cout << "Unable to open file";
+	}
+
+	if (!txgd_get_packets(file_string)) {
+		return false;
+	}
+	return true;
+
+}
+
+
+bool txgd_get_packets(std::string file) {
+	bool start = true;
+	bool end = false;
+	int filepointer = 0;
+
+	stringstream ss;
+	ss.width(1024);
+
+	ss << file;
+
+	char syn = 0x16;
+	char data[1024];
+
+	char frame[1027];
+
+	while (true) {
+		if (start) {
+			fill(data, data + 1024, 0x11);
+		}
+		else if (end) {
+			fill(data, data + 1024, 0x00);
+		}
+		else {
+			//ss.seekg(ios::cur, ios::end);
+			//int remaining_char = ss.tellg();
+			//ss.seekg(ios::cur, ios::end);
+			/*if (remaining_char < 1024) {
+			for (int i=0; i<1024; i++) {
+
+			}
+			copy(data, data + 1024, frame + 1);
+			}*/
+			//else {
+			ss.seekg(filepointer * 1024, ios::beg);
+
+			//}
+
+
+
+			ss >> data;
+		}
+
+		frame[0] = syn;
+		memcpy_s(frame + 1, 1027, data, 1024);
+		//std::copy(data, data + 1024, frame + 1);
+		frame[1025] = 'x';
+		frame[1026] = 'x';
+
+		if (!txsd_setup(frame)) {
+			return false;
+		}
+		filepointer++;
+	}
+}
+
+
+
 /*void getData() {
 	openFile(TEXT("\\TEST.TXT"));
 }*/
+
+string data;
+vector <string> v;
+
 
 DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile) {
 
@@ -71,9 +168,11 @@ DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile) {
 	} else
 		LOGMESSAGE(L"FILE NOT ABLE TO OPEN");
 
-	file.read(buff, 1024);
+	file.read(buff, 1024);*/
+
 	readFile(buff);
-	file.close();*/
+	file.close();
+
 
 	return 0;
 }

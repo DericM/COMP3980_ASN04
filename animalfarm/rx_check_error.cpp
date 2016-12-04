@@ -5,58 +5,49 @@
 
 
 //error check after receiving codeword, pass in codeword and size of codeword
-uint16_t crcReceive(const uint8_t *data, uint16_t size)
-{
+uint16_t crcReceive(const std::string& data) {
+	static constexpr auto poly = 0x8005;
+	auto size = data.size();
 	uint16_t out = 0;
-	int bits_read = 0, bit_flag;
+	int bits_read = 0;
+	bool bit_flag;
 
+	std::vector<char> bytes(data.begin(), data.end());
 
-	// test
-	printf("buffer in function %s\n", data);
-
-	/* Sanity check: */
-	if (data == NULL)
-		return 0;
-
-	while (size > 0)
-	{
-		bit_flag = out >> 15;
+	int i = 0;
+	while (size > 0) {
+		bit_flag = (out >> 15) != 0;
 
 		/* Get next bit: */
-		out <<= 1;
-		out |= (*data >> bits_read) & 1; // item a) work from the least significant bits
+		// item a) work from the least significant bits
+		out = (out << 1) | ((bytes[i] >> bits_read) & 1);
 
-										 /* Increment bit counter: */
-		bits_read++;
-		if (bits_read > 7)
-		{
+		/* Increment bit counter: */
+		if (++bits_read > 7) {
 			bits_read = 0;
-			data++;
+			i++;
 			size--;
 		}
 
 		/* Cycle check: */
-		if (bit_flag)
-			out ^= CRC16;
-
+		if (bit_flag) {
+			out ^= poly;
+		}
 	}
 
 	// item b) "push out" the last 16 bits
-	int i;
-	for (i = 0; i < 16; ++i) {
-		bit_flag = out >> 15;
-		out <<= 1;
-		if (bit_flag)
-			out ^= CRC16;
+	for (int i = 0; i < 16; ++i) {
+		out = (out << 1) ^ (poly * ((out >> 15) != 0));
 	}
 
 	// item c) reverse the bits
 	uint16_t crc = 0;
-	i = 0x8000;
-	int j = 0x0001;
-	for (; i != 0; i >>= 1, j <<= 1) {
-		if (i & out) crc |= j;
+	for (int i = 0x8000, j = 0x001; i; i >>= 1, j <<= 1) {
+		if (i & out) {
+			crc |= j;
+		}
 	}
+	return crc;
 }
 
 //if remainder == 0000..

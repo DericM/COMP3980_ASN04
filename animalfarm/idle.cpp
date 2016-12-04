@@ -9,6 +9,7 @@
 #include "receive.h"
 #include "session.h"
 #include <random>
+#include "tx_get_data.h"
 
 /*Counters*/
 std::random_device rnd;
@@ -171,8 +172,9 @@ DWORD WINAPI write_thread_entry_point(LPVOID pData) {
 }
 
 
-void idle_go_to_sendfile(const std::wstring& fileName)
+void idle_go_to_sendfile(const LPCWSTR fileName)
 {
 	bSendingFile = true;
 	sendFileName = fileName;
+	openFile(&GlobalVar::g_hSendBox, fileName);
 }

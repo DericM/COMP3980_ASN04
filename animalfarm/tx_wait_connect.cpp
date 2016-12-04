@@ -78,7 +78,7 @@ DWORD WINAPI txwc_receive_ack_event(LPVOID pData_)
 		else*/
 			
 			GlobalVar::g_ENQsSent = 0;
-			openFile(&GlobalVar::g_hSendBox, L"Test.txt");
+			//take 1024 from the buffer
 		// Received ack;
 		break;
 

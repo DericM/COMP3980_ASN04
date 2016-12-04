@@ -60,6 +60,7 @@ bool ipc_recieve_packet(char * readChar, HANDLE* hThread, LPTHREAD_START_ROUTINE
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout, hThread, routine)) {
 		LOGMESSAGE(L"Successfuly receieved: packet" << std::endl);
+		SetEvent(GlobalVar::g_hRXPackEvent);
 		return TRUE;
 	}
 	else {

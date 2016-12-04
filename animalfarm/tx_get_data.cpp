@@ -144,10 +144,12 @@ DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile) {
 
 	static size_t packetCounter = 0;
 	size_t curFilePos = packetCounter * DATA_SIZE;
-	char packetBuffer[DATA_SIZE];
+	char packetBuffer[DATA_SIZE + 1];
 	size_t remain = buffer.size() - curFilePos - 1;
 	memcpy_s(packetBuffer, DATA_SIZE, &buffer[curFilePos], remain < DATA_SIZE ? remain : DATA_SIZE);
-	uint16_t crc = calculateCRC16(packetBuffer);
+	packetBuffer[DATA_SIZE] = '\0';
+	std::string strData(packetBuffer);
+	uint16_t crc = calculateCRC16(strData);
 
 	memcpy_s(packetize, HEADER_SIZE, &syn, HEADER_SIZE);
 	memcpy_s(packetize + HEADER_SIZE, DATA_SIZE, packetBuffer, DATA_SIZE);

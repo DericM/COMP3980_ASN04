@@ -9,19 +9,18 @@ std::vector<char> buffer;
 char checkSyn = 0x16;
 
 void rx_pp_parse(const char* packet) {
-	char dataBuffer[DATA_SIZE];
+	char dataBuffer[DATA_SIZE + 1];
 	uint16_t crc;
 	memcpy_s(dataBuffer, DATA_SIZE, packet, DATA_SIZE);
 	memcpy_s(&crc, CRC_SIZE, packet + DATA_SIZE, CRC_SIZE);
+	dataBuffer[DATA_SIZE] = '\0';
+	std::string strData(dataBuffer);
 
-	uint16_t checkCrc = calculateCRC16(dataBuffer);
+	uint16_t checkCrc = calculateCRC16(strData);
 	if (crc != checkCrc)
 		LOGMESSAGE(L"Decode error! crc is different!" << std::endl);
 
-	char printStr[DATA_SIZE + 1];
-	memcpy_s(printStr, DATA_SIZE, dataBuffer, DATA_SIZE);
-	printStr[DATA_SIZE] = '\0';
 	int idx = GetWindowTextLength(GlobalVar::g_hSendBox);
 	SendMessageA(GlobalVar::g_hSendBox, EM_SETSEL, (LPARAM)idx, (LPARAM)idx);
-	SendMessageA(GlobalVar::g_hSendBox, EM_REPLACESEL, 0, (LPARAM)printStr);
+	SendMessageA(GlobalVar::g_hSendBox, EM_REPLACESEL, 0, (LPARAM)strData.c_str());
 }

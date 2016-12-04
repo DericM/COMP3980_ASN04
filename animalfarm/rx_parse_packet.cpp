@@ -12,7 +12,7 @@ void rx_pp_parse(char packet[]) {
 	char dataBuffer[DATA_SIZE];
 	uint16_t crc;
 	memcpy_s(dataBuffer, DATA_SIZE, packet, DATA_SIZE);
-	memcpy_s(&crc, CRC_SIZE, packet + HEADER_SIZE + DATA_SIZE, CRC_SIZE);
+	memcpy_s(&crc, CRC_SIZE, packet + DATA_SIZE, CRC_SIZE);
 
 	uint16_t checkCrc = calculateCRC16(dataBuffer);
 	if (crc != checkCrc)

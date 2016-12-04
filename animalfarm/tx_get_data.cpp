@@ -130,7 +130,7 @@ DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile) {
 	int sendLines;
 	int idx;
 	string tmp;
-	ifstream file("C:\\Users\\luxes\\Source\\Repos\\COMP3980_ASN04\\x64\\Debug\\test.txt", std::ios::binary);
+	ifstream file("C:\\Users\\Maitiu\\Desktop\\test3.txt", std::ios::binary);
 
 	std::vector<char> buffer((
 		std::istreambuf_iterator<char>(file)),

@@ -126,14 +126,12 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 				LOGMESSAGE(L"WAIT_OBJECT_0==>");
 				if (!GetOverlappedResult(hComm, &osReader, &eventRet, FALSE)) {
 					LOGMESSAGE(L"!GetOverlappedResult()");
-				}
-				else {
+				} else {
 					if (target == NULL || readChar[0] == target) {
 						LOGMESSAGE(L"GOT_TARGET2==>");
 						GlobalVar::g_hRunReadThread = FALSE;
 						bResult = TRUE;
-					}
-					else {
+					} else {
 						//LOGMESSAGE(L"GOT_NOTHING2==>");
 					}
 				}

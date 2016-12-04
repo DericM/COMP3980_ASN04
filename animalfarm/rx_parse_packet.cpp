@@ -8,7 +8,7 @@
 std::vector<char> buffer;
 char checkSyn = 0x16;
 
-void rx_pp_parse(char packet[]) {
+void rx_pp_parse(const char* packet) {
 	char dataBuffer[DATA_SIZE];
 	uint16_t crc;
 	memcpy_s(dataBuffer, DATA_SIZE, packet, DATA_SIZE);
@@ -18,7 +18,11 @@ void rx_pp_parse(char packet[]) {
 	if (crc != checkCrc)
 		LOGMESSAGE(L"Decode error! crc is different!" << std::endl);
 
+	size_t convertedChars = 0;
+	wchar_t wcstring[DATA_SIZE + 1];
+	mbstowcs_s(&convertedChars, wcstring, DATA_SIZE, dataBuffer, _TRUNCATE);
+	wcstring[DATA_SIZE] = L'\0';
 	int idx = GetWindowTextLength(GlobalVar::g_hSendBox);
 	SendMessageA(GlobalVar::g_hSendBox, EM_SETSEL, (LPARAM)idx, (LPARAM)idx);
-	SendMessageA(GlobalVar::g_hSendBox, EM_REPLACESEL, 0, (LPARAM)dataBuffer);
+	SendMessageA(GlobalVar::g_hSendBox, EM_REPLACESEL, 0, (LPARAM)wcstring);
 }

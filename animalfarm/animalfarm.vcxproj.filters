@@ -102,6 +102,9 @@
     <ClInclude Include="packetDefine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="receive2.h">
+      <Filter>Header Files\physical</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -154,6 +157,9 @@
     </ClCompile>
     <ClCompile Include="packetDefine.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="receive2.cpp">
+      <Filter>Source Files\physical</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

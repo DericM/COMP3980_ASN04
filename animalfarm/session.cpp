@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include <stdexcept>
 #include "globalvar.h"
+#include "packetDefine.h"
 
 
 /*
@@ -34,6 +35,15 @@ bool is_open_port( LPCWSTR& lpszCommName) {
 	}
 
 	SetCommState(GlobalVar::g_hComm, &GlobalVar::g_cc.dcb);
+
+	DWORD packetSize = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
+	COMMTIMEOUTS timeouts;
+	timeouts.ReadIntervalTimeout = ceil(packetSize / GlobalVar::g_cc.dcb.BaudRate * 1000 / packetSize);
+	timeouts.ReadTotalTimeoutMultiplier = 0;
+	timeouts.ReadTotalTimeoutConstant = ceil(packetSize / GlobalVar::g_cc.dcb.BaudRate * 1000) * 2;
+	timeouts.WriteTotalTimeoutMultiplier = 0;
+	timeouts.WriteTotalTimeoutConstant = 0;
+	SetCommTimeouts(GlobalVar::g_hComm, &timeouts);
 
 	return true;
 }

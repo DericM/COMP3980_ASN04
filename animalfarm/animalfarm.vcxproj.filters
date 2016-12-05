@@ -155,6 +155,9 @@
     <ClCompile Include="packetDefine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="receive2.cpp">
+      <Filter>Source Files\physical</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="animalfarm.rc">

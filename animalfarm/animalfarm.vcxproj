@@ -169,6 +169,7 @@
     <ClCompile Include="globalvar.cpp" />
     <ClCompile Include="idle.cpp" />
     <ClCompile Include="packetDefine.cpp" />
+    <ClCompile Include="receive2.cpp" />
     <ClCompile Include="session.cpp" />
     <ClCompile Include="receive.cpp" />
     <ClCompile Include="rx_check_error.cpp" />

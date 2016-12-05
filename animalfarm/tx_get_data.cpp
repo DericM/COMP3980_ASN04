@@ -39,51 +39,70 @@ DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile) {
 
 	static size_t packetCounter = 0;
 
-	while (packet_flag != 'x') {
-		size_t curFilePos = packetCounter * DATA_SIZE;
-		char packetBuffer[DATA_SIZE + 1];
+	// START TEST. DELETE LATER!!!!!!!!!!!!
+	char packetBuffer[DATA_SIZE + 1];
+	memcpy_s(packetBuffer, DATA_SIZE, &buffer[0], DATA_SIZE);
 
-		size_t remain = buffer.size() - curFilePos - 1;
+	packetBuffer[DATA_SIZE] = '\0';
+	std::string strData(packetBuffer);
+	uint16_t crc = calculateCRC16(strData);
 
+	memcpy_s(packetize, HEADER_SIZE, &syn, HEADER_SIZE);
+	memcpy_s(packetize + HEADER_SIZE, DATA_SIZE, packetBuffer, DATA_SIZE);
+	memcpy_s(packetize + HEADER_SIZE + DATA_SIZE, CRC_SIZE, &crc, CRC_SIZE);
 
-		switch (packet_flag) {
-		case 's':
-			memset(packetBuffer, 's', sizeof(packetBuffer));
-			packet_flag = 'm';
-			break;
-		case 'm':
-			if (remain < DATA_SIZE) {
-				memset(packetBuffer, '\0', sizeof(packetBuffer));
-				memcpy_s(packetBuffer, DATA_SIZE, &buffer[curFilePos], remain);
-				packet_flag = 'e';
-			}
-			else {
-				memcpy_s(packetBuffer, DATA_SIZE, &buffer[curFilePos], DATA_SIZE);
-			}
-			packetCounter++;
-			break;
-		case 'e':
-			memset(packetBuffer, 'x', sizeof(packetBuffer));
-			packet_flag = 'x';
-			break;
-		}
-
-		packetBuffer[DATA_SIZE] = '\0';
-		std::string strData(packetBuffer);
-		uint16_t crc = calculateCRC16(strData);
-
-		memcpy_s(packetize, HEADER_SIZE, &syn, HEADER_SIZE);
-		memcpy_s(packetize + HEADER_SIZE, DATA_SIZE, packetBuffer, DATA_SIZE);
-		memcpy_s(packetize + HEADER_SIZE + DATA_SIZE, CRC_SIZE, &crc, CRC_SIZE);
-
-		/*if (!ipc_send_packet(packetize)) {
-			break;
-		}*/
-
-		if (!txsd_setup(packetize)) {
-			break;
-		}
+	if (!txsd_setup(packetize)) {
 	}
+
+	file.close();
+	return 0;
+	// END TEST.
+
+	//while (packet_flag != 'x') {
+	//	size_t curFilePos = packetCounter * DATA_SIZE;
+	//	char packetBuffer[DATA_SIZE + 1];
+
+	//	size_t remain = buffer.size() - curFilePos - 1;
+
+
+	//	switch (packet_flag) {
+	//	case 's':
+	//		memset(packetBuffer, 's', sizeof(packetBuffer));
+	//		packet_flag = 'm';
+	//		break;
+	//	case 'm':
+	//		if (remain < DATA_SIZE) {
+	//			memset(packetBuffer, '\0', sizeof(packetBuffer));
+	//			memcpy_s(packetBuffer, DATA_SIZE, &buffer[curFilePos], remain);
+	//			packet_flag = 'e';
+	//		}
+	//		else {
+	//			memcpy_s(packetBuffer, DATA_SIZE, &buffer[curFilePos], DATA_SIZE);
+	//		}
+	//		packetCounter++;
+	//		break;
+	//	case 'e':
+	//		memset(packetBuffer, 'x', sizeof(packetBuffer));
+	//		packet_flag = 'x';
+	//		break;
+	//	}
+
+	//	packetBuffer[DATA_SIZE] = '\0';
+	//	std::string strData(packetBuffer);
+	//	uint16_t crc = calculateCRC16(strData);
+
+	//	memcpy_s(packetize, HEADER_SIZE, &syn, HEADER_SIZE);
+	//	memcpy_s(packetize + HEADER_SIZE, DATA_SIZE, packetBuffer, DATA_SIZE);
+	//	memcpy_s(packetize + HEADER_SIZE + DATA_SIZE, CRC_SIZE, &crc, CRC_SIZE);
+
+	//	/*if (!ipc_send_packet(packetize)) {
+	//		break;
+	//	}*/
+
+	//	if (!txsd_setup(packetize)) {
+	//		break;
+	//	}
+	//}
 	file.close();
 	return 0;
 }

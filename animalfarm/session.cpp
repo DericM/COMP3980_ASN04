@@ -1,14 +1,13 @@
 #include "stdafx.h"
 #include <stdexcept>
 #include "globalvar.h"
+#include "packetDefine.h"
 
 
 /*
 * Open the comm port.
 */
 bool is_open_port( LPCWSTR& lpszCommName) {
-	LOGMESSAGE(L"Entering: idle_open_port()\n");
-
 	//set comm settings
 	GlobalVar::g_cc.dwSize = sizeof(COMMCONFIG);
 	GlobalVar::g_cc.wVersion = 0x100;
@@ -37,6 +36,15 @@ bool is_open_port( LPCWSTR& lpszCommName) {
 
 	SetCommState(GlobalVar::g_hComm, &GlobalVar::g_cc.dcb);
 
+	double packetSize = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
+	COMMTIMEOUTS timeouts;
+	timeouts.ReadIntervalTimeout = ceil(packetSize / GlobalVar::g_cc.dcb.BaudRate * 1000 / packetSize);
+	timeouts.ReadTotalTimeoutMultiplier = 0;
+	timeouts.ReadTotalTimeoutConstant = 0;
+	timeouts.WriteTotalTimeoutMultiplier = 0;
+	timeouts.WriteTotalTimeoutConstant = 0;
+	SetCommTimeouts(GlobalVar::g_hComm, &timeouts);
+
 	return true;
 }
 
@@ -46,8 +54,6 @@ bool is_open_port( LPCWSTR& lpszCommName) {
 * close port.
 */
 void is_close_port() {
-	LOGMESSAGE(L"Entering: idle_close_port()\n");
-
 	//CloseHandle(osReader.hEvent);
 	CloseHandle(GlobalVar::g_hComm);
 }

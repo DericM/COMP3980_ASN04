@@ -53,7 +53,7 @@ bool ipc_recieve_syn(int timeout, HANDLE* hThread, LPTHREAD_START_ROUTINE routin
 	}
 }
 
-bool ipc_recieve_packet(char * readChar, HANDLE* hThread, LPTHREAD_START_ROUTINE routine) {
+bool ipc_recieve_packet(char* readChar, int timeout, HANDLE* hThread, LPTHREAD_START_ROUTINE routine) {
 	GlobalVar::g_hRXPackEvent = CreateEvent(
 		NULL,               // default security attributes
 		TRUE,               // manual-reset event
@@ -61,9 +61,8 @@ bool ipc_recieve_packet(char * readChar, HANDLE* hThread, LPTHREAD_START_ROUTINE
 		NULL    // object name
 	);
 
-	char target = NULL;
-	DWORD toReadSize = DATA_SIZE + CRC_SIZE;
-	int timeout = 500;
+	char target = 0x16;
+	DWORD toReadSize = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout, hThread, routine)) {
 		LOGMESSAGE(L"Successfuly receieved: packet" << std::endl);
@@ -81,7 +80,7 @@ bool ipc_recieve_packet(char * readChar, HANDLE* hThread, LPTHREAD_START_ROUTINE
 
 
 
-bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int timeout, HANDLE* hThread, LPTHREAD_START_ROUTINE routine) {
+bool ipc_read_from_port(char* readChar, DWORD toReadSize, char target, int timeout, HANDLE* hThread, LPTHREAD_START_ROUTINE routine) {
 	HANDLE& hComm = GlobalVar::g_hComm;
 	DWORD dwRes;
 	OVERLAPPED osReader = { 0 };
@@ -119,7 +118,6 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 			else {
 
 				if (target == NULL || readChar[0] == target) {
-					LOGMESSAGE(L"GOT_TARGET1==>");
 					GlobalVar::g_hRunReadThread = FALSE;
 					bResult = TRUE;
 				}
@@ -131,12 +129,9 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 			switch (dwRes)
 			{
 			case WAIT_OBJECT_0:
-				LOGMESSAGE(L"WAIT_OBJECT_0==>");
 				if (!GetOverlappedResult(hComm, &osReader, &eventRet, FALSE)) {
-					LOGMESSAGE(L"!GetOverlappedResult()");
 				} else {
 					if (target == NULL || readChar[0] == target) {
-						LOGMESSAGE(L"GOT_TARGET2==>");
 						GlobalVar::g_hRunReadThread = FALSE;
 						bResult = TRUE;
 					} else {
@@ -146,11 +141,9 @@ bool ipc_read_from_port(char readChar[], DWORD toReadSize, char target, int time
 				fWaitingOnRead = FALSE;
 				break;
 			case WAIT_TIMEOUT:
-				LOGMESSAGE(L"WAIT_TIMEOUT==>");
 				return FALSE;
 
 			default:
-				LOGMESSAGE(L"DEFAULT==>\n");
 				break;
 			}
 		}

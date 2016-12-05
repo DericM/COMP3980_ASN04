@@ -5,12 +5,12 @@
 #include "tx_wait_ack.h"
 #include "tx_send_data.h"
 
+
 #define TX_FAIL_COUNTER 3
 
-bool txsd_setup(char * frame) {
-	int transmission_attempts = 1;
-	while (transmission_attempts <= TX_FAIL_COUNTER) {
-		LOGMESSAGE(L"SendPacket attempt: " << transmission_attempts << "\n");
+bool txsd_setup(const char* frame) {
+	int transmission_attempts = 0;
+	while (transmission_attempts < TX_FAIL_COUNTER) {
 		if (txsd_send(frame)) {
 			return true;//go get next packet
 		}
@@ -20,7 +20,7 @@ bool txsd_setup(char * frame) {
 }
 
 
-bool txsd_send(char * frame) {
+bool txsd_send(const char* frame) {
 	//send packet
 	if (!ipc_send_packet(frame)) {
 		return false;//resend packet
@@ -29,7 +29,6 @@ bool txsd_send(char * frame) {
 	if (!txwa_receive_ack()) {
 		return false;//resend packet
 	}
-	LOGMESSAGE(L"Packet sent successfuly");
 	return true;
 }
 

@@ -5,4 +5,5 @@
 #define CRC_SIZE 2
 
 uint16_t calculateCRC16(const std::string& data);
-std::wstring ExePath();
+std::wstring ExePathW();
+std::string ExePathA();

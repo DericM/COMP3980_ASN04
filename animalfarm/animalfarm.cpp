@@ -239,7 +239,6 @@ INT_PTR CALLBACK MainDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 			idle_go_to_idle();
 			break;
 		case IDC_SENDFILE:
-			LOGMESSAGE(L'TEST');
 			wchar_t filenameBuff[128];
 			GetDlgItemTextW(hDlg, IDC_EDIT_SENDFILE, filenameBuff, 128);
 			LPCWSTR filename(filenameBuff);

@@ -11,8 +11,8 @@ char checkSyn = 0x16;
 void rx_pp_parse(const char* packet) {
 	char dataBuffer[DATA_SIZE + 1];
 	uint16_t crc;
-	memcpy_s(dataBuffer, DATA_SIZE, packet, DATA_SIZE);
-	memcpy_s(&crc, CRC_SIZE, packet + DATA_SIZE, CRC_SIZE);
+	memcpy_s(dataBuffer, DATA_SIZE, packet + HEADER_SIZE, DATA_SIZE);
+	memcpy_s(&crc, CRC_SIZE, packet+  HEADER_SIZE + DATA_SIZE, CRC_SIZE);
 	dataBuffer[DATA_SIZE] = '\0';
 	std::string strData(dataBuffer);
 

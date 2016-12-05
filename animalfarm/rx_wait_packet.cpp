@@ -19,12 +19,11 @@ struct SynParams
 SynParams synParam;
 
 int SYN_TIMER;
-char pack[DATA_SIZE + CRC_SIZE];
+char pack[HEADER_SIZE + DATA_SIZE + CRC_SIZE];
 
 BOOL rxwp_setUp() {
-
-	LOGMESSAGE(L"\nEntering: rxwp_setUP\n");
-	SYN_TIMER = (ceil(8216.0 / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3);
+	double packetSize = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
+	SYN_TIMER = ceil(packetSize / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3;
 
 	GlobalVar::g_hRXSynEvent = CreateEvent(
 		NULL,               // default security attributes
@@ -47,13 +46,19 @@ BOOL rxwp_setUp() {
 
 DWORD WINAPI rx_read_for_syn(LPVOID pData_)
 {
-
-	if (!ipc_recieve_syn(SYN_TIMER, &GlobalVar::g_hWaitForSYNThread, rx_wait_syn)) {
+	if (!ipc_recieve_packet(pack, synParam.timer, &GlobalVar::g_hReadForPACKThread, rx_wait_pack)) {
 		//timeout
 	}
 	else {
 		//success
 	}
+
+	//if (!ipc_recieve_syn(SYN_TIMER, &GlobalVar::g_hWaitForSYNThread, rx_wait_syn)) {
+	//	//timeout
+	//}
+	//else {
+	//	//success
+	//}
 
 	return 0;
 }
@@ -70,7 +75,7 @@ DWORD WINAPI rx_wait_syn(LPVOID pData_)
 	{
 	case WAIT_OBJECT_0:
 		// Received SYN;
-		if (!ipc_recieve_packet(pack, &GlobalVar::g_hReadForPACKThread, rx_wait_pack)) {
+		if (!ipc_recieve_packet(pack, synParam.timer, &GlobalVar::g_hReadForPACKThread, rx_wait_pack)) {
 			//timeout
 		} else {
 			//success
@@ -79,7 +84,6 @@ DWORD WINAPI rx_wait_syn(LPVOID pData_)
 
 	case WAIT_TIMEOUT:
 		// Not receieved SYN.
-		LOGMESSAGE(L"TIMED OUT IN WAIT FOR PACKET" << std::endl);
 		ipc_terminate_read_thread(GlobalVar::g_hReadForSYNThread);
 		idle_go_to_idle();
 		break;
@@ -96,7 +100,7 @@ DWORD WINAPI rx_wait_syn(LPVOID pData_)
 
 
 DWORD WINAPI rx_wait_pack(LPVOID pData_) {
-	DWORD dwRes = WaitForSingleObject(GlobalVar::g_hRXPackEvent, 10000);
+	DWORD dwRes = WaitForSingleObject(GlobalVar::g_hRXPackEvent, synParam.timer);
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
@@ -106,8 +110,7 @@ DWORD WINAPI rx_wait_pack(LPVOID pData_) {
 
 	case WAIT_TIMEOUT:
 		// Not receieved Packet.
-		LOGMESSAGE(L"TIMED OUT IN WAIT FOR PACKET" << std::endl);
-		ipc_terminate_read_thread(GlobalVar::g_hReadForPACKThread);
+		ipc_terminate_read_thread(GlobalVar::g_hReadForSYNThread);
 		idle_go_to_idle();
 		break;
 
@@ -116,7 +119,7 @@ DWORD WINAPI rx_wait_pack(LPVOID pData_) {
 		break;
 	}
 
-	ResetEvent(GlobalVar::g_hReadForPACKThread);
+	ResetEvent(GlobalVar::g_hRXPackEvent);
 
 	return 0;
 }

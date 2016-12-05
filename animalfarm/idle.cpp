@@ -34,8 +34,6 @@ EnqParams enqParam;
 
 
 void idle_setup(LPCWSTR lpszCommName) {
-	LOGMESSAGE(L"\nEntering: idle_setup()\n");
-
 	GlobalVar::g_ENQsSent = 0;
 	idle_rand_timeout_reset();
 
@@ -50,6 +48,7 @@ void idle_setup(LPCWSTR lpszCommName) {
 }
 
 void idle_go_to_idle() {
+	LOGMESSAGE(L"idle_go_to_idle" << std::endl);
 	if (GlobalVar::g_hComm == NULL){
 		MessageBoxW(GlobalVar::g_hWnd, L"COM setting is not set up yet.", 0, 0);
 		return;
@@ -74,24 +73,18 @@ void idle_rand_timeout_reset() {
 
 	RAND_TIMEOUT = uni(rng);
 	//RAND_TIMEOUT = rand() % 101; //0-100
-	LOGMESSAGE(L"RAND_TIMEOUT assigned value: " << RAND_TIMEOUT << "\n");
 }
 
 /*
 IDLE Wait
 */
 DWORD WINAPI idle_wait(LPVOID pData) {
-	LOGMESSAGE(L"\nEntering: idle_wait()\n");
-	
 	int timeout = IDLE_SEQ_TIMEOUT;
 	idle_rand_timeout_reset();
 	if (bSendingFile) {
-		LOGMESSAGE(L"Switching to RAND_TIMEOUT\n");
 		timeout = RAND_TIMEOUT;
 	}
-	LOGMESSAGE(L"timeout value: " << timeout << "\n");
 
-	LOGMESSAGE(L"Creating g_hEnqEvent\n");
 	GlobalVar::g_hEnqEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	if (GlobalVar::g_hEnqEvent == NULL) {
 		throw std::runtime_error("Failed to create event");
@@ -122,14 +115,12 @@ DWORD WINAPI idle_send_enq(LPVOID tData_) {
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
-		LOGMESSAGE(L"GOING TO TRANSMISSION \n");
 		TerminateThread(GlobalVar::g_hReceivingThread, 0);
 		//CloseHandle(GlobalVar::g_hReceivingThread);
 		GlobalVar::g_hReceivingThread = CreateThread(NULL, 0, send_ack, NULL, 0, 0);
 		break;
 	case WAIT_TIMEOUT:
 		if (!bSendingFile) {
-			LOGMESSAGE(L"SETTING RANDTIMER");
 			enqParam.timer = RAND_TIMEOUT;
 			bSendingFile = true;
 			idle_send_enq(NULL);
@@ -149,8 +140,6 @@ DWORD WINAPI idle_send_enq(LPVOID tData_) {
 }
 
 void idle_create_write_thread() {
-	LOGMESSAGE(L"Create write thread\n");
-
 	//TerminateThread(GlobalVar::g_hReadThread, 0);
 	//CloseHandle(GlobalVar::g_hReadThread);
 	GlobalVar::g_hReadThread = CreateThread(
@@ -165,7 +154,6 @@ void idle_create_write_thread() {
 
 
 DWORD WINAPI write_thread_entry_point(LPVOID pData) {
-	LOGMESSAGE(L"\nEntering: write_thread_entry_point\n");
 	ipc_send_enq();
 	txwc_setup(sendFileName);
 	return TRUE;

@@ -9,6 +9,8 @@ namespace GlobalVar
 	extern COMMCONFIG g_cc;
 
 	extern BOOL g_hRunReadThread;
+	extern BOOL g_SendingFile;
+	extern BOOL g_IdleSeq;
 	extern int g_ENQsSent;
 
 	/*Thread handles*/

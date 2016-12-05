@@ -30,7 +30,7 @@ int ACK_TIMER;
 
 BOOL txwc_setup(const std::wstring& fileName) {
 	GlobalVar::g_ENQsSent++;
-	ACK_TIMER = (ceil(16.0 / GlobalVar::g_cc.dcb.BaudRate * 1000));
+	ACK_TIMER = 10;//(ceil(16.0 / GlobalVar::g_cc.dcb.BaudRate * 1000));
 
 
 	GlobalVar::g_hAckEvent = CreateEvent(

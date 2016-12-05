@@ -11,6 +11,8 @@ namespace GlobalVar
 
 	BOOL g_hRunReadThread;
 	int g_ENQsSent;
+	BOOL g_SendingFile = false;
+	BOOL g_IdleSeq = true;
 
 	/*Thread handles*/
 	HANDLE g_hReadThread;

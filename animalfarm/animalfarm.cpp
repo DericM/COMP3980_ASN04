@@ -242,6 +242,7 @@ INT_PTR CALLBACK MainDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 			wchar_t filenameBuff[128];
 			GetDlgItemTextW(hDlg, IDC_EDIT_SENDFILE, filenameBuff, 128);
 			LPCWSTR filename(filenameBuff);
+			GlobalVar::g_SendingFile = true;
 			idle_go_to_sendfile(filename);
 			break;
 		}

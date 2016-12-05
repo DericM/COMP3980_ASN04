@@ -53,9 +53,8 @@ void idle_go_to_idle() {
 		MessageBoxW(GlobalVar::g_hWnd, L"COM setting is not set up yet.", 0, 0);
 		return;
 	}
-
+	GlobalVar::g_IdleSeq = true;
 	idle_rand_timeout_reset();
-	bSendingFile = false;
 	sendFileName = L"";
 
 	//TerminateThread(GlobalVar::g_hIdleWaitThread, 0);
@@ -81,7 +80,7 @@ IDLE Wait
 DWORD WINAPI idle_wait(LPVOID pData) {
 	int timeout = IDLE_SEQ_TIMEOUT;
 	idle_rand_timeout_reset();
-	if (bSendingFile) {
+	if (GlobalVar::g_SendingFile || !GlobalVar::g_IdleSeq) {
 		timeout = RAND_TIMEOUT;
 	}
 
@@ -120,9 +119,8 @@ DWORD WINAPI idle_send_enq(LPVOID tData_) {
 		GlobalVar::g_hReceivingThread = CreateThread(NULL, 0, send_ack, NULL, 0, 0);
 		break;
 	case WAIT_TIMEOUT:
-		if (!bSendingFile) {
+		if (GlobalVar::g_IdleSeq) {
 			enqParam.timer = RAND_TIMEOUT;
-			bSendingFile = true;
 			idle_send_enq(NULL);
 		} 
 		else {
@@ -154,8 +152,9 @@ void idle_create_write_thread() {
 
 
 DWORD WINAPI write_thread_entry_point(LPVOID pData) {
-	ipc_send_enq();
-	txwc_setup(sendFileName);
+	if (ipc_send_enq()) {
+		txwc_setup(sendFileName);
+	}
 	return TRUE;
 }
 

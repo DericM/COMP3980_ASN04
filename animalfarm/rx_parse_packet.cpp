@@ -2,6 +2,8 @@
 #include "globalvar.h"
 #include "packetDefine.h"
 #include "rx_parse_packet.h"
+#include "send.h"
+#include "idle.h"
 
 #include <vector>
 
@@ -17,10 +19,21 @@ void rx_pp_parse(const char* packet) {
 	std::string strData(dataBuffer);
 
 	uint16_t checkCrc = calculateCRC16(strData);
-	if (crc != checkCrc)
+	if (crc != checkCrc) {
 		LOGMESSAGE(L"Decode error! crc is different!" << std::endl);
+	} else {
+		int idx = GetWindowTextLength(GlobalVar::g_hSendBox);
+		SendMessageA(GlobalVar::g_hSendBox, EM_SETSEL, (LPARAM)idx, (LPARAM)idx);
+		SendMessageA(GlobalVar::g_hSendBox, EM_REPLACESEL, 0, (LPARAM)strData.c_str());
 
-	int idx = GetWindowTextLength(GlobalVar::g_hSendBox);
-	SendMessageA(GlobalVar::g_hSendBox, EM_SETSEL, (LPARAM)idx, (LPARAM)idx);
-	SendMessageA(GlobalVar::g_hSendBox, EM_REPLACESEL, 0, (LPARAM)strData.c_str());
+
+	}
+
+
+}
+
+void rx_pp_send_Ack() {
+	GlobalVar::g_ENQsSent = 0;
+	ipc_send_ack();
+	idle_go_to_idle();
 }

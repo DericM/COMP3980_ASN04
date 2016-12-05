@@ -1,9 +1,12 @@
 #include "stdafx.h"
-#include "receive.h"
+#include "receive2.h"
 #include "globalvar.h"
 #include "packetDefine.h"
 
-int TERMINATE_THREAD_TIMEOUT = 500;
+
+
+
+int TERMINATE_THREAD_TIMEOUT2 = 500;
 
 HANDLE receiveThread;
 HANDLE receiveDataEvent;
@@ -43,6 +46,7 @@ DWORD WINAPI recieve_ack_thread(LPVOID timeout) {
 	char readChar[1];
 
 	ipc_read_from_port2(readChar, toReadSize, target, (int)timeout);
+	return 0;
 }
 
 
@@ -135,7 +139,7 @@ bool ipc_terminate_read_thread()
 {
 	f_runningThread = false;
 
-	DWORD dwRes = WaitForSingleObject(terminateThreadEvent, TERMINATE_THREAD_TIMEOUT);
+	DWORD dwRes = WaitForSingleObject(terminateThreadEvent, TERMINATE_THREAD_TIMEOUT2);
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:

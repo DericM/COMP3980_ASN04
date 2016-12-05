@@ -21,7 +21,7 @@ bool ipc_send_enq() {
 	return TRUE;
 }
 
-bool ipc_send_packet(char* packet) {
+bool ipc_send_packet(const char* packet) {
 	DWORD dwToWrite = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
 	if (!ipc_send_data_to_port(packet, dwToWrite)) {
 		return FALSE;
@@ -33,7 +33,7 @@ bool ipc_send_packet(char* packet) {
 /*
 	Send data to the port
 */
-bool ipc_send_data_to_port(char* data, DWORD dwToWrite) {
+bool ipc_send_data_to_port(const char* data, DWORD dwToWrite) {
 	HANDLE& hComm = GlobalVar::g_hComm;
 	OVERLAPPED osWrite = { 0 };
 	DWORD dwWritten;

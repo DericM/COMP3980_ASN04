@@ -48,6 +48,7 @@ void idle_setup(LPCWSTR lpszCommName) {
 }
 
 void idle_go_to_idle() {
+	LOGMESSAGE(L"idle_go_to_idle" << std::endl);
 	if (GlobalVar::g_hComm == NULL){
 		MessageBoxW(GlobalVar::g_hWnd, L"COM setting is not set up yet.", 0, 0);
 		return;

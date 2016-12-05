@@ -23,7 +23,7 @@ char pack[HEADER_SIZE + DATA_SIZE + CRC_SIZE];
 
 BOOL rxwp_setUp() {
 	double packetSize = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
-	SYN_TIMER = ceil(packetSize / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3;
+	SYN_TIMER = ceil(80000.0 / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3;
 
 	GlobalVar::g_hRXSynEvent = CreateEvent(
 		NULL,               // default security attributes
@@ -110,7 +110,7 @@ DWORD WINAPI rx_wait_pack(LPVOID pData_) {
 
 	case WAIT_TIMEOUT:
 		// Not receieved Packet.
-		ipc_terminate_read_thread(GlobalVar::g_hReadForPACKThread);
+		ipc_terminate_read_thread(GlobalVar::g_hReadForSYNThread);
 		idle_go_to_idle();
 		break;
 
@@ -119,7 +119,7 @@ DWORD WINAPI rx_wait_pack(LPVOID pData_) {
 		break;
 	}
 
-	ResetEvent(GlobalVar::g_hReadForPACKThread);
+	ResetEvent(GlobalVar::g_hRXPackEvent);
 
 	return 0;
 }

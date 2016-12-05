@@ -23,7 +23,7 @@ char pack[HEADER_SIZE + DATA_SIZE + CRC_SIZE];
 
 BOOL rxwp_setUp() {
 	double packetSize = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
-	SYN_TIMER = ceil(80000.0 / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3;
+	SYN_TIMER = ceil(8224/ GlobalVar::g_cc.dcb.BaudRate * 1000) * 3;
 
 	GlobalVar::g_hRXSynEvent = CreateEvent(
 		NULL,               // default security attributes

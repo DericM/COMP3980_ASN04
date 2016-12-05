@@ -71,13 +71,15 @@ DWORD WINAPI txwc_receive_ack_event(LPVOID pData_)
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
-		/*if (ackParam.filename.length() == 0)
+		GlobalVar::g_ENQsSent = 0;
+		if (!GlobalVar::g_SendingFile) {
+			//wait 3 transmissions
+			Sleep(ceil(8224 / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3);
 			idle_go_to_idle();
-		else*/
-			
-			GlobalVar::g_ENQsSent = 0;
+		} else {
 			openFile(&GlobalVar::g_hSendBox, L"Test.txt");
-			//take 1024 from the buffer
+		}	
+		//take 1024 from the buffer
 		// Received ack;
 		break;
 

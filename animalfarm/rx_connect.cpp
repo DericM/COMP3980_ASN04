@@ -22,8 +22,3 @@ DWORD WINAPI send_ack(LPVOID var) {
 
 	return 0;
 }
-
-
-
-
-	

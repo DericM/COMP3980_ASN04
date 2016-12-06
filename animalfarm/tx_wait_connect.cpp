@@ -43,11 +43,12 @@ BOOL txwc_setup(const std::wstring& fileName) {
 	ackParam.timer = ACK_TIMER;
 	ackParam.filename = fileName;
 
-	//TerminateThread(GlobalVar::g_hWaitConnectThread, 0);
-	//TerminateThread(GlobalVar::g_hWaitForACKThread, 0);
-	//CloseHandle(GlobalVar::g_hWaitConnectThread);
-	//CloseHandle(GlobalVar::g_hWaitForACKThread);
 	GlobalVar::g_hWaitConnectThread = CreateThread(NULL, 0, txwc_receive_ack, NULL, 0, 0);
+	if (GlobalVar::g_hWaitConnectThread)
+	{
+		CloseHandle(GlobalVar::g_hWaitConnectThread);
+	}
+
 
 	return TRUE;
 }
@@ -74,7 +75,7 @@ DWORD WINAPI txwc_receive_ack_event(LPVOID pData_)
 		GlobalVar::g_ENQsSent = 0;
 		if (!GlobalVar::g_SendingFile) {
 			//wait 3 transmissions
-			Sleep(ceil(8224 / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3);
+			Sleep(static_cast<DWORD>(ceil(8224 / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3));
 			idle_go_to_idle();
 		} else {
 			openFile(&GlobalVar::g_hSendBox, L"Test.txt");

@@ -22,6 +22,10 @@ bool ipc_recieve_ack2(int timeout) {
 	}
 
 	receiveThread = CreateThread(NULL, 0, recieve_ack_thread, NULL, 0, 0);
+	if (receiveThread)
+	{
+		CloseHandle(receiveThread);
+	}
 
 	DWORD dwRes = WaitForSingleObject(receiveDataEvent, timeout);
 	ResetEvent(receiveDataEvent);
@@ -45,7 +49,7 @@ DWORD WINAPI recieve_ack_thread(LPVOID timeout) {
 	DWORD toReadSize = 1;
 	char readChar[1];
 
-	ipc_read_from_port2(readChar, toReadSize, target, (int)timeout);
+	ipc_read_from_port2(readChar, toReadSize, target, *static_cast<int*>(timeout));
 	return 0;
 }
 
@@ -139,23 +143,23 @@ bool ipc_terminate_read_thread()
 {
 	f_runningThread = false;
 
-	DWORD dwRes = WaitForSingleObject(terminateThreadEvent, TERMINATE_THREAD_TIMEOUT2);
-	switch (dwRes)
-	{
-	case WAIT_OBJECT_0:
-		//CloseHandle(hThread);
-		return true;
+	//DWORD dwRes = WaitForSingleObject(terminateThreadEvent, TERMINATE_THREAD_TIMEOUT2);
+	//switch (dwRes)
+	//{
+	//case WAIT_OBJECT_0:
+	//	//CloseHandle(hThread);
+	//	return true;
 
-	case WAIT_TIMEOUT:
-		TerminateThread(receiveThread, 0);
-		//CloseHandle(hThread);
-		return false;
+	//case WAIT_TIMEOUT:
+	//	TerminateThread(receiveThread, 0);
+	//	//CloseHandle(hThread);
+	//	return false;
 
-	default:
-		TerminateThread(receiveThread, 0);
-		//CloseHandle(hThread);
-		return false;
-	}
+	//default:
+	//	TerminateThread(receiveThread, 0);
+	//	//CloseHandle(hThread);
+	//	return false;
+	//}
 }
 
 

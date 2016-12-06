@@ -38,7 +38,7 @@ bool is_open_port( LPCWSTR& lpszCommName) {
 
 	double packetSize = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
 	COMMTIMEOUTS timeouts;
-	timeouts.ReadIntervalTimeout = ceil(packetSize / GlobalVar::g_cc.dcb.BaudRate * 1000 / packetSize);
+	timeouts.ReadIntervalTimeout = static_cast<DWORD>(ceil(packetSize / GlobalVar::g_cc.dcb.BaudRate * 1000 / packetSize));
 	timeouts.ReadTotalTimeoutMultiplier = 0;
 	timeouts.ReadTotalTimeoutConstant = 0;
 	timeouts.WriteTotalTimeoutMultiplier = 0;

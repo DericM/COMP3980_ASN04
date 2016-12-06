@@ -99,10 +99,16 @@ bool ipc_read_from_port(char* readChar, DWORD toReadSize, char target, int timeo
 		return FALSE;
 	}
 
-	BOOL bResult = FALSE;
+	bool bResult = false;
 	GlobalVar::g_hRunReadThread = TRUE;
 	if (hThread)
+	{
 		*hThread = CreateThread(NULL, 0, routine, NULL, 0, 0);
+		if (*hThread)
+		{
+			CloseHandle(*hThread);
+		}
+	}
 	while (GlobalVar::g_hRunReadThread) {
 		//LOGMESSAGE(L"BEGIN==>");
 		if (!fWaitingOnRead) {
@@ -119,7 +125,7 @@ bool ipc_read_from_port(char* readChar, DWORD toReadSize, char target, int timeo
 
 				if (target == NULL || readChar[0] == target) {
 					GlobalVar::g_hRunReadThread = FALSE;
-					bResult = TRUE;
+					bResult = true;
 				}
 				//LOGMESSAGE(L"GOT_NOTHING1==>");
 			}
@@ -133,7 +139,7 @@ bool ipc_read_from_port(char* readChar, DWORD toReadSize, char target, int timeo
 				} else {
 					if (target == NULL || readChar[0] == target) {
 						GlobalVar::g_hRunReadThread = FALSE;
-						bResult = TRUE;
+						bResult = true;
 					} else {
 						//LOGMESSAGE(L"GOT_NOTHING2==>");
 					}
@@ -161,21 +167,23 @@ bool ipc_terminate_read_thread(HANDLE& hThread)
 {
 	GlobalVar::g_hRunReadThread = FALSE;
 
-	DWORD dwRes = WaitForSingleObject(GlobalVar::g_hTerminateThreadEvent, TERMINATE_THREAD_TIMEOUT);
-	switch (dwRes)
-	{
-	case WAIT_OBJECT_0:
-		//CloseHandle(hThread);
-		return true;
+	//DWORD dwRes = WaitForSingleObject(GlobalVar::g_hTerminateThreadEvent, TERMINATE_THREAD_TIMEOUT);
+	//switch (dwRes)
+	//{
+	//case WAIT_OBJECT_0:
+	//	//CloseHandle(hThread);
+	//	return true;
 
-	case WAIT_TIMEOUT:
-		TerminateThread(hThread, 0);
-		//CloseHandle(hThread);
-		return false;
+	//case WAIT_TIMEOUT:
+	//	TerminateThread(hThread, 0);
+	//	//CloseHandle(hThread);
+	//	return false;
 
-	default:
-		TerminateThread(hThread, 0);
-		//CloseHandle(hThread);
-		return false;
-	}
+	//default:
+	//	TerminateThread(hThread, 0);
+	//	//CloseHandle(hThread);
+	//	return false;
+	//}
+
+	return true;
 }

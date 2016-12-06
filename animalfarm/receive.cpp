@@ -203,7 +203,7 @@ void ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD ti
 	//DWORD readFileTimeout = static_cast<DWORD>(ceil(8.0 * toReadSize / GlobalVar::g_cc.dcb.BaudRate * 1000 ));
 
 	f_runningThread = true;
-	while (f_runningThread) {
+	//while (f_runningThread) {
 		//LOGMESSAGE(L"BEGIN==>");
 		if (!fWaitingOnRead) {
 			if (!ReadFile(hComm, readChar, toReadSize, &eventRet, &osReader)) {
@@ -259,12 +259,14 @@ void ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD ti
 		}
 		ResetEvent(osReader.hEvent);
 		//LOGMESSAGE(L"END\n");
-	}
+	//}
 	if (successfulyReceivedData) {
 		SetEvent(receiveDataEvent);
 	}
 
 	SetEvent(terminateThreadEvent);
+
+	CloseHandle(osReader.hEvent);
 }
 
 
@@ -273,23 +275,27 @@ bool ipc_terminate_read_thread()
 {
 	f_runningThread = false;
 
-	DWORD dwRes = WaitForSingleObject(terminateThreadEvent, TERMINATE_THREAD_TIMEOUT2);
-	switch (dwRes)
-	{
-	case WAIT_OBJECT_0:
-		//CloseHandle(hThread);
-		return true;
+	//DWORD dwRes = WaitForSingleObject(terminateThreadEvent, TERMINATE_THREAD_TIMEOUT2);
+	//switch (dwRes)
+	//{
+	//case WAIT_OBJECT_0:
+	//	//CloseHandle(hThread);
+	//	return true;
 
-	case WAIT_TIMEOUT:
-		TerminateThread(receiveThread, 0);
-		//CloseHandle(hThread);
-		return false;
+	//case WAIT_TIMEOUT:
+	//	TerminateThread(receiveThread, 0);
+	//	//CloseHandle(hThread);
+	//	return false;
 
-	default:
-		TerminateThread(receiveThread, 0);
-		//CloseHandle(hThread);
-		return false;
-	}
+	//default:
+	//	TerminateThread(receiveThread, 0);
+	//	//CloseHandle(hThread);
+	//	return false;
+	//}
+
+	CloseHandle(terminateThreadEvent);
+
+	return true;
 }
 
 

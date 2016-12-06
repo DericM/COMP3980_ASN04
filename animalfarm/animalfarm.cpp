@@ -194,6 +194,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     case WM_DESTROY:
+		GlobalVar::g_hRunReadThread = FALSE;
         PostQuitMessage(0);
         break;
     default:

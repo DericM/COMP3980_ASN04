@@ -9,6 +9,7 @@ bool rxce_check_error(std::string data, uint16_t syndrome) {
 	uint16_t derived_syndrome = calculateCRC16(data);
 
 	if (syndrome != derived_syndrome) {
+		LOGMESSAGE(L"error in packet");
 		return false;
 	}
 

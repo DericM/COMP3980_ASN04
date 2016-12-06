@@ -10,6 +10,7 @@ struct ReceiveParams
 	char   target;
 	DWORD  toReadSize;
 	char * readChar;
+	long long startTime;
 };
 ReceiveParams recieveParam;
 
@@ -30,6 +31,7 @@ bool ipc_recieve_ack(DWORD timeout) {
 	recieveParam.toReadSize = 1;
 	recieveParam.target     = 0x06;
 	recieveParam.readChar   = readChar;
+	recieveParam.startTime = generateTimestamp();
 
 
 	receiveThread = CreateThread(NULL, 0, recieve_thread, NULL, 0, 0);
@@ -64,6 +66,7 @@ bool ipc_recieve_enq(DWORD timeout) {
 	recieveParam.toReadSize = 1;
 	recieveParam.target     = 0x05;
 	recieveParam.readChar   = readChar;
+	recieveParam.startTime = generateTimestamp();
 
 	receiveThread = CreateThread(NULL, 0, recieve_thread, NULL, 0, 0);
 	if (receiveThread)
@@ -203,7 +206,7 @@ void ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD ti
 	//DWORD readFileTimeout = static_cast<DWORD>(ceil(8.0 * toReadSize / GlobalVar::g_cc.dcb.BaudRate * 1000 ));
 
 	f_runningThread = true;
-	//while (f_runningThread) {
+	while (generateTimestamp() - recieveParam.startTime < timeout) {
 		//LOGMESSAGE(L"BEGIN==>");
 		if (!fWaitingOnRead) {
 			if (!ReadFile(hComm, readChar, toReadSize, &eventRet, &osReader)) {
@@ -226,7 +229,7 @@ void ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD ti
 			}
 		}
 		if (fWaitingOnRead) {
-			DWORD dwRes = WaitForSingleObject(osReader.hEvent, timeout);
+			DWORD dwRes = WaitForSingleObject(osReader.hEvent, 1);
 			switch (dwRes)
 			{
 			case WAIT_OBJECT_0:
@@ -259,7 +262,7 @@ void ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD ti
 		}
 		ResetEvent(osReader.hEvent);
 		//LOGMESSAGE(L"END\n");
-	//}
+	}
 	if (successfulyReceivedData) {
 		SetEvent(receiveDataEvent);
 	}

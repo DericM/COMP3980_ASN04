@@ -25,11 +25,8 @@ bool   f_runningThread;
 
 bool ipc_recieve_ack(int timeout) {
 	
-	receiveDataEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-	if (receiveDataEvent == NULL) {
-		LOGMESSAGE(L"Failed to create hEvent. ");
-		return FALSE;
-	}
+	createEvents();
+
 	char readChar[1];
 	recieveParam.timeout    = timeout;
 	recieveParam.toReadSize = 1;
@@ -41,6 +38,9 @@ bool ipc_recieve_ack(int timeout) {
 
 	DWORD dwRes = WaitForSingleObject(receiveDataEvent, timeout);
 	ResetEvent(receiveDataEvent);
+
+	WaitForSingleObject(terminateThreadEvent, timeout);
+
 	int ms = duration_cast<milliseconds>(
 		system_clock::now().time_since_epoch()
 		).count() - 1480980000000;
@@ -62,11 +62,7 @@ bool ipc_recieve_ack(int timeout) {
 
 bool ipc_recieve_enq(int timeout) {
 
-	receiveDataEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-	if (receiveDataEvent == NULL) {
-		LOGMESSAGE(L"Failed to create hEvent. ");
-		return FALSE;
-	}
+	createEvents();
 
 	char readChar[1];
 	recieveParam.timeout    = timeout;
@@ -78,6 +74,9 @@ bool ipc_recieve_enq(int timeout) {
 
 	DWORD dwRes = WaitForSingleObject(receiveDataEvent, timeout);
 	ResetEvent(receiveDataEvent);
+
+	WaitForSingleObject(terminateThreadEvent, timeout);
+
 	int ms = duration_cast<milliseconds>(
 		system_clock::now().time_since_epoch()
 		).count() - 1480980000000;
@@ -97,14 +96,10 @@ bool ipc_recieve_enq(int timeout) {
 	return false;
 }
 
-
+/*
 bool ipc_recieve_syn(int timeout) {
 
-	receiveDataEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-	if (receiveDataEvent == NULL) {
-		LOGMESSAGE(L"Failed to create hEvent. ");
-		return FALSE;
-	}
+	createEvents();
 
 	char readChar[1];
 	recieveParam.timeout    = timeout;
@@ -134,16 +129,12 @@ bool ipc_recieve_syn(int timeout) {
 		break;
 	}
 	return false;
-}
+}*/
 
 
 bool ipc_recieve_packet(char * readChar, int timeout) {
 
-	receiveDataEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-	if (receiveDataEvent == NULL) {
-		LOGMESSAGE(L"Failed to create hEvent. ");
-		return FALSE;
-	}
+	createEvents();
 
 	recieveParam.timeout    = timeout;
 	recieveParam.toReadSize = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
@@ -155,6 +146,9 @@ bool ipc_recieve_packet(char * readChar, int timeout) {
 
 	DWORD dwRes = WaitForSingleObject(receiveDataEvent, timeout);
 	ResetEvent(receiveDataEvent);
+
+	WaitForSingleObject(terminateThreadEvent, timeout);
+
 	int ms = duration_cast<milliseconds>(
 		system_clock::now().time_since_epoch()
 		).count() - 1480980000000;
@@ -175,6 +169,23 @@ bool ipc_recieve_packet(char * readChar, int timeout) {
 }
 
 
+bool createEvents() {
+	receiveDataEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (receiveDataEvent == NULL) {
+		LOGMESSAGE(L"Failed to create hEvent. ");
+		return false;
+	}
+	terminateThreadEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (terminateThreadEvent == NULL) {
+		LOGMESSAGE(L"Failed to create hEvent. ");
+		return false;
+	}
+	return true;
+}
+
+
+
+
 DWORD WINAPI recieve_thread(LPVOID na) {
 
 	ipc_read_from_port(recieveParam.readChar, 
@@ -193,12 +204,6 @@ void ipc_read_from_port(char * readChar, DWORD toReadSize, char target, int time
 	BOOL fWaitingOnRead = FALSE;
 	DWORD eventRet;
 	bool successfulyReceivedData = false;
-
-	terminateThreadEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-	if (terminateThreadEvent == NULL) {
-		LOGMESSAGE(L"Failed to create hEvent. ");
-		return;
-	}
 
 	osReader.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	if (osReader.hEvent == NULL) {
@@ -224,6 +229,7 @@ void ipc_read_from_port(char * readChar, DWORD toReadSize, char target, int time
 				if (target == NULL || readChar[0] == target) {
 					//LOGMESSAGE(L"GOT_TARGET1==>");
 					f_runningThread = false;
+					successfulyReceivedData = true;
 				}
 				//LOGMESSAGE(L"GOT_NOTHING1==>");
 			}
@@ -241,6 +247,7 @@ void ipc_read_from_port(char * readChar, DWORD toReadSize, char target, int time
 					if (target == NULL || readChar[0] == target) {
 						LOGMESSAGE(L"GOT_TARGET2==>");
 						f_runningThread = false;
+						successfulyReceivedData = true;
 					}
 					else {
 						//LOGMESSAGE(L"GOT_NOTHING2==>");

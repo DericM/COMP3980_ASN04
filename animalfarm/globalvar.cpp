@@ -11,6 +11,7 @@ namespace GlobalVar
 
 	BOOL g_hRunReadThread;
 	int g_ENQsSent;
+	int g_TransmissionAttempts; //how many times we have tried to send a packet
 	BOOL g_SendingFile = false;
 	BOOL g_IdleSeq = true;
 

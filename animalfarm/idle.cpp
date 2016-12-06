@@ -122,6 +122,7 @@ DWORD WINAPI idle_send_enq(LPVOID tData_) {
 		break;
 	case WAIT_TIMEOUT:
 		if (GlobalVar::g_IdleSeq) {
+			GlobalVar::g_IdleSeq = false;
 			enqParam.timer = RAND_TIMEOUT;
 			idle_send_enq(NULL);
 		} 

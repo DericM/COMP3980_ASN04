@@ -1,3 +1,3 @@
 #pragma once
 
-bool txwa_receive_ack();
+DWORD WINAPI txwa_receive_ack();

@@ -40,7 +40,7 @@ void idle_rand_timeout_reset() {
 }
 
 
-
+//Called after connect button is pushed
 void idle_connect() {
 	idleThread = CreateThread(NULL, 0, idle_wait, NULL, 0, 0);
 	if (idleThread)
@@ -91,7 +91,7 @@ DWORD WINAPI idle_wait(LPVOID na) {
 		//Send Enq
 		ipc_send_enq();
 		//recieve ACK
-		txwc_receive_ack();
+		txwc_wait_connect_ack();
 	}
 	//sets event to terminate the thread
 	SetEvent(terminateIdleThreadEvent);
@@ -102,7 +102,7 @@ DWORD WINAPI idle_wait(LPVOID na) {
 bool idle_terminate_thread()
 {
 	frunningIdleThread = false;
-
+	//Waits for Terminate thread event or Terminate_thread Timeout
 	DWORD dwRes = WaitForSingleObject(terminateIdleThreadEvent, TERMINATE_THREAD_TIMEOUT);
 	switch (dwRes)
 	{

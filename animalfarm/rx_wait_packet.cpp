@@ -23,7 +23,7 @@ char pack[HEADER_SIZE + DATA_SIZE + CRC_SIZE];
 
 BOOL rxwp_setUp() {
 	double packetSize = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
-	SYN_TIMER = ceil(packetSize / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3;
+	SYN_TIMER = static_cast<int>(ceil(packetSize / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3);
 
 	GlobalVar::g_hRXSynEvent = CreateEvent(
 		NULL,               // default security attributes
@@ -35,11 +35,11 @@ BOOL rxwp_setUp() {
 
 	synParam.timer = SYN_TIMER;
 
-	//TerminateThread(GlobalVar::g_hWaitForSYNThread, 0);
-	//TerminateThread(GlobalVar::g_hReadForSYNThread, 0);
-	//CloseHandle(GlobalVar::g_hWaitForSYNThread);
-	//CloseHandle(GlobalVar::g_hReadForSYNThread);
 	GlobalVar::g_hReadForSYNThread = CreateThread(NULL, 0, rx_read_for_syn, NULL, 0, 0);
+	if (GlobalVar::g_hReadForSYNThread)
+	{
+		CloseHandle(GlobalVar::g_hReadForSYNThread);
+	}
 
 	return TRUE;
 }

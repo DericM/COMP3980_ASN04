@@ -44,11 +44,12 @@ BOOL txwc_setup(const std::wstring& fileName) {
 	ackParam.timer = ACK_TIMER;
 	ackParam.filename = fileName;
 
-	//TerminateThread(GlobalVar::g_hWaitConnectThread, 0);
-	//TerminateThread(GlobalVar::g_hWaitForACKThread, 0);
-	//CloseHandle(GlobalVar::g_hWaitConnectThread);
-	//CloseHandle(GlobalVar::g_hWaitForACKThread);
 	GlobalVar::g_hWaitConnectThread = CreateThread(NULL, 0, txwc_receive_ack, NULL, 0, 0);
+	if (GlobalVar::g_hWaitConnectThread)
+	{
+		CloseHandle(GlobalVar::g_hWaitConnectThread);
+	}
+
 
 	return TRUE;
 }

@@ -57,9 +57,11 @@ void idle_go_to_idle() {
 	idle_rand_timeout_reset();
 	sendFileName = L"";
 
-	//TerminateThread(GlobalVar::g_hIdleWaitThread, 0);
-	//CloseHandle(GlobalVar::g_hIdleWaitThread);
 	GlobalVar::g_hIdleWaitThread = CreateThread(NULL, 0, idle_wait, NULL, 0, 0);
+	if (GlobalVar::g_hIdleWaitThread)
+	{
+		CloseHandle(GlobalVar::g_hIdleWaitThread);
+	}
 }
 
 /*
@@ -91,8 +93,6 @@ DWORD WINAPI idle_wait(LPVOID pData) {
 
 	enqParam.timer = IDLE_SEQ_TIMEOUT;
 
-	TerminateThread(GlobalVar::g_hIdleSendENQThread, 0);
-	//CloseHandle(GlobalVar::g_hIdleSendENQThread);
 	//LOGMESSAGE(L"ENQS Sent " << GlobalVar::g_ENQsSent << "\n");
 	/*if (GlobalVar::g_ENQsSent == 3) {
 		//LOGMESSAGE(L"SENT ENQS 3 TIMES\nn");
@@ -114,9 +114,11 @@ DWORD WINAPI idle_send_enq(LPVOID tData_) {
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
-		TerminateThread(GlobalVar::g_hReceivingThread, 0);
-		//CloseHandle(GlobalVar::g_hReceivingThread);
 		GlobalVar::g_hReceivingThread = CreateThread(NULL, 0, send_ack, NULL, 0, 0);
+		if (GlobalVar::g_hReceivingThread)
+		{
+			CloseHandle(GlobalVar::g_hReceivingThread);
+		}
 		break;
 	case WAIT_TIMEOUT:
 		if (GlobalVar::g_IdleSeq) {
@@ -138,8 +140,6 @@ DWORD WINAPI idle_send_enq(LPVOID tData_) {
 }
 
 void idle_create_write_thread() {
-	//TerminateThread(GlobalVar::g_hReadThread, 0);
-	//CloseHandle(GlobalVar::g_hReadThread);
 	GlobalVar::g_hReadThread = CreateThread(
 		NULL,
 		0,
@@ -148,6 +148,10 @@ void idle_create_write_thread() {
 		0,
 		NULL
 	);
+	if (GlobalVar::g_hReadThread)
+	{
+		CloseHandle(GlobalVar::g_hReadThread);
+	}
 }
 
 

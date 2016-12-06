@@ -160,6 +160,8 @@ bool ipc_terminate_read_thread()
 	//	//CloseHandle(hThread);
 	//	return false;
 	//}
+
+	return true;
 }
 
 

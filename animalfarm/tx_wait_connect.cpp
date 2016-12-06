@@ -4,6 +4,7 @@
 #include "idle.h"
 #include "tx_get_data.h"
 #include "receive.h"
+#include "packetDefine.h"
 
 #include <stdexcept>
 #include <memory>
@@ -71,10 +72,12 @@ DWORD WINAPI txwc_receive_ack_event(LPVOID pData_)
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
+		
 		GlobalVar::g_ENQsSent = 0;
 		if (!GlobalVar::g_SendingFile) {
 			//wait 3 transmissions
-			Sleep(ceil(8224 / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3);
+			double packetSize = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
+			Sleep(ceil(packetSize / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3);
 			idle_go_to_idle();
 		} else {
 			openFile(&GlobalVar::g_hSendBox, L"Test.txt");

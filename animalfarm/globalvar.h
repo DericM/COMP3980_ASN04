@@ -9,9 +9,11 @@ namespace GlobalVar
 	extern COMMCONFIG g_cc;
 
 	extern BOOL g_hRunReadThread;
-	extern BOOL g_SendingFile;
-	extern BOOL g_IdleSeq;
-	extern int g_ENQsSent;
+	extern BOOL g_SendingFile;//are we sending a file
+	extern BOOL g_IdleSeq;//are we in idleseq
+
+	extern int g_ENQsSent;//num of ENQs sent
+	extern int g_TransmissionAttempts; //how many times we have tried to send a packet
 
 	/*Thread handles*/
 	extern HANDLE g_hReadThread;

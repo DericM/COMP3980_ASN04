@@ -51,8 +51,8 @@ DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile) {
 	memcpy_s(packetize + HEADER_SIZE, DATA_SIZE, packetBuffer, DATA_SIZE);
 	memcpy_s(packetize + HEADER_SIZE + DATA_SIZE, CRC_SIZE, &crc, CRC_SIZE);
 
-	if (!txsd_setup(packetize)) {
-	}
+	txsd_setup(packetize);
+	
 
 	file.close();
 	return 0;

@@ -4,31 +4,37 @@
 #include "send.h"
 #include "tx_wait_ack.h"
 #include "tx_send_data.h"
+#include "packetDefine.h"
+#include "idle.h"
 
 
 #define TX_FAIL_COUNTER 3
+const char* packet;
 
 bool txsd_setup(const char* frame) {
-	int transmission_attempts = 0;
-	while (transmission_attempts < TX_FAIL_COUNTER) {
-		if (txsd_send(frame)) {
-			return true;//go get next packet
-		}
-		transmission_attempts++;
-	}
+	packet = frame;
+	GlobalVar::g_TransmissionAttempts = 0;
+	txsd_send();
+
 	return false;//return to idle
 }
 
 
-bool txsd_send(const char* frame) {
+void txsd_send() {
 	//send packet
-	if (!ipc_send_packet(frame)) {
-		return false;//resend packet
+	if (GlobalVar::g_TransmissionAttempts < TX_FAIL_COUNTER) {
+		GlobalVar::g_TransmissionAttempts++;
+		if (!ipc_send_packet(packet)) {
+			//return false;//resend packet
+		}
+		//goto wait for ack.
+		if (!txwa_receive_ack()) {
+			//return false;//resend packet
+		}
 	}
-	//goto wait for ack.
-	if (!txwa_receive_ack()) {
-		return false;//resend packet
+	else {
+		idle_go_to_idle();
 	}
-	return true;
+	
 }
 

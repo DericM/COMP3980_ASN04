@@ -11,15 +11,23 @@ bool rxwp_wait_for_packet() {
 	int SYN_TIMER = ceil(packetSize / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3;
 	LOGMESSAGE(L"SYN_TIMER:" << SYN_TIMER << " \n");
 
-	if (!ipc_recieve_syn(SYN_TIMER)) {
-		return false;//couldnt get sync
-	}
+	char packet[HEADER_SIZE + DATA_SIZE + CRC_SIZE];
 
-	char * packet = "";
-	if (ipc_recieve_packet(packet, 2000)) {
+	if (ipc_recieve_packet(packet, SYN_TIMER)) {
 		if (rxpp_parse_packet(packet)) {
 			return true;//packet recieved
 		}
 	}
+
+	//if (!ipc_recieve_syn(SYN_TIMER)) {
+	//	return false;//couldnt get sync
+	//}
+
+	//char * packet = "";
+	//if (ipc_recieve_packet(packet, 2000)) {
+	//	if (rxpp_parse_packet(packet)) {
+	//		return true;//packet recieved
+	//	}
+	//}
 	return false;//no packet
 }

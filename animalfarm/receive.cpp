@@ -146,8 +146,8 @@ bool ipc_recieve_packet(char * readChar, int timeout) {
 	}
 
 	recieveParam.timeout    = timeout;
-	recieveParam.toReadSize = 1026;
-	recieveParam.target     = NULL;
+	recieveParam.toReadSize = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
+	recieveParam.target     = 0x16;
 	recieveParam.readChar   = readChar;
 
 

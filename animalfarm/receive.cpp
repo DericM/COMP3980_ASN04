@@ -147,7 +147,8 @@ bool ipc_read_from_port(char* readChar, DWORD toReadSize, char target, int timeo
 				fWaitingOnRead = FALSE;
 				break;
 			case WAIT_TIMEOUT:
-				return FALSE;
+				break;
+				//return FALSE;
 
 			default:
 				break;

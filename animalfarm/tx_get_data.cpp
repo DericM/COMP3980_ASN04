@@ -22,19 +22,22 @@ char packet_flag;
 
 
 bool txgd_setup() {
+	//gets file for directory path
 	file.open(ExePathA() + "\\test.txt", std::ios::binary);
 
 	packetCounter = 0;
 	packet_flag = 's';
 
+	//checks if file is open
 	if (!file.is_open())
 	{
 		MessageBoxW(GlobalVar::g_hWnd, L"Cannot open file!", 0, 0);
 		return false;
 	}
-
+	//passes characters from vector to buffer
 	buffer = vector<char>((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
 
+	//chekcs wif buffer is empty
 	if (buffer.size() == 0)
 	{
 		MessageBoxW(GlobalVar::g_hWnd, L"The file is empty!", 0, 0);

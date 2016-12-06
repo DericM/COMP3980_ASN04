@@ -2,4 +2,4 @@
 
 #include <string>
 
-bool txwc_receive_ack();
+bool txwc_wait_connect_ack();

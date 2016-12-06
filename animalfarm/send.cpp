@@ -2,9 +2,7 @@
 #include "globalvar.h"
 #include "send.h"
 #include "packetDefine.h"
-#include <chrono>
-
-using namespace std::chrono;
+#include "testingfunctions.h"
 
 
 
@@ -14,10 +12,7 @@ bool ipc_send_ack() {
 	if (!ipc_send_data_to_port(&ACK, dwToWrite)) {
 		return FALSE;
 	}
-	long long ms = duration_cast<milliseconds>(
-		system_clock::now().time_since_epoch()
-		).count() - 1480980000000;
-	LOGMESSAGE(L"Send ACK--------" << ms << "\n");
+	LOGMESSAGE(L"Send ACK--------" << generateTimestamp() << "\n");
 	return TRUE;
 }
 
@@ -27,10 +22,7 @@ bool ipc_send_enq() {
 	if (!ipc_send_data_to_port(&ENQ, dwToWrite)) {
 		return FALSE;
 	}
-	long long ms = duration_cast<milliseconds>(
-		system_clock::now().time_since_epoch()
-		).count() - 1480980000000;
-	LOGMESSAGE(L"Send ENQ--------" << ms << "\n");
+	LOGMESSAGE(L"Send ENQ--------" << generateTimestamp() << "\n");
 	return TRUE;
 }
 
@@ -39,10 +31,7 @@ bool ipc_send_packet(const char* packet) {
 	if (!ipc_send_data_to_port(packet, dwToWrite)) {
 		return FALSE;
 	}
-	long long ms = duration_cast<milliseconds>(
-		system_clock::now().time_since_epoch()
-		).count() - 1480980000000;
-	LOGMESSAGE(L"Send PACKET-----" << ms <<"\n");
+	LOGMESSAGE(L"Send PACKET-----" << generateTimestamp() <<"\n");
 	return TRUE;
 }
 

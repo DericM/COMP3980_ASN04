@@ -40,7 +40,7 @@ void idle_rand_timeout_reset() {
 }
 
 
-
+//Called after connect button is pushed
 void idle_connect() {
 	idleThread = CreateThread(NULL, 0, idle_wait, NULL, 0, 0);
 	if (idleThread)
@@ -67,36 +67,33 @@ DWORD WINAPI idle_wait(LPVOID na) {
 	}
 
 	while (frunningIdleThread) {
-		//LOGMESSAGE(L"idle=>");
+		//Sending File timeout Procedure
 		if (GlobalVar::g_sending_file) {
-			//LOGMESSAGE(L"sendingfile=>");
 			idle_rand_timeout_reset();
 			timeout = RAND_TIMEOUT;
 			if (ipc_recieve_enq(timeout)) {
-				//LOGMESSAGE(L"!recieved_enq(rnd)=>");
 				rxc_send_ack();
 			}
-		}
+		}//Idles Sequence Timeout procedure
 		else {
-			//LOGMESSAGE(L"!sendingfile=>");
 			timeout = IDLE_SEQ_TIMEOUT;
 			if (ipc_recieve_enq(timeout)) {
-				//LOGMESSAGE(L"recieved_enq(idle_seq)=>");
 				rxc_send_ack();
 			}
-			else {
+			else {//After idle Squence timewr times out use rand timout
 				idle_rand_timeout_reset();
 				timeout = RAND_TIMEOUT;
 				if (ipc_recieve_enq(timeout)) {
-					//LOGMESSAGE(L"recieved_enq(rand)=>");
 					rxc_send_ack();
 				}
 			}
 		}
-		//LOGMESSAGE(L"!recieved_enq(rand)=>");
+		//Send Enq
 		ipc_send_enq();
-		txwc_receive_ack();
+		//recieve ACK in tx_wait_connect.cpp
+		txwc_wait_connect_ack();
 	}
+	//sets event to terminate the thread
 	SetEvent(terminateIdleThreadEvent);
 	return 0;
 }
@@ -105,7 +102,7 @@ DWORD WINAPI idle_wait(LPVOID na) {
 bool idle_terminate_thread()
 {
 	frunningIdleThread = false;
-
+	//Waits for Terminate thread event or Terminate_thread Timeout
 	DWORD dwRes = WaitForSingleObject(terminateIdleThreadEvent, TERMINATE_THREAD_TIMEOUT);
 	switch (dwRes)
 	{

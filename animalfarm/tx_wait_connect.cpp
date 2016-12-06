@@ -5,13 +5,16 @@
 #include "globalvar.h"
 
 
-
-bool txwc_receive_ack() {
+//Waiting for An ACK
+bool txwc_wait_connect_ack() {
+	//Wait for ACK Connect timeout
 	DWORD ACK_TIMER = static_cast<DWORD>(ceil(16.0 / GlobalVar::g_cc.dcb.BaudRate * 1000));
 
+	//Tries to recieve ack returns true is ack is recieved returns false if timed out
 	if (ipc_recieve_ack(ACK_TIMER)) {
 		if (!GlobalVar::g_sending_file) {//check if we are starting a new transfer
 			GlobalVar::g_sending_file = true;
+			//get data in tx_get_data.cpp
 			txgd_setup();
 		}
 		if (txgd_get_next_packet()) {//try to send packet

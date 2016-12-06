@@ -200,7 +200,7 @@ void ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD ti
 		return;
 	}
 
-	DWORD readFileTimeout = static_cast<DWORD>(ceil(8.0 * toReadSize / GlobalVar::g_cc.dcb.BaudRate * 1000 ));
+	//DWORD readFileTimeout = static_cast<DWORD>(ceil(8.0 * toReadSize / GlobalVar::g_cc.dcb.BaudRate * 1000 ));
 
 	f_runningThread = true;
 	while (f_runningThread) {
@@ -226,7 +226,7 @@ void ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD ti
 			}
 		}
 		if (fWaitingOnRead) {
-			DWORD dwRes = WaitForSingleObject(osReader.hEvent, readFileTimeout);
+			DWORD dwRes = WaitForSingleObject(osReader.hEvent, timeout);
 			switch (dwRes)
 			{
 			case WAIT_OBJECT_0:

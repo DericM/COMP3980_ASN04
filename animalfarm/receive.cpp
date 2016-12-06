@@ -39,8 +39,6 @@ bool ipc_recieve_ack(int timeout) {
 	DWORD dwRes = WaitForSingleObject(receiveDataEvent, timeout);
 	ResetEvent(receiveDataEvent);
 
-	WaitForSingleObject(terminateThreadEvent, timeout);
-
 	int ms = duration_cast<milliseconds>(
 		system_clock::now().time_since_epoch()
 		).count() - 1480980000000;
@@ -74,8 +72,6 @@ bool ipc_recieve_enq(int timeout) {
 
 	DWORD dwRes = WaitForSingleObject(receiveDataEvent, timeout);
 	ResetEvent(receiveDataEvent);
-
-	WaitForSingleObject(terminateThreadEvent, timeout);
 
 	int ms = duration_cast<milliseconds>(
 		system_clock::now().time_since_epoch()
@@ -147,8 +143,6 @@ bool ipc_recieve_packet(char * readChar, int timeout) {
 	DWORD dwRes = WaitForSingleObject(receiveDataEvent, timeout);
 	ResetEvent(receiveDataEvent);
 
-	WaitForSingleObject(terminateThreadEvent, timeout);
-
 	int ms = duration_cast<milliseconds>(
 		system_clock::now().time_since_epoch()
 		).count() - 1480980000000;
@@ -200,8 +194,8 @@ DWORD WINAPI recieve_thread(LPVOID na) {
 void ipc_read_from_port(char * readChar, DWORD toReadSize, char target, int timeout) {
 	HANDLE& hComm = GlobalVar::g_hComm;
 
+	static BOOL fWaitingOnRead = FALSE;
 	OVERLAPPED osReader = { 0 };
-	BOOL fWaitingOnRead = FALSE;
 	DWORD eventRet;
 	bool successfulyReceivedData = false;
 
@@ -210,6 +204,8 @@ void ipc_read_from_port(char * readChar, DWORD toReadSize, char target, int time
 		LOGMESSAGE(L"Failed to create hEvent. ");
 		return;
 	}
+
+	DWORD readFileTimeout = static_cast<DWORD>(ceil(8.0 * toReadSize / GlobalVar::g_cc.dcb.BaudRate * 1000 ));
 
 	f_runningThread = true;
 	while (f_runningThread) {
@@ -235,7 +231,7 @@ void ipc_read_from_port(char * readChar, DWORD toReadSize, char target, int time
 			}
 		}
 		if (fWaitingOnRead) {
-			DWORD dwRes = WaitForSingleObject(osReader.hEvent, timeout);
+			DWORD dwRes = WaitForSingleObject(osReader.hEvent, readFileTimeout);
 			switch (dwRes)
 			{
 			case WAIT_OBJECT_0:
@@ -256,7 +252,7 @@ void ipc_read_from_port(char * readChar, DWORD toReadSize, char target, int time
 				fWaitingOnRead = FALSE;
 				break;
 			case WAIT_TIMEOUT:
-				LOGMESSAGE(L"WAIT_TIMEOUT==>");
+				//LOGMESSAGE(L"WAIT_TIMEOUT==>" << target << std::endl);
 				break;
 
 			default:

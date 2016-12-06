@@ -14,6 +14,7 @@ bool txwc_wait_connect_ack() {
 	if (ipc_recieve_ack(ACK_TIMER)) {
 		if (!GlobalVar::g_sending_file) {//check if we are starting a new transfer
 			GlobalVar::g_sending_file = true;
+			//get data in tx_get_data.cpp
 			txgd_setup();
 		}
 		if (txgd_get_next_packet()) {//try to send packet

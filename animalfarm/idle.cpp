@@ -90,7 +90,7 @@ DWORD WINAPI idle_wait(LPVOID na) {
 		}
 		//Send Enq
 		ipc_send_enq();
-		//recieve ACK
+		//recieve ACK in tx_wait_connect.cpp
 		txwc_wait_connect_ack();
 	}
 	//sets event to terminate the thread

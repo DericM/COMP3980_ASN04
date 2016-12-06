@@ -2,9 +2,7 @@
 #include "receive.h"
 #include "globalvar.h"
 #include "packetDefine.h"
-#include <chrono>
-
-using namespace std::chrono;
+#include "testingfunctions.h"
 
 struct ReceiveParams
 {
@@ -41,16 +39,13 @@ bool ipc_recieve_ack(DWORD timeout) {
 	DWORD dwRes = WaitForSingleObject(receiveDataEvent, timeout);
 	ResetEvent(receiveDataEvent);
 
-	long long ms = duration_cast<milliseconds>(
-		system_clock::now().time_since_epoch()
-		).count() - 1480980000000;
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
-		LOGMESSAGE(L"Received ACK----" << ms << "\n");
+		LOGMESSAGE(L"Received ACK----Timestamp:" << generateTimestamp() << "\n");
 		return true;
 	case WAIT_TIMEOUT:
-		LOGMESSAGE(L"Timeout ACK-----" << ms << L"-----" << timeout << "\n");
+		LOGMESSAGE(L"Timeout ACK-----Timestamp:" << generateTimestamp() << L"-----Timeout:" << timeout << "\n");
 		ipc_terminate_read_thread();
 		return false;
 	default:
@@ -77,16 +72,13 @@ bool ipc_recieve_enq(DWORD timeout) {
 	DWORD dwRes = WaitForSingleObject(receiveDataEvent, timeout);
 	ResetEvent(receiveDataEvent);
 
-	long long ms = duration_cast<milliseconds>(
-		system_clock::now().time_since_epoch()
-		).count() - 1480980000000;
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
-		LOGMESSAGE(L"Received ENQ----" << ms << "\n");
+		LOGMESSAGE(L"Received ENQ----Timestamp:" << generateTimestamp() << "\n");
 		return true;
 	case WAIT_TIMEOUT:
-		LOGMESSAGE(L"Timeout ENQ-----" << ms << L"-----" << timeout << "\n");
+		LOGMESSAGE(L"Timeout ENQ-----Timestamp:" << generateTimestamp() << L"-----Timeout:" << timeout << "\n");
 		ipc_terminate_read_thread();
 		return false;
 	default:
@@ -96,6 +88,7 @@ bool ipc_recieve_enq(DWORD timeout) {
 	return false;
 }
 
+/*
 bool ipc_recieve_syn(DWORD timeout) {
 
 	createEvents();
@@ -117,10 +110,10 @@ bool ipc_recieve_syn(DWORD timeout) {
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
-		LOGMESSAGE(L"Received SYN----" << ms << "\n");
+		LOGMESSAGE(L"Received SYN----Timestamp:" << ms << "\n");
 		return true;
 	case WAIT_TIMEOUT:
-		LOGMESSAGE(L"Timeout SYN-----" << ms << "\n");
+		LOGMESSAGE(L"Timeout SYN-----Timestamp:" << ms << "\n");
 		ipc_terminate_read_thread();
 		return false;
 	default:
@@ -129,7 +122,7 @@ bool ipc_recieve_syn(DWORD timeout) {
 	}
 	return false;
 }
-
+*/
 
 bool ipc_recieve_packet(char * readChar, DWORD timeout) {
 
@@ -148,16 +141,13 @@ bool ipc_recieve_packet(char * readChar, DWORD timeout) {
 	DWORD dwRes = WaitForSingleObject(receiveDataEvent, timeout);
 	ResetEvent(receiveDataEvent);
 
-	long long ms = duration_cast<milliseconds>(
-		system_clock::now().time_since_epoch()
-		).count() - 1480980000000;
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
-		LOGMESSAGE(L"Received PACKET-" << ms << "\n");
+		LOGMESSAGE(L"Received PACKET-Timestamp:" << generateTimestamp() << "\n");
 		return true;
 	case WAIT_TIMEOUT:
-		LOGMESSAGE(L"Timeout PACKET--" << ms << "\n");
+		LOGMESSAGE(L"Timeout PACKET--Timestamp:" << generateTimestamp() << "\n");
 		ipc_terminate_read_thread();
 		return false;
 	default:
@@ -301,8 +291,6 @@ bool ipc_terminate_read_thread()
 		return false;
 	}
 }
-
-
 
 
 

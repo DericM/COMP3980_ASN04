@@ -105,6 +105,9 @@
     <ClInclude Include="rx_check_error.h">
       <Filter>Header Files\rx</Filter>
     </ClInclude>
+    <ClInclude Include="testingfunctions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -156,6 +159,9 @@
       <Filter>Source Files\command</Filter>
     </ClCompile>
     <ClCompile Include="packetDefine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="testingfunctions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

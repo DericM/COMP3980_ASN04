@@ -74,6 +74,12 @@ DWORD WINAPI idle_wait(LPVOID na) {
 			if (ipc_recieve_enq(timeout)) {
 				rxc_send_ack();
 			}
+			else {
+				//Send Enq
+				ipc_send_enq();
+				//recieve ACK in tx_wait_connect.cpp
+				txwc_wait_connect_ack();
+			}
 		}//Idles Sequence Timeout procedure
 		else {
 			timeout = IDLE_SEQ_TIMEOUT;
@@ -86,12 +92,16 @@ DWORD WINAPI idle_wait(LPVOID na) {
 				if (ipc_recieve_enq(timeout)) {
 					rxc_send_ack();
 				}
+				else {
+					//Send Enq
+					ipc_send_enq();
+					//recieve ACK in tx_wait_connect.cpp
+					txwc_wait_connect_ack();
+				}
 			}
+
 		}
-		//Send Enq
-		ipc_send_enq();
-		//recieve ACK in tx_wait_connect.cpp
-		txwc_wait_connect_ack();
+		
 	}
 	//sets event to terminate the thread
 	SetEvent(terminateIdleThreadEvent);

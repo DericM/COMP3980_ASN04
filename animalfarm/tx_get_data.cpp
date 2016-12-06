@@ -12,32 +12,42 @@
 
 using namespace std;
 
-char syn = 0x16;
+
 char packetize [HEADER_SIZE + DATA_SIZE + CRC_SIZE];
 
+ifstream file;
+vector<char> buffer;
+static size_t packetCounter;
+char packet_flag;
 
-DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile) {
 
-	char packet_flag = 's';
+bool txgd_setup() {
+	file.open(ExePathA() + "\\test.txt", std::ios::binary);
 
-	ifstream file(ExePathA() + "\\test3.txt", std::ios::binary);
+	packetCounter = 0;
+	packet_flag = 's';
+
 	if (!file.is_open())
 	{
 		MessageBoxW(GlobalVar::g_hWnd, L"Cannot open file!", 0, 0);
 		return 0;
 	}
 
-	std::vector<char> buffer((
-		std::istreambuf_iterator<char>(file)),
-		(std::istreambuf_iterator<char>()));
+	buffer = vector<char>((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
 
 	if (buffer.size() == 0)
 	{
 		MessageBoxW(GlobalVar::g_hWnd, L"The file is empty!", 0, 0);
 		return 0;
 	}
+}
 
-	static size_t packetCounter = 0;
+
+
+
+bool txgd_get_next_packet() {
+
+	char syn = 0x16;
 
 	// START TEST. DELETE LATER!!!!!!!!!!!!
 	char packetBuffer[DATA_SIZE + 1];
@@ -51,10 +61,13 @@ DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile) {
 	memcpy_s(packetize + HEADER_SIZE, DATA_SIZE, packetBuffer, DATA_SIZE);
 	memcpy_s(packetize + HEADER_SIZE + DATA_SIZE, CRC_SIZE, &crc, CRC_SIZE);
 
-	if (!txsd_setup(packetize)) {
-	}
-
 	file.close();
+	if (txsd_setup(packetize)) {
+		return true;
+	}
+	return false;
+
+	
 	return 0;
 	// END TEST.
 
@@ -99,9 +112,10 @@ DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile) {
 	//		break;
 	//	}*/
 
-	//	if (!txsd_setup(packetize)) {
-	//		break;
+	//	if (txsd_setup(packetize)) {
+	//		return true;
 	//	}
+	//	return false;
 	//}
 	file.close();
 	return 0;

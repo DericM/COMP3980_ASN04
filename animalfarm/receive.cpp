@@ -2,113 +2,216 @@
 #include "receive.h"
 #include "globalvar.h"
 #include "packetDefine.h"
+#include <chrono>
 
-int TERMINATE_THREAD_TIMEOUT = 500;
+using namespace std::chrono;
 
-bool ipc_recieve_ack(int timeout, HANDLE* hThread, LPTHREAD_START_ROUTINE routine) {
-	char target = 0x06;
-	DWORD toReadSize = 1;
+struct ReceiveParams
+{
+	int    timeout;
+	char   target;
+	DWORD  toReadSize;
+	char * readChar;
+};
+ReceiveParams recieveParam;
+
+int TERMINATE_THREAD_TIMEOUT2 = 500;
+
+HANDLE receiveThread;
+HANDLE receiveDataEvent;
+HANDLE terminateThreadEvent;
+bool   f_runningThread;
+
+
+bool ipc_recieve_ack(int timeout) {
+	
+	receiveDataEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (receiveDataEvent == NULL) {
+		LOGMESSAGE(L"Failed to create hEvent. ");
+		return FALSE;
+	}
 	char readChar[1];
+	recieveParam.timeout    = timeout;
+	recieveParam.toReadSize = 1;
+	recieveParam.target     = 0x06;
+	recieveParam.readChar   = readChar;
 
-	if (ipc_read_from_port(readChar, toReadSize, target, timeout, hThread, routine)) {
-		LOGMESSAGE(L"Successfuly receieved: ACK" << std::endl);
-		SetEvent(GlobalVar::g_hAckEvent);
-		return TRUE;
+
+	receiveThread = CreateThread(NULL, 0, recieve_thread, NULL, 0, 0);
+
+	DWORD dwRes = WaitForSingleObject(receiveDataEvent, timeout);
+	ResetEvent(receiveDataEvent);
+	int ms = duration_cast<milliseconds>(
+		system_clock::now().time_since_epoch()
+		).count() - 1480980000000;
+	switch (dwRes)
+	{
+	case WAIT_OBJECT_0:
+		LOGMESSAGE(L"Received ACK----" << ms << "\n");
+		return true;
+	case WAIT_TIMEOUT:
+		LOGMESSAGE(L"Timeout ACK-----" << ms << "\n");
+		ipc_terminate_read_thread();
+		return false;
+	default:
+		LOGMESSAGE("Something bad");
+		break;
 	}
-	else {
-		//ACK timeout
-		return FALSE;
-	}
+	return false;
 }
 
-bool ipc_recieve_enq(int timeout, HANDLE* hThread, LPTHREAD_START_ROUTINE routine) {
-	char target = 0x05;
-	DWORD toReadSize = 1;
+bool ipc_recieve_enq(int timeout) {
+
+	receiveDataEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (receiveDataEvent == NULL) {
+		LOGMESSAGE(L"Failed to create hEvent. ");
+		return FALSE;
+	}
+
 	char readChar[1];
+	recieveParam.timeout    = timeout;
+	recieveParam.toReadSize = 1;
+	recieveParam.target     = 0x05;
+	recieveParam.readChar   = readChar;
 
-	if (ipc_read_from_port(readChar, toReadSize, target, timeout, hThread, routine)) {
-		LOGMESSAGE(L"Successfuly receieved: ENQ" << std::endl);
-		SetEvent(GlobalVar::g_hEnqEvent);
-		return TRUE;
+	receiveThread = CreateThread(NULL, 0, recieve_thread, NULL, 0, 0);
+
+	DWORD dwRes = WaitForSingleObject(receiveDataEvent, timeout);
+	ResetEvent(receiveDataEvent);
+	int ms = duration_cast<milliseconds>(
+		system_clock::now().time_since_epoch()
+		).count() - 1480980000000;
+	switch (dwRes)
+	{
+	case WAIT_OBJECT_0:
+		LOGMESSAGE(L"Received ENQ----" << ms << "\n");
+		return true;
+	case WAIT_TIMEOUT:
+		LOGMESSAGE(L"Timeout ENQ-----" << ms << "\n");
+		ipc_terminate_read_thread();
+		return false;
+	default:
+		LOGMESSAGE("Something bad");
+		break;
 	}
-	else {
-		//ENQ timeout
-		return FALSE;
-	}
+	return false;
 }
 
-bool ipc_recieve_syn(int timeout, HANDLE* hThread, LPTHREAD_START_ROUTINE routine) {
-	char target = 0x16;
-	DWORD toReadSize = 1;
+
+bool ipc_recieve_syn(int timeout) {
+
+	receiveDataEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (receiveDataEvent == NULL) {
+		LOGMESSAGE(L"Failed to create hEvent. ");
+		return FALSE;
+	}
+
 	char readChar[1];
+	recieveParam.timeout    = timeout;
+	recieveParam.toReadSize = 1;
+	recieveParam.target     = 0x16;
+	recieveParam.readChar   = readChar;
 
-	if (ipc_read_from_port(readChar, toReadSize, target, timeout, hThread, routine)) {
-		LOGMESSAGE(L"Successfuly receieved: SYN" << std::endl);
-		SetEvent(GlobalVar::g_hRXSynEvent);
-		return TRUE;
-	}
-	else {
-		//SYN timeout
-		return FALSE;
-	}
-}
 
-bool ipc_recieve_packet(char* readChar, int timeout, HANDLE* hThread, LPTHREAD_START_ROUTINE routine) {
-	GlobalVar::g_hRXPackEvent = CreateEvent(
-		NULL,               // default security attributes
-		TRUE,               // manual-reset event
-		FALSE,              // initial state is nonsignaled
-		NULL    // object name
-	);
+	receiveThread = CreateThread(NULL, 0, recieve_thread, NULL, 0, 0);
 
-	char target = 0x16;
-	DWORD toReadSize = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
-
-	if (ipc_read_from_port(readChar, toReadSize, target, timeout, hThread, routine)) {
-		LOGMESSAGE(L"Successfuly receieved: packet" << std::endl);
-		SetEvent(GlobalVar::g_hRXPackEvent);
-		return TRUE;
+	DWORD dwRes = WaitForSingleObject(receiveDataEvent, timeout);
+	ResetEvent(receiveDataEvent);
+	int ms = duration_cast<milliseconds>(
+		system_clock::now().time_since_epoch()
+		).count() - 1480980000000;
+	switch (dwRes)
+	{
+	case WAIT_OBJECT_0:
+		LOGMESSAGE(L"Received SYN----" << ms << "\n");
+		return true;
+	case WAIT_TIMEOUT:
+		LOGMESSAGE(L"Timeout SYN-----" << ms << "\n");
+		ipc_terminate_read_thread();
+		return false;
+	default:
+		LOGMESSAGE("Something bad");
+		break;
 	}
-	else {
-		//packet timeout
-		LOGMESSAGE(L"PACKET TIMED OUT BAD BAD BAD" << std::endl);
-		return FALSE;
-	}
+	return false;
 }
 
 
+bool ipc_recieve_packet(char * readChar, int timeout) {
+
+	receiveDataEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (receiveDataEvent == NULL) {
+		LOGMESSAGE(L"Failed to create hEvent. ");
+		return FALSE;
+	}
+
+	recieveParam.timeout    = timeout;
+	recieveParam.toReadSize = 1026;
+	recieveParam.target     = NULL;
+	recieveParam.readChar   = readChar;
+
+
+	receiveThread = CreateThread(NULL, 0, recieve_thread, NULL, 0, 0);
+
+	DWORD dwRes = WaitForSingleObject(receiveDataEvent, timeout);
+	ResetEvent(receiveDataEvent);
+	int ms = duration_cast<milliseconds>(
+		system_clock::now().time_since_epoch()
+		).count() - 1480980000000;
+	switch (dwRes)
+	{
+	case WAIT_OBJECT_0:
+		LOGMESSAGE(L"Received PACKET-" << ms << "\n");
+		return true;
+	case WAIT_TIMEOUT:
+		LOGMESSAGE(L"Timeout PACKET--" << ms << "\n");
+		ipc_terminate_read_thread();
+		return false;
+	default:
+		LOGMESSAGE("Something bad");
+		break;
+	}
+	return false;
+}
+
+
+DWORD WINAPI recieve_thread(LPVOID na) {
+
+	ipc_read_from_port(recieveParam.readChar, 
+					   recieveParam.toReadSize, 
+					   recieveParam.target, 
+					   recieveParam.timeout);
+	return 0;
+}
 
 
 
-bool ipc_read_from_port(char* readChar, DWORD toReadSize, char target, int timeout, HANDLE* hThread, LPTHREAD_START_ROUTINE routine) {
+void ipc_read_from_port(char * readChar, DWORD toReadSize, char target, int timeout) {
 	HANDLE& hComm = GlobalVar::g_hComm;
-	DWORD dwRes;
+
 	OVERLAPPED osReader = { 0 };
 	BOOL fWaitingOnRead = FALSE;
 	DWORD eventRet;
 
-	GlobalVar::g_hTerminateThreadEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-	if (GlobalVar::g_hTerminateThreadEvent == NULL) {
+	terminateThreadEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (terminateThreadEvent == NULL) {
 		LOGMESSAGE(L"Failed to create hEvent. ");
-		return FALSE;
+		return;
 	}
 
 	osReader.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	if (osReader.hEvent == NULL) {
 		LOGMESSAGE(L"Failed to create hEvent. ");
-		return FALSE;
+		return;
 	}
 
-	BOOL bResult = FALSE;
-	GlobalVar::g_hRunReadThread = TRUE;
-	if (hThread)
-		*hThread = CreateThread(NULL, 0, routine, NULL, 0, 0);
-	while (GlobalVar::g_hRunReadThread) {
+	f_runningThread = true;
+	while (f_runningThread) {
 		//LOGMESSAGE(L"BEGIN==>");
 		if (!fWaitingOnRead) {
 			if (!ReadFile(hComm, readChar, toReadSize, &eventRet, &osReader)) {
 				if (GetLastError() != ERROR_IO_PENDING) {
-					LOGMESSAGE(L"Error reading from port. ");
+					LOGMESSAGE(L"Error reading from port." << GetLastError << " \n");
 				}
 				else {
 					//LOGMESSAGE(L"WAITING_TO_READ==>");
@@ -118,50 +221,58 @@ bool ipc_read_from_port(char* readChar, DWORD toReadSize, char target, int timeo
 			else {
 
 				if (target == NULL || readChar[0] == target) {
-					GlobalVar::g_hRunReadThread = FALSE;
-					bResult = TRUE;
+					//LOGMESSAGE(L"GOT_TARGET1==>");
+					f_runningThread = false;
+					SetEvent(receiveDataEvent);
 				}
 				//LOGMESSAGE(L"GOT_NOTHING1==>");
 			}
 		}
 		if (fWaitingOnRead) {
-			dwRes = WaitForSingleObject(osReader.hEvent, timeout);
+			DWORD dwRes = WaitForSingleObject(osReader.hEvent, timeout);
 			switch (dwRes)
 			{
 			case WAIT_OBJECT_0:
+				//LOGMESSAGE(L"WAIT_OBJECT_0==>");
 				if (!GetOverlappedResult(hComm, &osReader, &eventRet, FALSE)) {
-				} else {
+					LOGMESSAGE(L"!GetOverlappedResult()");
+				}
+				else {
 					if (target == NULL || readChar[0] == target) {
-						GlobalVar::g_hRunReadThread = FALSE;
-						bResult = TRUE;
-					} else {
+						LOGMESSAGE(L"GOT_TARGET2==>");
+						f_runningThread = false;
+						SetEvent(receiveDataEvent);
+					}
+					else {
 						//LOGMESSAGE(L"GOT_NOTHING2==>");
 					}
 				}
 				fWaitingOnRead = FALSE;
 				break;
 			case WAIT_TIMEOUT:
-				return FALSE;
+				LOGMESSAGE(L"WAIT_TIMEOUT==>");
+				break;
 
 			default:
+				LOGMESSAGE(L"DEFAULT==>\n");
 				break;
 			}
 		}
+
 		ResetEvent(osReader.hEvent);
 		//LOGMESSAGE(L"END\n");
 	}
 
-	SetEvent(GlobalVar::g_hTerminateThreadEvent);
-
-	return bResult;
-
+	SetEvent(terminateThreadEvent);
 }
 
-bool ipc_terminate_read_thread(HANDLE& hThread)
-{
-	GlobalVar::g_hRunReadThread = FALSE;
 
-	DWORD dwRes = WaitForSingleObject(GlobalVar::g_hTerminateThreadEvent, TERMINATE_THREAD_TIMEOUT);
+
+bool ipc_terminate_read_thread()
+{
+	f_runningThread = false;
+
+	DWORD dwRes = WaitForSingleObject(terminateThreadEvent, TERMINATE_THREAD_TIMEOUT2);
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
@@ -169,13 +280,21 @@ bool ipc_terminate_read_thread(HANDLE& hThread)
 		return true;
 
 	case WAIT_TIMEOUT:
-		TerminateThread(hThread, 0);
+		TerminateThread(receiveThread, 0);
 		//CloseHandle(hThread);
 		return false;
 
 	default:
-		TerminateThread(hThread, 0);
+		TerminateThread(receiveThread, 0);
 		//CloseHandle(hThread);
 		return false;
 	}
 }
+
+
+
+
+
+
+
+

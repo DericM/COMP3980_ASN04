@@ -35,7 +35,7 @@ bool is_open_port( LPCWSTR& lpszCommName) {
 	}
 
 	SetCommState(GlobalVar::g_hComm, &GlobalVar::g_cc.dcb);
-
+	/*
 	double packetSize = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
 	COMMTIMEOUTS timeouts;
 	timeouts.ReadIntervalTimeout = ceil(packetSize / GlobalVar::g_cc.dcb.BaudRate * 1000 / packetSize);
@@ -44,7 +44,7 @@ bool is_open_port( LPCWSTR& lpszCommName) {
 	timeouts.WriteTotalTimeoutMultiplier = 0;
 	timeouts.WriteTotalTimeoutConstant = 0;
 	SetCommTimeouts(GlobalVar::g_hComm, &timeouts);
-
+	*/
 	return true;
 }
 
@@ -54,7 +54,6 @@ bool is_open_port( LPCWSTR& lpszCommName) {
 * close port.
 */
 void is_close_port() {
-	//CloseHandle(osReader.hEvent);
 	CloseHandle(GlobalVar::g_hComm);
 }
 

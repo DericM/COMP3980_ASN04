@@ -7,6 +7,7 @@
 #include "tx_wait_connect.h"
 #include "idle.h"
 #include "tx_get_data.h"
+#include "session.h"
 
 
 
@@ -194,14 +195,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     case WM_DESTROY:
-		TerminateThread(GlobalVar::g_hReadThread, 0);
-		TerminateThread(GlobalVar::g_hWriteThread, 0);
-		TerminateThread(GlobalVar::g_hIdleSendENQThread, 0);
-		TerminateThread(GlobalVar::g_hReceivingThread, 0);
-		CloseHandle(GlobalVar::g_hReadThread);
-		CloseHandle(GlobalVar::g_hWriteThread);
-		CloseHandle(GlobalVar::g_hIdleSendENQThread);
-		CloseHandle(GlobalVar::g_hReceivingThread);
+		is_close_port();
+		idle_terminate_thread();
         PostQuitMessage(0);
         break;
     default:
@@ -236,13 +231,13 @@ INT_PTR CALLBACK MainDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		switch (wmId)
 		{
 		case IDC_CONNECT:
-			idle_go_to_idle();
+			idle_connect();
 			break;
 		case IDC_SENDFILE:
 			wchar_t filenameBuff[128];
 			GetDlgItemTextW(hDlg, IDC_EDIT_SENDFILE, filenameBuff, 128);
 			LPCWSTR filename(filenameBuff);
-			idle_go_to_sendfile(filename);
+			//idle_go_to_sendfile(filename);
 			break;
 		}
 		break;

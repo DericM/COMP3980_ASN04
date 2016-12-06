@@ -1,3 +1,3 @@
 #pragma once
 
-DWORD WINAPI send_ack(LPVOID);
+bool rxc_send_ack();

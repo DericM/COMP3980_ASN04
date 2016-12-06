@@ -2,11 +2,10 @@
 
 #include <string>
 
-//void getData();
-DWORD WINAPI openFile(const HWND *box, LPCWSTR pFile);
-std::string makePacket(char buff[]);
 
 uint16_t calculateCRC16(const std::string& data);
 
+
+
 bool txgd_setup();
-bool txgd_get_packets(std::string file);
+bool txgd_get_next_packet();

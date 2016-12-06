@@ -2,6 +2,11 @@
 #include "globalvar.h"
 #include "send.h"
 #include "packetDefine.h"
+#include <chrono>
+
+using namespace std::chrono;
+
+
 
 bool ipc_send_ack() {
 	DWORD dwToWrite = 1;
@@ -9,6 +14,10 @@ bool ipc_send_ack() {
 	if (!ipc_send_data_to_port(&ACK, dwToWrite)) {
 		return FALSE;
 	}
+	int ms = duration_cast<milliseconds>(
+		system_clock::now().time_since_epoch()
+		).count() - 1480980000000;
+	LOGMESSAGE(L"Send ACK--------" << ms << "\n");
 	return TRUE;
 }
 
@@ -18,6 +27,10 @@ bool ipc_send_enq() {
 	if (!ipc_send_data_to_port(&ENQ, dwToWrite)) {
 		return FALSE;
 	}
+	int ms = duration_cast<milliseconds>(
+		system_clock::now().time_since_epoch()
+		).count() - 1480980000000;
+	LOGMESSAGE(L"Send ENQ--------" << ms << "\n");
 	return TRUE;
 }
 
@@ -26,6 +39,10 @@ bool ipc_send_packet(const char* packet) {
 	if (!ipc_send_data_to_port(packet, dwToWrite)) {
 		return FALSE;
 	}
+	int ms = duration_cast<milliseconds>(
+		system_clock::now().time_since_epoch()
+		).count() - 1480980000000;
+	LOGMESSAGE(L"Send PACKET-----" << ms <<"\n");
 	return TRUE;
 }
 

@@ -1,3 +1,3 @@
 #pragma once
 
-void rx_pp_parse(const char* packet);
+bool rxpp_parse_packet(const char* packet);

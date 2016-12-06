@@ -3,8 +3,6 @@
 #include "rx_wait_packet.h"
 
 
-bool freceivingFile;
-
 bool rxc_send_ack() {
 
 	ipc_send_ack();
@@ -13,7 +11,6 @@ bool rxc_send_ack() {
 		return true;
 	}
 	return false;
-
 }
 
 

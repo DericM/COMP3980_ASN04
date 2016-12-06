@@ -67,36 +67,33 @@ DWORD WINAPI idle_wait(LPVOID na) {
 	}
 
 	while (frunningIdleThread) {
-		//LOGMESSAGE(L"idle=>");
+		//Sending File timeout Procedure
 		if (GlobalVar::g_sending_file) {
-			//LOGMESSAGE(L"sendingfile=>");
 			idle_rand_timeout_reset();
 			timeout = RAND_TIMEOUT;
 			if (ipc_recieve_enq(timeout)) {
-				//LOGMESSAGE(L"!recieved_enq(rnd)=>");
 				rxc_send_ack();
 			}
-		}
+		}//Idles Sequence Timeout procedure
 		else {
-			//LOGMESSAGE(L"!sendingfile=>");
 			timeout = IDLE_SEQ_TIMEOUT;
 			if (ipc_recieve_enq(timeout)) {
-				//LOGMESSAGE(L"recieved_enq(idle_seq)=>");
 				rxc_send_ack();
 			}
-			else {
+			else {//After idle Squence timewr times out use rand timout
 				idle_rand_timeout_reset();
 				timeout = RAND_TIMEOUT;
 				if (ipc_recieve_enq(timeout)) {
-					//LOGMESSAGE(L"recieved_enq(rand)=>");
 					rxc_send_ack();
 				}
 			}
 		}
-		//LOGMESSAGE(L"!recieved_enq(rand)=>");
+		//Send Enq
 		ipc_send_enq();
+		//recieve ACK
 		txwc_receive_ack();
 	}
+	//sets event to terminate the thread
 	SetEvent(terminateIdleThreadEvent);
 	return 0;
 }

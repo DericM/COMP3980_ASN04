@@ -8,7 +8,7 @@ using namespace std::chrono;
 
 struct ReceiveParams
 {
-	int    timeout;
+	DWORD    timeout;
 	char   target;
 	DWORD  toReadSize;
 	char * readChar;
@@ -23,7 +23,7 @@ HANDLE terminateThreadEvent;
 bool   f_runningThread;
 
 
-bool ipc_recieve_ack(int timeout) {
+bool ipc_recieve_ack(DWORD timeout) {
 	
 	createEvents();
 
@@ -35,11 +35,13 @@ bool ipc_recieve_ack(int timeout) {
 
 
 	receiveThread = CreateThread(NULL, 0, recieve_thread, NULL, 0, 0);
+	if (receiveThread)
+		CloseHandle(receiveThread);
 
 	DWORD dwRes = WaitForSingleObject(receiveDataEvent, timeout);
 	ResetEvent(receiveDataEvent);
 
-	int ms = duration_cast<milliseconds>(
+	long long ms = duration_cast<milliseconds>(
 		system_clock::now().time_since_epoch()
 		).count() - 1480980000000;
 	switch (dwRes)
@@ -48,7 +50,7 @@ bool ipc_recieve_ack(int timeout) {
 		LOGMESSAGE(L"Received ACK----" << ms << "\n");
 		return true;
 	case WAIT_TIMEOUT:
-		LOGMESSAGE(L"Timeout ACK-----" << ms << "\n");
+		LOGMESSAGE(L"Timeout ACK-----" << ms << L"-----" << timeout << "\n");
 		ipc_terminate_read_thread();
 		return false;
 	default:
@@ -58,7 +60,7 @@ bool ipc_recieve_ack(int timeout) {
 	return false;
 }
 
-bool ipc_recieve_enq(int timeout) {
+bool ipc_recieve_enq(DWORD timeout) {
 
 	createEvents();
 
@@ -69,11 +71,13 @@ bool ipc_recieve_enq(int timeout) {
 	recieveParam.readChar   = readChar;
 
 	receiveThread = CreateThread(NULL, 0, recieve_thread, NULL, 0, 0);
+	if (receiveThread)
+		CloseHandle(receiveThread);
 
 	DWORD dwRes = WaitForSingleObject(receiveDataEvent, timeout);
 	ResetEvent(receiveDataEvent);
 
-	int ms = duration_cast<milliseconds>(
+	long long ms = duration_cast<milliseconds>(
 		system_clock::now().time_since_epoch()
 		).count() - 1480980000000;
 	switch (dwRes)
@@ -82,7 +86,7 @@ bool ipc_recieve_enq(int timeout) {
 		LOGMESSAGE(L"Received ENQ----" << ms << "\n");
 		return true;
 	case WAIT_TIMEOUT:
-		LOGMESSAGE(L"Timeout ENQ-----" << ms << "\n");
+		LOGMESSAGE(L"Timeout ENQ-----" << ms << L"-----" << timeout << "\n");
 		ipc_terminate_read_thread();
 		return false;
 	default:
@@ -92,8 +96,7 @@ bool ipc_recieve_enq(int timeout) {
 	return false;
 }
 
-/*
-bool ipc_recieve_syn(int timeout) {
+bool ipc_recieve_syn(DWORD timeout) {
 
 	createEvents();
 
@@ -108,7 +111,7 @@ bool ipc_recieve_syn(int timeout) {
 
 	DWORD dwRes = WaitForSingleObject(receiveDataEvent, timeout);
 	ResetEvent(receiveDataEvent);
-	int ms = duration_cast<milliseconds>(
+	long long ms = duration_cast<milliseconds>(
 		system_clock::now().time_since_epoch()
 		).count() - 1480980000000;
 	switch (dwRes)
@@ -125,10 +128,10 @@ bool ipc_recieve_syn(int timeout) {
 		break;
 	}
 	return false;
-}*/
+}
 
 
-bool ipc_recieve_packet(char * readChar, int timeout) {
+bool ipc_recieve_packet(char * readChar, DWORD timeout) {
 
 	createEvents();
 
@@ -139,11 +142,13 @@ bool ipc_recieve_packet(char * readChar, int timeout) {
 
 
 	receiveThread = CreateThread(NULL, 0, recieve_thread, NULL, 0, 0);
+	if (receiveThread)
+		CloseHandle(receiveThread);
 
 	DWORD dwRes = WaitForSingleObject(receiveDataEvent, timeout);
 	ResetEvent(receiveDataEvent);
 
-	int ms = duration_cast<milliseconds>(
+	long long ms = duration_cast<milliseconds>(
 		system_clock::now().time_since_epoch()
 		).count() - 1480980000000;
 	switch (dwRes)
@@ -191,7 +196,7 @@ DWORD WINAPI recieve_thread(LPVOID na) {
 
 
 
-void ipc_read_from_port(char * readChar, DWORD toReadSize, char target, int timeout) {
+void ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD timeout) {
 	HANDLE& hComm = GlobalVar::g_hComm;
 
 	static BOOL fWaitingOnRead = FALSE;

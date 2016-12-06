@@ -43,6 +43,8 @@ void idle_rand_timeout_reset() {
 
 void idle_connect() {
 	idleThread = CreateThread(NULL, 0, idle_wait, NULL, 0, 0);
+	if (idleThread)
+		CloseHandle(idleThread);
 }
 
 

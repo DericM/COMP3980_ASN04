@@ -30,7 +30,7 @@ bool txgd_setup() {
 	if (!file.is_open())
 	{
 		MessageBoxW(GlobalVar::g_hWnd, L"Cannot open file!", 0, 0);
-		return 0;
+		return false;
 	}
 
 	buffer = vector<char>((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
@@ -38,8 +38,10 @@ bool txgd_setup() {
 	if (buffer.size() == 0)
 	{
 		MessageBoxW(GlobalVar::g_hWnd, L"The file is empty!", 0, 0);
-		return 0;
+		return false;
 	}
+
+	return true;
 }
 
 

@@ -7,7 +7,7 @@
 
 
 bool txwc_receive_ack() {
-	int ACK_TIMER = (ceil(16.0 / GlobalVar::g_cc.dcb.BaudRate * 1000));
+	DWORD ACK_TIMER = static_cast<DWORD>(ceil(16.0 / GlobalVar::g_cc.dcb.BaudRate * 1000));
 
 	if (ipc_recieve_ack(ACK_TIMER)) {
 		if (!GlobalVar::g_sending_file) {//check if we are starting a new transfer

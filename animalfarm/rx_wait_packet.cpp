@@ -7,8 +7,8 @@
 
 
 bool rxwp_wait_for_packet() {
-	double packetSize = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
-	int SYN_TIMER = ceil(packetSize / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3;
+	DWORD packetSize = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
+	DWORD SYN_TIMER = static_cast<DWORD>(ceil(8.0 * packetSize / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3);
 	LOGMESSAGE(L"SYN_TIMER:" << SYN_TIMER << " \n");
 
 	char packet[HEADER_SIZE + DATA_SIZE + CRC_SIZE];

@@ -192,6 +192,7 @@ void ipc_read_from_port(char * readChar, DWORD toReadSize, char target, int time
 	OVERLAPPED osReader = { 0 };
 	BOOL fWaitingOnRead = FALSE;
 	DWORD eventRet;
+	bool successfulyReceivedData = false;
 
 	terminateThreadEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	if (terminateThreadEvent == NULL) {
@@ -223,7 +224,6 @@ void ipc_read_from_port(char * readChar, DWORD toReadSize, char target, int time
 				if (target == NULL || readChar[0] == target) {
 					//LOGMESSAGE(L"GOT_TARGET1==>");
 					f_runningThread = false;
-					SetEvent(receiveDataEvent);
 				}
 				//LOGMESSAGE(L"GOT_NOTHING1==>");
 			}
@@ -241,7 +241,6 @@ void ipc_read_from_port(char * readChar, DWORD toReadSize, char target, int time
 					if (target == NULL || readChar[0] == target) {
 						LOGMESSAGE(L"GOT_TARGET2==>");
 						f_runningThread = false;
-						SetEvent(receiveDataEvent);
 					}
 					else {
 						//LOGMESSAGE(L"GOT_NOTHING2==>");
@@ -257,10 +256,14 @@ void ipc_read_from_port(char * readChar, DWORD toReadSize, char target, int time
 				LOGMESSAGE(L"DEFAULT==>\n");
 				break;
 			}
-		}
 
+
+		}
 		ResetEvent(osReader.hEvent);
 		//LOGMESSAGE(L"END\n");
+	}
+	if (successfulyReceivedData) {
+		SetEvent(receiveDataEvent);
 	}
 
 	SetEvent(terminateThreadEvent);

@@ -47,13 +47,13 @@ void idle_setup(LPCWSTR lpszCommName) {
 	}
 }
 
-void idle_go_to_idle() {
+void idle_go_to_idle(bool idelSeq) {
 	LOGMESSAGE(L"idle_go_to_idle" << std::endl);
 	if (GlobalVar::g_hComm == NULL){
 		MessageBoxW(GlobalVar::g_hWnd, L"COM setting is not set up yet.", 0, 0);
 		return;
 	}
-	GlobalVar::g_IdleSeq = true;
+	GlobalVar::g_IdleSeq = idelSeq;
 	idle_rand_timeout_reset();
 	sendFileName = L"";
 
@@ -124,8 +124,8 @@ DWORD WINAPI idle_send_enq(LPVOID tData_) {
 		if (GlobalVar::g_IdleSeq) {
 			GlobalVar::g_IdleSeq = false;
 			enqParam.timer = RAND_TIMEOUT;
-			idle_send_enq(NULL);
-			ResetEvent(GlobalVar::g_hEnqEvent);
+			//idle_send_enq(NULL);
+			idle_go_to_idle(false);
 		} 
 		else {
 			ipc_terminate_read_thread(GlobalVar::g_hIdleWaitThread);

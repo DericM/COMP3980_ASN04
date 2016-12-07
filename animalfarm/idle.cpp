@@ -87,6 +87,7 @@ DWORD WINAPI idle_wait(LPVOID na) {
 
 		}
 		
+		PurgeComm(GlobalVar::g_hComm, PURGE_RXCLEAR);
 	}
 	//sets event to terminate the thread
 	SetEvent(GlobalVar::g_hTerminateIdleEvent);

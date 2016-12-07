@@ -8,7 +8,7 @@
 
 bool rxwp_wait_for_packet() {
 	
-	char packet[DATA_SIZE + CRC_SIZE];
+	char packet[HEADER_SIZE + DATA_SIZE + CRC_SIZE];
 
 	if (ipc_recieve_packet(packet, GlobalVar::T_RX)) {
 		LOGMESSAGE(L"rawpacket:" << packet << "\n")

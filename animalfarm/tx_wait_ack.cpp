@@ -16,5 +16,8 @@ bool txwa_receive_ack() {
 	if (ipc_recieve_ack(ACK_TIMER)) {
 		return true;//success
 	}
+
+	PurgeComm(GlobalVar::g_hComm, PURGE_TXCLEAR);
+
 	return false;//failed to send packet
 }

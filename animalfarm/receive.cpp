@@ -55,6 +55,44 @@ bool ipc_recieve_packet(char * readChar, DWORD timeout) {
 
 bool ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD timeout) {
 
+	OVERLAPPED osReader = { 0 };
+	DWORD eventRet;
+
+	osReader.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+
+	if (!ReadFile(GlobalVar::g_hComm, readChar, toReadSize, &eventRet, &osReader)) {
+		if (GetLastError() == ERROR_IO_PENDING) {
+			DWORD dwRes = WaitForSingleObject(osReader.hEvent, timeout);
+			switch (dwRes)
+			{
+			case WAIT_OBJECT_0:
+				if (GetOverlappedResult(GlobalVar::g_hComm, &osReader, &eventRet, FALSE)) {
+					if (target == NULL || readChar[0] == target) {
+						return true;
+					}
+				}
+				break;
+			case WAIT_TIMEOUT:
+				CancelIo(GlobalVar::g_hComm);
+				break;
+		}
+	}
+	else {
+		if (target == NULL || readChar[0] == target) {
+			return true;
+		}
+		LOGMESSAGE(L"READ GARBAGE!!!!!!!!!!!!!!!!!!!!!! " << checkChar(readChar[0]) << "\n");
+	}
+	ResetEvent(osReader.hEvent);
+	return false;
+}
+
+
+
+
+/*
+bool ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD timeout) {
+
 	BOOL fWaitingOnRead = FALSE;
 	OVERLAPPED osReader = { 0 };
 	DWORD eventRet;
@@ -114,6 +152,10 @@ bool ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD ti
 	return false;
 
 }
+
+*/
+
+
 
 
 

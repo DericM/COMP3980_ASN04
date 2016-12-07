@@ -60,7 +60,11 @@ DWORD WINAPI idle_wait(LPVOID na) {
 		LOGMESSAGE(L"Failed to create hEvent. ");
 		return 0;
 	}
-
+	/*
+	while (TRUE) {
+		ipc_read_from_port()
+	}
+*/
 	while (frunningIdleThread) {
 		//Sending File timeout Procedure
 		if (GlobalVar::g_sending_file) {

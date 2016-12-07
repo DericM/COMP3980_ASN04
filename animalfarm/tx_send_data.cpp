@@ -29,9 +29,9 @@ bool txsd_send(const char* frame) {
 		return false;//resend packet
 	}
 	//goto wait for ack.
-	if (!txwa_receive_ack()) {
-		return false;//resend packet
-	}
+	//if (!txwa_receive_ack()) {
+	//	return false;//resend packet
+	//}
 	return true;
 }
 

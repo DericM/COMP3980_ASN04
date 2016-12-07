@@ -65,21 +65,17 @@ bool ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD ti
 		return false;
 	}
 
-	//DWORD readFileTimeout = static_cast<DWORD>(ceil(8.0 * toReadSize / GlobalVar::g_cc.dcb.BaudRate * 1000 ));
-
 	if (!ReadFile(GlobalVar::g_hComm, readChar, toReadSize, &eventRet, &osReader)) {
 		if (GetLastError() != ERROR_IO_PENDING) {
 			LOGMESSAGE(L"Error reading from port." << GetLastError << " \n");
 		}
 		else {
-			//LOGMESSAGE(L"WAITING_TO_READ==>");
 			fWaitingOnRead = TRUE;
 		}
 	}
 	else {
 
 		if (target == NULL || readChar[0] == target) {
-			//LOGMESSAGE(L"GOT_TARGET1==>");
 			return true;
 		}
 		LOGMESSAGE(L"READ GARBAGE!!!!!!!!!!!!!!!!!!!!!! " << checkChar(readChar[0]) << "\n");

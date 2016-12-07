@@ -81,6 +81,8 @@ bool ipc_recieve_packet(char* readChar, DWORD timeout) {
 
 DWORD WINAPI recieve_thread(LPVOID na) {
 
+	PurgeComm(GlobalVar::g_hComm, PURGE_RXCLEAR);
+
 	ipc_read_from_port(recieveParam.readChar, 
 					   recieveParam.toReadSize, 
 					   recieveParam.target, 

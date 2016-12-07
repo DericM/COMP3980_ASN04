@@ -47,19 +47,34 @@ bool ipc_recieve_enq(DWORD timeout) {
 	LOGMESSAGE(L"Timeout ENQ ----------- " << generateTimestamp() << L" ----------- Timeout:" << timeout << std::endl);
 	return false;
 }
+bool ipc_recieve_syn(DWORD timeout) {
 
-
-bool ipc_recieve_packet(char * readChar, DWORD timeout) {
-
-	DWORD toReadSize = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
-	char target     = 0x16;
+	char readChar[1];
+	DWORD toReadSize = 1;
+	char target = 0x16;
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
 		LOGMESSAGE(L"Received SYN ----------- " << generateTimestamp() << std::endl);
-		SendMessageA(GlobalVar::g_hSendBox, EM_REPLACESEL, 0,(LPARAM)readChar);
+		SendMessageA(GlobalVar::g_hSendBox, EM_REPLACESEL, 0, (LPARAM)readChar);
 		return true;
 	}
 	LOGMESSAGE(L"Timeout SYN ----------- " << generateTimestamp() << L" ----------- Timeout:" << timeout << std::endl);
+	return false;
+}
+
+
+
+bool ipc_recieve_packet(char* readChar, DWORD timeout) {
+
+	DWORD toReadSize = DATA_SIZE + CRC_SIZE;
+	char target     = 0x16;
+
+	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
+		LOGMESSAGE(L"Received PAC ----------- " << generateTimestamp() << std::endl);
+		SendMessageA(GlobalVar::g_hSendBox, EM_REPLACESEL, 0,(LPARAM)readChar);
+		return true;
+	}
+	LOGMESSAGE(L"Timeout PAC ----------- " << generateTimestamp() << L" ----------- Timeout:" << timeout << std::endl);
 	return false;
 }
 
@@ -80,7 +95,7 @@ DWORD WINAPI recieve_thread(LPVOID na) {
 
 
 
-bool ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD timeout) {
+bool ipc_read_from_port(char* readChar, DWORD toReadSize, char target, DWORD timeout) {
 	HANDLE& hComm = GlobalVar::g_hComm;
 
 	OVERLAPPED osReader = { 0 };

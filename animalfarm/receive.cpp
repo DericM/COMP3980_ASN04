@@ -114,7 +114,6 @@ bool ipc_read_from_port(char* readChar, DWORD toReadSize, char target, DWORD tim
 			else {
 				if (target == NULL || readChar[0] == target) {
 					LOGMESSAGE(L"(1)RECEVIED CHARACTER : " << (int)readChar[0] << L" ---------- " << generateTimestamp() << std::endl);
-					PurgeComm(GlobalVar::g_hComm, PURGE_RXABORT);
 					PurgeComm(GlobalVar::g_hComm, PURGE_RXCLEAR);
 					return true;
 				}
@@ -140,7 +139,6 @@ bool ipc_read_from_port(char* readChar, DWORD toReadSize, char target, DWORD tim
 		{
 			if (target == NULL || readChar[0] == target) {
 				LOGMESSAGE(L"(2)RECEVIED CHARACTER : " << (int)readChar[0] << L" ---------- " << generateTimestamp() << std::endl);
-				PurgeComm(GlobalVar::g_hComm, PURGE_RXABORT);
 				PurgeComm(GlobalVar::g_hComm, PURGE_RXCLEAR);
 				return true;
 			}
@@ -150,7 +148,6 @@ bool ipc_read_from_port(char* readChar, DWORD toReadSize, char target, DWORD tim
 	CancelIo(hComm);
 	CloseHandle(osReader.hEvent);
 
-	PurgeComm(GlobalVar::g_hComm, PURGE_RXABORT);
 	PurgeComm(GlobalVar::g_hComm, PURGE_RXCLEAR);
 
 	return false;

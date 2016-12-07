@@ -1,3 +1,12 @@
+/*------------------------------------------------------------------------------------------------------------------
+-- SOURCE FILE: tx_wait_ack.cpp : is Responsible for receiving an ack after receiving en ENQ to verify
+-- that we are going to receive a packet shortly.
+--
+-- PROGRAM: Animal Farm
+--
+-- FUNCTIONS:
+-- txwc_wait_connect_ack()
+----------------------------------------------------------------------------------------------------------------------*/
 #include "stdafx.h"
 #include "tx_wait_connect.h"
 #include "tx_get_data.h"
@@ -5,7 +14,14 @@
 #include "globalvar.h"
 
 
-//Waiting for An ACK
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: txwa_receive_ack()
+--
+-- NOTES:
+-- Waits for and ACK character to be read from the comm port. Calls appropriate functions to receive a packet
+-- if it succedes.
+----------------------------------------------------------------------------------------------------------------------*/
+
 bool txwc_wait_connect_ack() {
 	//Wait for ACK Connect timeout
 	DWORD ACK_TIMER = static_cast<DWORD>(ceil(16.0 / GlobalVar::g_cc.dcb.BaudRate * 1000));

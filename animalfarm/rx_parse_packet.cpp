@@ -11,13 +11,14 @@ bool rxpp_parse_packet(const char* packet) {
 	memcpy_s(&syndrome, CRC_SIZE, packet + DATA_SIZE, CRC_SIZE);
 	dataBuffer[DATA_SIZE] = '\0';
 	std::string strData(dataBuffer);
+	std::string tempStr = "";
 	size_t lastChar = strData.find_first_of('x');
 	if (lastChar != std::string::npos)
-		strData = strData.substr(0, lastChar);
+		tempStr = strData.substr(0, lastChar);
 	
 	std::ostringstream stringStream;
-	stringStream << strData.length() << " : " << strData << std::endl;
-	std::string tempStr = stringStream.str();
+	stringStream << strData.length() << " : " << tempStr << std::endl;
+	tempStr = stringStream.str();
 
 	SendMessageA(GlobalVar::g_hSendBox, EM_REPLACESEL, 0, (LPARAM)tempStr.c_str());
 

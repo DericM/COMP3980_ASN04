@@ -1,12 +1,28 @@
+/*------------------------------------------------------------------------------------------------------------------
+-- SOURCE FILE: recieve.cpp : Handles all the writing to the port
+--
+-- PROGRAM: Animal Farm
+--
+-- FUNCTIONS:
+-- bool ipc_send_ack()
+-- bool ipc_send_enq()
+-- bool  ipc_send_packet(const char* packet)
+-- bool ipc_send_data_to_port(const char* data, DWORD dwToWrite)
+----------------------------------------------------------------------------------------------------------------------*/
+
+
 #include "stdafx.h"
 #include "globalvar.h"
 #include "send.h"
 #include "packetDefine.h"
 #include "testingfunctions.h"
 
-
-
-bool ipc_send_ack() {
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: ipc_send_ack()
+--
+-- NOTES:
+-- Sets up to wtire an ACK to the port then calls send_data_to_port
+----------------------------------------------------------------------------------------------------------------------*/bool ipc_send_ack() {
 	DWORD dwToWrite = 1;
 	char ACK = 0x06;
 	if (!ipc_send_data_to_port(&ACK, dwToWrite)) {
@@ -16,6 +32,12 @@ bool ipc_send_ack() {
 	return true;
 }
 
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: ipc_send_enq()
+--
+-- NOTES:
+-- Sets up to wtire an ENQ to the port then calls send_data_to_port
+----------------------------------------------------------------------------------------------------------------------*/
 bool ipc_send_enq() {
 	DWORD dwToWrite = 1;
 	char ENQ = 0x05;
@@ -25,7 +47,12 @@ bool ipc_send_enq() {
 	LOGMESSAGE(L"Sent ENQ ---------- " << generateTimestamp() << std::endl);
 	return TRUE;
 }
-
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: ipc_send_packet()
+--
+-- NOTES:
+-- Sets up to wtire an packet to the port then calls send_data_to_port
+----------------------------------------------------------------------------------------------------------------------*/
 bool ipc_send_packet(const char* packet) {
 	DWORD dwToWrite = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
 	if (!ipc_send_data_to_port(packet, dwToWrite)) {
@@ -36,7 +63,12 @@ bool ipc_send_packet(const char* packet) {
 }
 
 
-
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: ipc_send_data_to_port()
+--
+-- NOTES:
+-- Wrties to the port using passed in data
+----------------------------------------------------------------------------------------------------------------------*/
 bool ipc_send_data_to_port(const char* data, DWORD dwToWrite) {
 	HANDLE& hComm = GlobalVar::g_hComm;
 	OVERLAPPED osWrite = { 0 };

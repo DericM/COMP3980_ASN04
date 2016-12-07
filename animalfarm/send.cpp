@@ -43,6 +43,9 @@ bool ipc_send_data_to_port(const char* data, DWORD dwToWrite) {
 	DWORD dwWritten;
 	DWORD dwRes;
 	bool fRes;
+
+	PurgeComm(GlobalVar::g_hComm, PURGE_TXABORT);
+	PurgeComm(GlobalVar::g_hComm, PURGE_TXCLEAR);
 	
 
 	osWrite.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);

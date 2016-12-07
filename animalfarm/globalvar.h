@@ -13,10 +13,11 @@ namespace GlobalVar
 	extern int g_sending_file;
 
 
-	extern DWORD TXWC_ACK_TIMER;
-	extern DWORD TXWA_ACK_TIMER;
-	extern DWORD IDLE_SEQ_TIMEOUT;
-	extern DWORD RXWP_SYN_TIMER;
+	extern DWORD T_IDLE;
+	extern DWORD T_ACK;
+	extern DWORD T_TX;
+	extern DWORD T_RX;
+	extern DWORD T_WAIT;
 
 
 }

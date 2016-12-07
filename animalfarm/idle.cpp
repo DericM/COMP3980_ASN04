@@ -51,7 +51,7 @@ void idle_connect() {
 IDLE Wait
 */
 DWORD WINAPI idle_wait(LPVOID na) {
-	int timeout = GlobalVar::IDLE_SEQ_TIMEOUT;
+	int timeout = GlobalVar::T_IDLE;
 	GlobalVar::g_sending_file = false;
 	frunningIdleThread = true;
 
@@ -75,7 +75,7 @@ DWORD WINAPI idle_wait(LPVOID na) {
 			}
 		}//Idles Sequence Timeout procedure
 		else {
-			if (ipc_recieve_enq(GlobalVar::IDLE_SEQ_TIMEOUT)) {
+			if (ipc_recieve_enq(GlobalVar::T_IDLE)) {
 				rxc_send_ack();
 			}
 			else {//After idle Squence timewr times out use rand timout

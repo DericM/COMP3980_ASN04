@@ -9,7 +9,7 @@
 	Waits for ACK after sending a packet.
 */
 bool txwa_receive_ack() {
-	if (ipc_recieve_ack(GlobalVar::TXWA_ACK_TIMER)) {
+	if (ipc_recieve_ack(GlobalVar::T_TX)) {
 		return true;//success
 	}
 	return false;//failed to send packet

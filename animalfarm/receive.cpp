@@ -34,8 +34,6 @@ bool ipc_recieve_ack(DWORD timeout) {
 
 	PurgeComm(GlobalVar::g_hComm, PURGE_TXABORT);
 	PurgeComm(GlobalVar::g_hComm, PURGE_TXCLEAR);
-	PurgeComm(GlobalVar::g_hComm, PURGE_RXABORT);
-	PurgeComm(GlobalVar::g_hComm, PURGE_RXCLEAR);
 
 	return false;
 }

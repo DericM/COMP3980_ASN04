@@ -73,8 +73,7 @@ DWORD WINAPI recieve_thread(LPVOID na) {
 					   recieveParam.target, 
 					   recieveParam.timeout);
 
-	PurgeComm(GlobalVar::g_hComm, PURGE_RXABORT);
-	PurgeComm(GlobalVar::g_hComm, PURGE_RXCLEAR);
+	//PurgeComm(GlobalVar::g_hComm, PURGE_RXCLEAR);
 
 	return 0;
 }

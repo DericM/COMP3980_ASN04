@@ -4,5 +4,5 @@
 void idle_setup(LPCWSTR lpszCommName);
 void idle_connect();
 DWORD WINAPI idle_wait(LPVOID na);
-void idle_rand_timeout_reset();
+int idle_rand_timeout();
 bool idle_terminate_thread();

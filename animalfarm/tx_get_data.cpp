@@ -58,9 +58,14 @@ bool txgd_get_next_packet() {
 
 	char packetBuffer[DATA_SIZE + 1];
 	size_t curPos = packetCounter * DATA_SIZE;
-	size_t remain = GlobalVar::g_vFileBuffer.size() - curPos < DATA_SIZE ? GlobalVar::g_vFileBuffer.size() - curPos : DATA_SIZE;
-	memset(packetBuffer, 's', DATA_SIZE);
-	memcpy_s(packetBuffer, DATA_SIZE, &GlobalVar::g_vFileBuffer[curPos], remain);
+	size_t curDataSize = GlobalVar::g_vFileBuffer.size() - curPos < DATA_SIZE ? GlobalVar::g_vFileBuffer.size() - curPos : DATA_SIZE;
+	if (curDataSize < DATA_SIZE)
+	{
+		memset(packetBuffer, 's', DATA_SIZE);
+		GlobalVar::g_sending_file = false;
+	}
+	if (curPos < GlobalVar::g_vFileBuffer.size())
+		memcpy_s(packetBuffer, DATA_SIZE, &GlobalVar::g_vFileBuffer[curPos], curDataSize);
 
 	packetBuffer[DATA_SIZE] = '\0';
 	std::string strData(packetBuffer);

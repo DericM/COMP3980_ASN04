@@ -13,7 +13,7 @@ bool rxwp_wait_for_packet() {
 	if (ipc_recieve_syn(500))
 	{
 		DWORD timeout = static_cast<DWORD>(ceil(8.0 * packetSize / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3);
-		timeout = 9000;
+		timeout = 3000;
 		if (ipc_recieve_packet(packet, timeout)) {
 			if (rxpp_parse_packet(packet)) {
 				return true;//packet recieved

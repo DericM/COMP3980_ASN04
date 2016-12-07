@@ -50,9 +50,6 @@ bool ipc_send_data_to_port(const char* data, DWORD dwToWrite) {
 		return false;
 	}
 
-	PurgeComm(hComm, PURGE_TXABORT);
-	PurgeComm(hComm, PURGE_TXCLEAR);
-
 	if (!WriteFile(hComm, data, dwToWrite, &dwWritten, &osWrite)) {
 		if (GetLastError() != ERROR_IO_PENDING) {
 			fRes = false;

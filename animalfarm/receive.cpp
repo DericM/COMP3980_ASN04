@@ -66,14 +66,14 @@ bool ipc_recieve_syn(DWORD timeout) {
 bool ipc_recieve_packet(char* readChar, DWORD timeout) {
 
 	DWORD toReadSize = DATA_SIZE + CRC_SIZE;
-	char target     = 0x16;
+	char target     = NULL;
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
 		LOGMESSAGE(L"Received PAC ----------- " << generateTimestamp() << std::endl);
 		return true;
 	}
 	LOGMESSAGE(L"Timeout PAC ----------- " << generateTimestamp() << L" ----------- Timeout:" << timeout << std::endl);
-	return false;
+	return true;
 }
 
 
@@ -86,7 +86,11 @@ DWORD WINAPI recieve_thread(LPVOID na) {
 					   recieveParam.target, 
 					   recieveParam.timeout);
 
-	//PurgeComm(GlobalVar::g_hComm, PURGE_RXCLEAR);
+	if (recieveParam.target != 0x16)
+	{
+		PurgeComm(GlobalVar::g_hComm, PURGE_RXABORT);
+		PurgeComm(GlobalVar::g_hComm, PURGE_RXCLEAR);
+	}
 
 	return 0;
 }

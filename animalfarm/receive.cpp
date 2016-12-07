@@ -41,7 +41,6 @@ bool ipc_recieve_ack(DWORD timeout) {
 		return true;
 	case WAIT_TIMEOUT:
 		LOGMESSAGE(L"Timeout ACK-----Timestamp:" << generateTimestamp() << L"-----Timeout:" << timeout << "\n");
-		ipc_terminate_read_thread();
 		return false;
 	default:
 		LOGMESSAGE("Something bad");
@@ -146,13 +145,3 @@ bool ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD ti
 	CancelIo(hComm);
 
 }
-
-
-	return true;
-}
-
-
-
-
-
-

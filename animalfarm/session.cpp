@@ -9,11 +9,21 @@
 */
 bool is_open_port( LPCWSTR& lpszCommName) {
 	//set comm settings
-	GlobalVar::g_cc.dwSize = sizeof(COMMCONFIG);
+	/*GlobalVar::g_cc.dwSize = sizeof(COMMCONFIG);
 	GlobalVar::g_cc.wVersion = 0x100;
 	GetCommConfig(GlobalVar::g_hComm, &GlobalVar::g_cc, &GlobalVar::g_cc.dwSize);
 	if (!CommConfigDialog(lpszCommName, GlobalVar::g_hWnd, &GlobalVar::g_cc)) {
 		MessageBoxW(GlobalVar::g_hWnd, L"Failed to configure Comm Settings", 0, 0);
+		return false;
+	}*/
+
+	DCB mydcb;
+	if (BuildCommDCB(L"96,N,8,1", &mydcb) == false) {
+		LOGMESSAGE("failed to make dcb\n");
+		return false;
+	}
+	if (SetCommState(GlobalVar::g_hComm, &mydcb)) {
+		LOGMESSAGE("failed to set comm state\n");
 		return false;
 	}
 
@@ -34,7 +44,7 @@ bool is_open_port( LPCWSTR& lpszCommName) {
 		return false;
 	}
 
-	SetCommState(GlobalVar::g_hComm, &GlobalVar::g_cc.dcb);
+	
 	
 	/*
 	DWORD packetSize = HEADER_SIZE + DATA_SIZE + CRC_SIZE;

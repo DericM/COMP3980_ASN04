@@ -51,6 +51,11 @@ void idle_connect() {
 IDLE Wait
 */
 DWORD WINAPI idle_wait(LPVOID na) {
+
+	LPCWSTR lpszCommName = L"COM1";
+	is_open_port(lpszCommName);
+
+
 	int timeout = GlobalVar::T_IDLE;
 	GlobalVar::g_sending_file = false;
 	frunningIdleThread = true;
@@ -64,7 +69,9 @@ DWORD WINAPI idle_wait(LPVOID na) {
 	while (TRUE) {
 		ipc_read_from_port()
 	}
-*/
+	*/
+
+	
 	while (frunningIdleThread) {
 		//Sending File timeout Procedure
 		if (GlobalVar::g_sending_file) {
@@ -100,6 +107,8 @@ DWORD WINAPI idle_wait(LPVOID na) {
 	//sets event to terminate the thread
 	SetEvent(terminateIdleThreadEvent);
 	return 0;
+
+	
 }
 
 

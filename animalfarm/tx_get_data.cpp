@@ -61,7 +61,7 @@ bool txgd_get_next_packet() {
 	size_t curDataSize = GlobalVar::g_vFileBuffer.size() - curPos < DATA_SIZE ? GlobalVar::g_vFileBuffer.size() - curPos : DATA_SIZE;
 	if (curDataSize < DATA_SIZE)
 	{
-		memset(packetBuffer, 's', DATA_SIZE);
+		memset(packetBuffer, 'x', DATA_SIZE);
 		GlobalVar::g_sending_file = false;
 	}
 	if (curPos < GlobalVar::g_vFileBuffer.size())

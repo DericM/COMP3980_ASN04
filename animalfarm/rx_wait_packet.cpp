@@ -22,10 +22,13 @@ bool rxwp_wait_for_packet() {
 	LOGMESSAGE(L"Wait For SYN ----------- " << generateTimestamp() << std::endl);
 	while (curTime - startTime < PACKET_TIMER)
 	{
-		if (ipc_recieve_packet(packet, PACKET_TIMER))
+		if (ipc_recieve_syn(SYN_TIMER))
 		{
-			if (rxpp_parse_packet(packet)) {
-				return true;//packet recieved
+			if (ipc_recieve_packet(packet, PACKET_TIMER))
+			{
+				if (rxpp_parse_packet(packet)) {
+					return true;//packet recieved
+				}
 			}
 		}
 		GetSystemTime(&st);

@@ -66,10 +66,10 @@ bool ipc_recieve_syn(DWORD timeout) {
 
 bool ipc_recieve_packet(char* readChar, DWORD timeout) {
 
-	DWORD toReadSize = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
+	DWORD toReadSize = DATA_SIZE + CRC_SIZE;
 	char target = 0x16;
 
-	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
+	if (ipc_read_from_port(readChar, toReadSize, target, timeout, true)) {
 		LOGMESSAGE(L"Received PAC ----------- " << generateTimestamp() << std::endl);
 		return true;
 	}
@@ -77,7 +77,7 @@ bool ipc_recieve_packet(char* readChar, DWORD timeout) {
 	return false;
 }
 
-bool ipc_read_from_port(char* readChar, DWORD toReadSize, char target, DWORD timeout) {
+bool ipc_read_from_port(char* readChar, DWORD toReadSize, char target, DWORD timeout, bool bPacket) {
 	HANDLE& hComm = GlobalVar::g_hComm;
 
 	OVERLAPPED osReader = { 0 };
@@ -102,7 +102,7 @@ bool ipc_read_from_port(char* readChar, DWORD toReadSize, char target, DWORD tim
 			}
 			else
 			{
-				if (toReadSize == readBytes && readChar[0] == target)
+				if (toReadSize == readBytes && (bPacket || readChar[0] == target))
 				{
 					LOGMESSAGE(L"(1)RECEVIED CHARACTER : " << (int)readChar[0] << L" ---------- " << generateTimestamp() << std::endl);
 					return true;
@@ -127,7 +127,7 @@ bool ipc_read_from_port(char* readChar, DWORD toReadSize, char target, DWORD tim
 		}
 		else
 		{
-			if (toReadSize == readBytes && readChar[0] == target)
+			if (toReadSize == readBytes && (bPacket || readChar[0] == target))
 			{
 				LOGMESSAGE(L"(1)RECEVIED CHARACTER : " << (int)readChar[0] << L" ---------- " << generateTimestamp() << std::endl);
 				return true;

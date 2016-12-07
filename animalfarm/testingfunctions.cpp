@@ -5,9 +5,10 @@
 using namespace std::chrono;
 
 long generateTimestamp() {
-	return duration_cast<milliseconds>(
+	return 0;
+	/*return duration_cast<milliseconds>(
 		system_clock::now().time_since_epoch()
-		).count() - 1480980000000;
+		).count() - 1480980000000;*/
 }
 
 

@@ -29,6 +29,6 @@ bool rxce_check_error(std::string data, uint16_t syndrome) {
 	LOGMESSAGE(L"packet" << data.c_str());
 	////////////////////
 
-	ipc_send_ack();
+	//ipc_send_ack();
 	return true;
 }

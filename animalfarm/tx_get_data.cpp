@@ -1,3 +1,14 @@
+/*------------------------------------------------------------------------------------------------------------------
+-- SOURCE FILE: tx_get_data.cpp : contains the functions that are responsible for getting the data from the file to be sent
+--                                , packitizing the data and grabing packets to pass into send data.
+--
+-- PROGRAM: Animal Farm
+--
+-- FUNCTIONS:
+-- bool txgd_setup()
+-- bool txgd_get_next_packet()
+----------------------------------------------------------------------------------------------------------------------*/
+
 #include "stdafx.h"
 #include "tx_get_data.h"
 #include "animalfarm.h"
@@ -18,7 +29,13 @@ char packetize [HEADER_SIZE + DATA_SIZE + CRC_SIZE];
 static size_t packetCounter = 0;
 char packet_flag;
 
-
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: txgd_setup()
+--
+-- NOTES:
+-- If new file is being sent this function gwets call to grab all the data from the file and save it into a vector that holds chars
+-- so that they can be accessed more easily 
+----------------------------------------------------------------------------------------------------------------------*/
 bool txgd_setup() {
 	//gets file for directory path
 	ifstream file;
@@ -51,7 +68,12 @@ bool txgd_setup() {
 
 
 
-
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION:  txgd_get_next_packet() 
+--
+-- NOTES:
+-- Grabs the next packet that need to be sent from the vector of chars and passes it to txsd_setup in tx_send_data.cpp
+----------------------------------------------------------------------------------------------------------------------*/
 bool txgd_get_next_packet() {
 	if (!GlobalVar::g_bStartPacket && packetCounter == 0)
 	{

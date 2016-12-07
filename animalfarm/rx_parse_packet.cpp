@@ -1,3 +1,11 @@
+/*------------------------------------------------------------------------------------------------------------------
+-- SOURCE FILE: rx_parse_packet.cpp: Parses the packet and prepares it for Error Check
+--
+-- PROGRAM: Animal Farm
+--
+-- FUNCTIONS:
+-- bool rxpp_parse_packet(const char* packet)
+----------------------------------------------------------------------------------------------------------------------*/
 #include "stdafx.h"
 #include "globalvar.h"
 #include "packetDefine.h"
@@ -5,6 +13,13 @@
 #include "rx_check_error.h"
 #include <fstream>
 
+
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: rrxpp_parse_packet(const char* packet)
+--
+-- NOTES:
+-- takes in a packet and separeates the data from the CRC and passes both into Error Check 
+----------------------------------------------------------------------------------------------------------------------*/
 bool rxpp_parse_packet(const char* packet) {
 	char dataBuffer[DATA_SIZE + 1];
 	uint16_t syndrome;

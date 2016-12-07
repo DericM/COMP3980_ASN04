@@ -1,3 +1,9 @@
+/*------------------------------------------------------------------------------------------------------------------
+-- SOURCE FILE: globalvar.cpp : contains all the global variables used in the animal farm protocol
+--
+-- PROGRAM: Animal Farm
+----------------------------------------------------------------------------------------------------------------------*/
+
 #include "stdafx.h"
 #include "globalvar.h"
 

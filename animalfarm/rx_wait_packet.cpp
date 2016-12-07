@@ -1,3 +1,12 @@
+/*------------------------------------------------------------------------------------------------------------------
+-- SOURCE FILE: rx_wait_Packet.cpp : reads port for a SYN character and a packet
+--
+-- PROGRAM: Animal Farm
+--
+-- FUNCTIONS:
+-- bool rxwp_wait_for_packet() 
+----------------------------------------------------------------------------------------------------------------------*/
+
 #include "stdafx.h"
 #include "globalvar.h"
 #include "rx_wait_packet.h"
@@ -7,6 +16,15 @@
 #include "testingfunctions.h"
 
 
+
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: rxwp_wait_for_packet()
+--
+-- NOTES:
+-- Reads from the Port for a SYN by calling ipc_receive_syn function in the recieve.cpp file and if that is successful 
+-- the function then reads from the port for the packet by calling ipc_receive_packet function in the receive.cpp file.
+-- if either fails function goes back to Idle
+----------------------------------------------------------------------------------------------------------------------*/
 bool rxwp_wait_for_packet() {
 	DWORD packetSize = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
 	char packet[HEADER_SIZE + DATA_SIZE + CRC_SIZE] = { 0 };

@@ -10,14 +10,17 @@
 
 bool txsd_setup(const char* frame) {
 	int transmission_attempts = 0;
-	while (transmission_attempts < TX_FAIL_COUNTER) {
-		if (txsd_send(frame)) {
+	while (transmission_attempts < TX_FAIL_COUNTER)
+	{
+		if (txsd_send(frame))
+		{
 			return true;//go get next packet
 		}
-		transmission_attempts++;
-
-		PurgeComm(GlobalVar::g_hComm, PURGE_TXABORT);
-		//PurgeComm(GlobalVar::g_hComm, PURGE_TXCLEAR);
+		else
+		{
+			transmission_attempts++;
+			PurgeComm(GlobalVar::g_hComm, PURGE_TXCLEAR);
+		}
 	}
 	return false;//return to idle
 }
@@ -29,9 +32,9 @@ bool txsd_send(const char* frame) {
 		return false;//resend packet
 	}
 	//goto wait for ack.
-	//if (!txwa_receive_ack()) {
-	//	return false;//resend packet
-	//}
+	if (!txwa_receive_ack()) {
+		return false;//resend packet
+	}
 	return true;
 }
 

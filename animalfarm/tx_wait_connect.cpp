@@ -18,9 +18,10 @@ bool txwc_wait_connect_ack() {
 		else
 			LOGMESSAGE(L"Sending a packet failed." << std::endl);
 	}
-
-	PurgeComm(GlobalVar::g_hComm, PURGE_TXABORT);
-	PurgeComm(GlobalVar::g_hComm, PURGE_TXCLEAR);
+	else
+	{
+		PurgeComm(GlobalVar::g_hComm, PURGE_TXCLEAR);
+	}
 
 	return false;//failed to send packet
 }

@@ -17,7 +17,6 @@ namespace GlobalVar
 	extern DWORD T_ACK;
 	extern DWORD T_TX;
 	extern DWORD T_RX;
-	extern DWORD T_WAIT;
 
 
 }

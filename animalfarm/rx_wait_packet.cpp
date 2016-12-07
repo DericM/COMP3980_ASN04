@@ -7,14 +7,12 @@
 
 
 bool rxwp_wait_for_packet() {
-	DWORD packetSize = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
-	char packet[HEADER_SIZE + DATA_SIZE + CRC_SIZE];
-
-
+	
 	if (!ipc_recieve_syn(GlobalVar::T_RX)) {
 		return false;//couldnt get sync
 	}
 
+	char packet[DATA_SIZE + CRC_SIZE];
 
 	if (ipc_recieve_packet(packet, GlobalVar::T_RX)) {
 		LOGMESSAGE(L"rawpacket:" << packet << "\n")
@@ -23,13 +21,5 @@ bool rxwp_wait_for_packet() {
 		}
 	}
 
-	
-
-	//char * packet = "";
-	//if (ipc_recieve_packet(packet, 2000)) {
-	//	if (rxpp_parse_packet(packet)) {
-	//		return true;//packet recieved
-	//	}
-	//}
 	return false;//no packet
 }

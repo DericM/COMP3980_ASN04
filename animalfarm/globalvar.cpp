@@ -12,9 +12,8 @@ namespace GlobalVar
 	int g_sending_file;
 
 	DWORD T_IDLE = 1000;
-	DWORD T_ACK  = 75;
+	DWORD T_ACK  = 125;
 	DWORD T_TX   = 1000;
 	DWORD T_RX   = 3 * T_TX;
-	DWORD T_WAIT = 3 * T_RX;
 
 }

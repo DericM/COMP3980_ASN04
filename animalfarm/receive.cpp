@@ -115,11 +115,11 @@ bool ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD ti
 			}
 			else {
 				if (target == NULL || readChar[0] == target) {
-					LOGMESSAGE(L"GOT_TARGET2==>" << (int)target << std::endl);
-					SetEvent(receiveDataEvent);
+					//LOGMESSAGE(L"GOT_TARGET2==>");
+					return true;
 				}
 				else {
-					//LOGMESSAGE(L"GOT_NOTHING2==>");
+					LOGMESSAGE(L"READ GARBAGE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
 				}
 			}
 			break;

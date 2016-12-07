@@ -17,8 +17,5 @@ bool txwa_receive_ack() {
 		return true;//success
 	}
 
-	PurgeComm(GlobalVar::g_hComm, PURGE_TXABORT);
-	PurgeComm(GlobalVar::g_hComm, PURGE_TXCLEAR);
-
 	return false;//failed to send packet
 }

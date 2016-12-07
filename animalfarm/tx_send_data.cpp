@@ -15,6 +15,9 @@ bool txsd_setup(const char* frame) {
 			return true;//go get next packet
 		}
 		transmission_attempts++;
+
+		PurgeComm(GlobalVar::g_hComm, PURGE_TXABORT);
+		PurgeComm(GlobalVar::g_hComm, PURGE_TXCLEAR);
 	}
 	return false;//return to idle
 }

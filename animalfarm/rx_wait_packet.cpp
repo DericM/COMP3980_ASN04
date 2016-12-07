@@ -4,13 +4,14 @@
 #include "rx_parse_packet.h"
 #include "receive.h"
 #include "packetDefine.h"
-
+#include <atomic>
+#include <thread>
 
 bool rxwp_wait_for_packet() {
 	
 	char packet[HEADER_SIZE + DATA_SIZE + CRC_SIZE + 1];
 	
-
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	if (ipc_recieve_packet(packet, GlobalVar::T_RX)) {
 		packet[HEADER_SIZE + DATA_SIZE + CRC_SIZE] = '\0';
 		LOGMESSAGE(L"rawpacket: " << packet << "\n")

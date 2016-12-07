@@ -22,7 +22,7 @@ bool rxc_send_ack() {
 
 	if (rxwp_wait_for_packet()) {
 		PurgeComm(GlobalVar::g_hComm, PURGE_TXCLEAR);
-		ipc_send_ack();
+		//ipc_send_ack();
 		return true;
 	}
 	return false;

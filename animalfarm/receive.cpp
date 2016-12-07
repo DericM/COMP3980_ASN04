@@ -18,7 +18,6 @@ int TERMINATE_THREAD_TIMEOUT2 = 500;
 
 HANDLE receiveThread;
 HANDLE receiveDataEvent;
-HANDLE terminateThreadEvent;
 bool   f_runningThread;
 
 
@@ -39,7 +38,6 @@ bool ipc_recieve_ack(DWORD timeout) {
 		CloseHandle(receiveThread);
 
 	DWORD dwRes = WaitForSingleObject(receiveDataEvent, timeout);
-	ResetEvent(receiveDataEvent);
 
 	switch (dwRes)
 	{
@@ -54,6 +52,7 @@ bool ipc_recieve_ack(DWORD timeout) {
 		LOGMESSAGE("Something bad");
 		break;
 	}
+	CloseHandle(receiveDataEvent);
 	return false;
 }
 
@@ -167,11 +166,6 @@ bool createEvents() {
 		LOGMESSAGE(L"Failed to create hEvent. ");
 		return false;
 	}
-	terminateThreadEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-	if (terminateThreadEvent == NULL) {
-		LOGMESSAGE(L"Failed to create hEvent. ");
-		return false;
-	}
 	return true;
 }
 
@@ -192,10 +186,8 @@ DWORD WINAPI recieve_thread(LPVOID na) {
 void ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD timeout) {
 	HANDLE& hComm = GlobalVar::g_hComm;
 
-	static BOOL fWaitingOnRead = FALSE;
 	OVERLAPPED osReader = { 0 };
 	DWORD eventRet;
-	bool successfulyReceivedData = false;
 
 	osReader.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	if (osReader.hEvent == NULL) {
@@ -203,71 +195,46 @@ void ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD ti
 		return;
 	}
 
-	//DWORD readFileTimeout = static_cast<DWORD>(ceil(8.0 * toReadSize / GlobalVar::g_cc.dcb.BaudRate * 1000 ));
-
-	f_runningThread = true;
-	while (generateTimestamp() - recieveParam.startTime < timeout) {
-		//LOGMESSAGE(L"BEGIN==>");
-		if (!fWaitingOnRead) {
-			if (!ReadFile(hComm, readChar, toReadSize, &eventRet, &osReader)) {
-				if (GetLastError() != ERROR_IO_PENDING) {
-					LOGMESSAGE(L"Error reading from port." << GetLastError << " \n");
-				}
-				else {
-					//LOGMESSAGE(L"WAITING_TO_READ==>");
-					fWaitingOnRead = TRUE;
-				}
+	if (GetLastError() != ERROR_IO_PENDING)
+	{
+		DWORD dwRes = WaitForSingleObject(osReader.hEvent, timeout);
+		switch (dwRes)
+		{
+		case WAIT_OBJECT_0:
+			//LOGMESSAGE(L"WAIT_OBJECT_0==>");
+			if (!GetOverlappedResult(hComm, &osReader, &eventRet, FALSE)) {
+				LOGMESSAGE(L"!GetOverlappedResult()");
 			}
 			else {
-
 				if (target == NULL || readChar[0] == target) {
-					//LOGMESSAGE(L"GOT_TARGET1==>");
-					f_runningThread = false;
-					successfulyReceivedData = true;
-				}
-				//LOGMESSAGE(L"GOT_NOTHING1==>");
-			}
-		}
-		if (fWaitingOnRead) {
-			DWORD dwRes = WaitForSingleObject(osReader.hEvent, 1);
-			switch (dwRes)
-			{
-			case WAIT_OBJECT_0:
-				//LOGMESSAGE(L"WAIT_OBJECT_0==>");
-				if (!GetOverlappedResult(hComm, &osReader, &eventRet, FALSE)) {
-					LOGMESSAGE(L"!GetOverlappedResult()");
+					LOGMESSAGE(L"GOT_TARGET2==>" << (int)target << std::endl);
+					SetEvent(receiveDataEvent);
 				}
 				else {
-					if (target == NULL || readChar[0] == target) {
-						LOGMESSAGE(L"GOT_TARGET2==>");
-						f_runningThread = false;
-						successfulyReceivedData = true;
-					}
-					else {
-						//LOGMESSAGE(L"GOT_NOTHING2==>");
-					}
+					//LOGMESSAGE(L"GOT_NOTHING2==>");
 				}
-				fWaitingOnRead = FALSE;
-				break;
-			case WAIT_TIMEOUT:
-				//LOGMESSAGE(L"WAIT_TIMEOUT==>" << target << std::endl);
-				break;
-
-			default:
-				LOGMESSAGE(L"DEFAULT==>\n");
-				break;
 			}
+			break;
+		case WAIT_TIMEOUT:
+			//LOGMESSAGE(L"WAIT_TIMEOUT==>" << target << std::endl);
+			break;
 
-
+		default:
+			LOGMESSAGE(L"DEFAULT==>\n");
+			break;
 		}
-		ResetEvent(osReader.hEvent);
-		//LOGMESSAGE(L"END\n");
 	}
-	if (successfulyReceivedData) {
-		SetEvent(receiveDataEvent);
+	else
+	{
+		if (!ReadFile(hComm, readChar, toReadSize, &eventRet, &osReader))
+		{
+			if (GetLastError() != ERROR_IO_PENDING) {
+				LOGMESSAGE(L"Error reading from port." << GetLastError << " \n");
+			}
+		}
 	}
 
-	SetEvent(terminateThreadEvent);
+	CancelIo(hComm);
 
 	CloseHandle(osReader.hEvent);
 }
@@ -295,8 +262,6 @@ bool ipc_terminate_read_thread()
 	//	//CloseHandle(hThread);
 	//	return false;
 	//}
-
-	CloseHandle(terminateThreadEvent);
 
 	return true;
 }

@@ -69,7 +69,8 @@ DWORD WINAPI idle_wait(LPVOID na) {
 	}
 
 	while (GlobalVar::g_bRunIdle) {
-		if (GlobalVar::g_sending_file)
+		//if (GlobalVar::g_sending_file)
+		if (GlobalVar::g_bWannaSendFile)
 		{
 			ipc_send_enq();
 			txwc_wait_connect_ack();

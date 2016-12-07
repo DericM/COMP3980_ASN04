@@ -10,10 +10,10 @@ bool ipc_send_ack() {
 	DWORD dwToWrite = 1;
 	char ACK = 0x06;
 	if (!ipc_send_data_to_port(&ACK, dwToWrite)) {
-		return FALSE;
+		return false;
 	}
-	LOGMESSAGE(L"Sent ACK--------Timestamp:" << generateTimestamp() << "\n");
-	return TRUE;
+	LOGMESSAGE(L"Sent ACK ---------- " << generateTimestamp() << std::endl);
+	return true;
 }
 
 bool ipc_send_enq() {
@@ -22,7 +22,7 @@ bool ipc_send_enq() {
 	if (!ipc_send_data_to_port(&ENQ, dwToWrite)) {
 		return FALSE;
 	}
-	LOGMESSAGE(L"Sent ENQ--------Timestamp:" << generateTimestamp() << "\n");
+	LOGMESSAGE(L"Sent ENQ ---------- " << generateTimestamp() << std::endl);
 	return TRUE;
 }
 
@@ -31,7 +31,7 @@ bool ipc_send_packet(const char* packet) {
 	if (!ipc_send_data_to_port(packet, dwToWrite)) {
 		return FALSE;
 	}
-	LOGMESSAGE(L"Sent PACKET-----Timestamp:" << generateTimestamp() <<"\n");
+	LOGMESSAGE(L"Sent SYN ---------- " << generateTimestamp() << std::endl);
 	return TRUE;
 }
 
@@ -47,16 +47,16 @@ bool ipc_send_data_to_port(const char* data, DWORD dwToWrite) {
 
 	osWrite.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	if (osWrite.hEvent == NULL) {
-		return FALSE;
+		return false;
 	}
 
 	if (!WriteFile(hComm, data, dwToWrite, &dwWritten, &osWrite)) {
 		if (GetLastError() != ERROR_IO_PENDING) {
-			fRes = FALSE;
+			fRes = false;
 		}
 		else {
 			if (!GetOverlappedResult(hComm, &osWrite, &dwWritten, TRUE)) {
-				fRes = FALSE;
+				fRes = false;
 			}
 			else {
 				// Write is pending.
@@ -66,17 +66,17 @@ bool ipc_send_data_to_port(const char* data, DWORD dwToWrite) {
 					// OVERLAPPED structure's event has been signaled. 
 				case WAIT_OBJECT_0:
 					if (!GetOverlappedResult(hComm, &osWrite, &dwWritten, FALSE))
-						fRes = FALSE;
+						fRes = false;
 					else
 						// Write operation completed successfully.
-						fRes = TRUE;
+						fRes = true;
 					break;
 
 				default:
 					// An error has occurred in WaitForSingleObject.
 					// This usually indicates a problem with the
 					// OVERLAPPED structure's event handle.
-					fRes = FALSE;
+					fRes = false;
 					
 					break;
 				}
@@ -84,7 +84,7 @@ bool ipc_send_data_to_port(const char* data, DWORD dwToWrite) {
 		}
 	}
 	else {
-		fRes = TRUE;
+		fRes = true;
 	}
 	CloseHandle(osWrite.hEvent);
 	return fRes;

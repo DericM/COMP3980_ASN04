@@ -26,27 +26,11 @@ bool ipc_recieve_ack(DWORD timeout) {
 	char readChar[1];
 	DWORD toReadSize = 1;
 	char target = 0x06;
-
-
-	receiveThread = CreateThread(NULL, 0, recieve_thread, NULL, 0, 0);
-	if (receiveThread)
-		CloseHandle(receiveThread);
-
-	DWORD dwRes = WaitForSingleObject(receiveDataEvent, timeout);
-
-	switch (dwRes)
-	{
-	case WAIT_OBJECT_0:
-		LOGMESSAGE(L"Received ACK----Timestamp:" << generateTimestamp() << "\n");
+	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
+		LOGMESSAGE(L"Received ACK ----------- " << generateTimestamp() << std::endl);
 		return true;
-	case WAIT_TIMEOUT:
-		LOGMESSAGE(L"Timeout ACK-----Timestamp:" << generateTimestamp() << L"-----Timeout:" << timeout << "\n");
-		return false;
-	default:
-		LOGMESSAGE("Something bad");
-		break;
 	}
-	CloseHandle(receiveDataEvent);
+	LOGMESSAGE(L"Timeout ACK ----------- " << generateTimestamp() << L" ----------- Timeout:" << timeout << std::endl);
 	return false;
 }
 
@@ -57,10 +41,10 @@ bool ipc_recieve_enq(DWORD timeout) {
 	char target = 0x05;
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
-		LOGMESSAGE(L"Received ENQ----Timestamp:" << generateTimestamp() << "\n");
+		LOGMESSAGE(L"Received ENQ ----------- " << generateTimestamp() << std::endl);
 		return true;
 	}
-	LOGMESSAGE(L"Timeout ENQ-----Timestamp:" << generateTimestamp() << L"-----Timeout:" << timeout << "\n");
+	LOGMESSAGE(L"Timeout ENQ ----------- " << generateTimestamp() << L" ----------- Timeout:" << timeout << std::endl);
 	return false;
 }
 
@@ -71,9 +55,10 @@ bool ipc_recieve_packet(char * readChar, DWORD timeout) {
 	char target     = 0x16;
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
-		LOGMESSAGE(L"Received PACKET-Timestamp:" << generateTimestamp() << "\n");
+		LOGMESSAGE(L"Received SYN ----------- " << generateTimestamp() << std::endl);
 		return true;
 	}
+	LOGMESSAGE(L"Timeout SYN ----------- " << generateTimestamp() << L" ----------- Timeout:" << timeout << std::endl);
 	return true;
 }
 
@@ -99,7 +84,7 @@ bool ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD ti
 
 	osReader.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	if (osReader.hEvent == NULL) {
-		LOGMESSAGE(L"Failed to create hEvent. ");
+		LOGMESSAGE(L"Failed to create hEvent. " << std::endl);
 		return false;
 	}
 
@@ -109,26 +94,21 @@ bool ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD ti
 		switch (dwRes)
 		{
 		case WAIT_OBJECT_0:
-			//LOGMESSAGE(L"WAIT_OBJECT_0==>");
 			if (!GetOverlappedResult(hComm, &osReader, &eventRet, FALSE)) {
-				LOGMESSAGE(L"!GetOverlappedResult()");
+				LOGMESSAGE(L"!GetOverlappedResult()" << std::endl);
 			}
 			else {
 				if (target == NULL || readChar[0] == target) {
-					//LOGMESSAGE(L"GOT_TARGET2==>");
+					LOGMESSAGE(L"(1)RECEVIED CHARACTER : " << (int)readChar[0] << L" ---------- " << generateTimestamp() << std::endl);
 					return true;
-				}
-				else {
-					LOGMESSAGE(L"READ GARBAGE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
 				}
 			}
 			break;
 		case WAIT_TIMEOUT:
-			//LOGMESSAGE(L"WAIT_TIMEOUT==>" << target << std::endl);
 			break;
 
 		default:
-			LOGMESSAGE(L"DEFAULT==>\n");
+			LOGMESSAGE(L"DEFAULT" << std::endl);
 			break;
 		}
 	}
@@ -137,11 +117,21 @@ bool ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD ti
 		if (!ReadFile(hComm, readChar, toReadSize, &eventRet, &osReader))
 		{
 			if (GetLastError() != ERROR_IO_PENDING) {
-				LOGMESSAGE(L"Error reading from port." << GetLastError << " \n");
+				LOGMESSAGE(L"Error reading from port." << GetLastError << std::endl);
+			}
+		}
+		else
+		{
+			if (target == NULL || readChar[0] == target) {
+				LOGMESSAGE(L"(2)RECEVIED CHARACTER : " << (int)readChar[0] << L" ---------- " << generateTimestamp() << std::endl);
+				return true;
 			}
 		}
 	}
 
 	CancelIo(hComm);
+	CloseHandle(osReader.hEvent);
+
+	return false;
 
 }

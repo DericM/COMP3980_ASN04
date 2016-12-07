@@ -21,5 +21,9 @@ namespace GlobalVar
 
 	DWORD RXWP_SYN_TIMER = 3000;
 	//SYN_TIMER = static_cast<DWORD>(ceil(8.0 * packetSize / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3);
+	
+	bool g_bRunIdle = false;
+	HANDLE g_hIdleThread;
+	HANDLE g_hTerminateIdleEvent;
 
 }

@@ -13,11 +13,6 @@ std::random_device rnd;
 
 int TERMINATE_THREAD_TIMEOUT = 500;
 
-HANDLE idleThread;
-HANDLE terminateIdleThreadEvent;
-
-bool frunningIdleThread;
-
 
 void idle_setup(LPCWSTR lpszCommName) {
 
@@ -37,9 +32,9 @@ int idle_rand_timeout() {
 
 //Called after connect button is pushed
 void idle_connect() {
-	idleThread = CreateThread(NULL, 0, idle_wait, NULL, 0, 0);
-	if (idleThread)
-		CloseHandle(idleThread);
+	GlobalVar::g_hIdleThread = CreateThread(NULL, 0, idle_wait, NULL, 0, 0);
+	if (GlobalVar::g_hIdleThread)
+		CloseHandle(GlobalVar::g_hIdleThread);
 }
 
 
@@ -53,15 +48,15 @@ IDLE Wait
 DWORD WINAPI idle_wait(LPVOID na) {
 	int timeout = GlobalVar::IDLE_SEQ_TIMEOUT;
 	GlobalVar::g_sending_file = false;
-	frunningIdleThread = true;
+	GlobalVar::g_bRunIdle = true;
 
-	terminateIdleThreadEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-	if (terminateIdleThreadEvent == NULL) {
+	GlobalVar::g_hTerminateIdleEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (GlobalVar::g_hTerminateIdleEvent == NULL) {
 		LOGMESSAGE(L"Failed to create hEvent. ");
 		return 0;
 	}
 
-	while (frunningIdleThread) {
+	while (GlobalVar::g_bRunIdle) {
 		//Sending File timeout Procedure
 		if (GlobalVar::g_sending_file) {
 			if (ipc_recieve_enq(idle_rand_timeout())) {
@@ -94,28 +89,31 @@ DWORD WINAPI idle_wait(LPVOID na) {
 		
 	}
 	//sets event to terminate the thread
-	SetEvent(terminateIdleThreadEvent);
+	SetEvent(GlobalVar::g_hTerminateIdleEvent);
 	return 0;
 }
 
 
 bool idle_terminate_thread()
 {
-	frunningIdleThread = false;
+	GlobalVar::g_bRunIdle = false;
 	//Waits for Terminate thread event or Terminate_thread Timeout
-	DWORD dwRes = WaitForSingleObject(terminateIdleThreadEvent, TERMINATE_THREAD_TIMEOUT);
+	DWORD dwRes = WaitForSingleObject(GlobalVar::g_hTerminateIdleEvent, INFINITE);
 	switch (dwRes)
 	{
 	case WAIT_OBJECT_0:
-		return true;
+		break;
 
 	case WAIT_TIMEOUT:
-		TerminateThread(idleThread, 0);
-		return false;
+		TerminateThread(GlobalVar::g_hIdleThread, 0);
+		break;
 
 	default:
-		TerminateThread(idleThread, 0);
-		//CloseHandle(hThread);
-		return false;
+		TerminateThread(GlobalVar::g_hIdleThread, 0);
+		break;
 	}
+
+	CloseHandle(GlobalVar::g_hTerminateIdleEvent);
+
+	return true;
 }

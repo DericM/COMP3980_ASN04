@@ -18,5 +18,8 @@ namespace GlobalVar
 	extern DWORD IDLE_SEQ_TIMEOUT;
 	extern DWORD RXWP_SYN_TIMER;
 
+	extern bool g_bRunIdle;
+	extern HANDLE g_hIdleThread;
+	extern HANDLE g_hTerminateIdleEvent;
 
 }

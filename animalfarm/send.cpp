@@ -10,6 +10,8 @@ bool ipc_send_ack() {
 	DWORD dwToWrite = 1;
 	char ACK = 0x06;
 	if (!ipc_send_data_to_port(&ACK, dwToWrite)) {
+		PurgeComm(GlobalVar::g_hComm, PURGE_TXABORT);
+		PurgeComm(GlobalVar::g_hComm, PURGE_TXCLEAR);
 		return false;
 	}
 	LOGMESSAGE(L"Sent ACK ---------- " << generateTimestamp() << std::endl);

@@ -1,3 +1,12 @@
+/*------------------------------------------------------------------------------------------------------------------
+-- SOURCE FILE: tx_wait_ack.cpp : is Responsible for wait for and ack after the program has sent a packet.   
+--
+-- PROGRAM: Animal Farm
+--
+-- FUNCTIONS:
+-- bool txwa_receive_ack()
+----------------------------------------------------------------------------------------------------------------------*/
+
 #include "stdafx.h"
 #include "tx_wait_ack.h"
 #include "tx_get_data.h"
@@ -6,9 +15,13 @@
 #include "globalvar.h"
 #include "packetDefine.h"
 
-/*
-	Waits for ACK after sending a packet.
-*/
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: txwa_receive_ack()
+--
+-- NOTES:
+-- Creates and event to wait for and ACK character to be read from the comm port and pairs it with the timer. If timer times out 
+-- function returns and program tries to send again. If Ack is recieved function returnus program to Idle
+----------------------------------------------------------------------------------------------------------------------*/
 bool txwa_receive_ack() {
 	DWORD packetSize = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
 	DWORD ACK_TIMER = static_cast<DWORD>(ceil(8.0 * packetSize / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3);

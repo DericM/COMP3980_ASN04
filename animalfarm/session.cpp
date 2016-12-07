@@ -1,3 +1,13 @@
+/*------------------------------------------------------------------------------------------------------------------
+-- SOURCE FILE: session.cpp : contains the functions that open the comm port and closes the comm port
+--
+-- PROGRAM: Animal Farm
+--
+-- FUNCTIONS:
+-- is_open_port( LPCWSTR& lpszCommName)
+-- void is_close_port() 
+----------------------------------------------------------------------------------------------------------------------*/
+
 #include "stdafx.h"
 #include <stdexcept>
 #include "globalvar.h"

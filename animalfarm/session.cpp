@@ -36,13 +36,15 @@ bool is_open_port( LPCWSTR& lpszCommName) {
 
 	SetCommState(GlobalVar::g_hComm, &GlobalVar::g_cc.dcb);
 	
+	
 	DWORD packetSize = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
 	COMMTIMEOUTS timeouts;
-	timeouts.ReadIntervalTimeout = static_cast<DWORD>(ceil(8.0 * packetSize / GlobalVar::g_cc.dcb.BaudRate * 1000 / packetSize));
+	//timeouts.ReadIntervalTimeout = static_cast<DWORD>(ceil(8.0 * packetSize / GlobalVar::g_cc.dcb.BaudRate * 1000 / packetSize));
+	timeouts.ReadIntervalTimeout = 5;
 	timeouts.ReadTotalTimeoutMultiplier = 0;
 	timeouts.ReadTotalTimeoutConstant = 0;
-	timeouts.WriteTotalTimeoutMultiplier = 0;
-	timeouts.WriteTotalTimeoutConstant = 0;
+	//timeouts.WriteTotalTimeoutMultiplier = 0;
+	//timeouts.WriteTotalTimeoutConstant = 0;
 	SetCommTimeouts(GlobalVar::g_hComm, &timeouts);
 	
 	return true;

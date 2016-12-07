@@ -69,6 +69,7 @@ DWORD WINAPI idle_wait(LPVOID na) {
 	}
 
 	while (GlobalVar::g_bRunIdle) {
+		PurgeComm(GlobalVar::g_hComm, PURGE_TXCLEAR);
 		//if (GlobalVar::g_sending_file)
 		if (GlobalVar::g_bWannaSendFile)
 		{

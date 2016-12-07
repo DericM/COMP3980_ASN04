@@ -75,6 +75,7 @@ bool ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD ti
 			case WAIT_TIMEOUT:
 				CancelIo(GlobalVar::g_hComm);
 				break;
+			}
 		}
 	}
 	else {

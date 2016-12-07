@@ -6,15 +6,18 @@
 
 
 bool rxpp_parse_packet(const char* packet) {
+	char syn;
 	char dataBuffer[DATA_SIZE + 1];
 	uint16_t syndrome;
-	memcpy_s(dataBuffer, DATA_SIZE, packet + HEADER_SIZE, DATA_SIZE);
-	memcpy_s(&syndrome, CRC_SIZE, packet+  HEADER_SIZE + DATA_SIZE, CRC_SIZE);
+
+	memcpy_s(&syn,       HEADER_SIZE, packet,                           HEADER_SIZE);
+	memcpy_s(dataBuffer, DATA_SIZE,   packet + HEADER_SIZE,             DATA_SIZE);
+	memcpy_s(&syndrome,  CRC_SIZE,    packet + HEADER_SIZE + DATA_SIZE, CRC_SIZE);
 	dataBuffer[DATA_SIZE] = '\0';
 	std::string strData(dataBuffer);
 
 
-	if (rxce_check_error(strData, syndrome)) {
+	if (rxce_check_error(syn, strData, syndrome)) {
 		return true;
 	}
 	return false;

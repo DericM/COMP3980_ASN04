@@ -8,10 +8,6 @@
 
 bool rxwp_wait_for_packet() {
 	
-	if (!ipc_recieve_syn(GlobalVar::T_RX)) {
-		return false;//couldnt get sync
-	}
-
 	char packet[DATA_SIZE + CRC_SIZE];
 
 	if (ipc_recieve_packet(packet, GlobalVar::T_RX)) {

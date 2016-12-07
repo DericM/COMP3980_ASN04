@@ -35,7 +35,7 @@ bool ipc_recieve_enq(DWORD timeout) {
 	LOGMESSAGE(L"Timeout ENQ-----Timestamp:" << generateTimestamp() << L"-----Timeout:" << timeout << "\n");
 	return false;
 }
-
+/*
 bool ipc_recieve_syn(DWORD timeout) {
 
 	char readChar[1];
@@ -53,7 +53,7 @@ bool ipc_recieve_syn(DWORD timeout) {
 	LOGMESSAGE(L"Timeout SYN-----Timestamp:" << generateTimestamp() << L"-----Timeout:" << timeout << "\n");
 	return false;
 }
-
+*/
 /*
 bool ipc_recieve_packet(char * readChar, DWORD timeout) {
 
@@ -70,7 +70,7 @@ bool ipc_recieve_packet(char * readChar, DWORD timeout) {
 */
 bool ipc_recieve_packet(char * readChar, DWORD timeout) {
 
-	DWORD toReadSize =  DATA_SIZE + CRC_SIZE;
+	DWORD toReadSize =  HEADER_SIZE + DATA_SIZE + CRC_SIZE;
 	//char target     = 0x16;
 
 	if (ipc_read_from_port(readChar, toReadSize, NULL, timeout)) {
@@ -84,10 +84,9 @@ bool ipc_recieve_packet(char * readChar, DWORD timeout) {
 
 bool ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD timeout) {
 
-	static BOOL fWaitingOnRead = FALSE;
+	BOOL fWaitingOnRead = FALSE;
 	OVERLAPPED osReader = { 0 };
 	DWORD eventRet;
-	bool successfulyReceivedData = false;
 
 	osReader.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	if (osReader.hEvent == NULL) {

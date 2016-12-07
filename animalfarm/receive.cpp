@@ -11,7 +11,7 @@ bool ipc_recieve_ack(DWORD timeout) {
 	char target = 0x06;
 
 	int ackCounter = 0;
-	while (ackCounter < 20) {
+	while (ackCounter < 3) {
 		ackCounter++;
 		if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
 			LOGMESSAGE(L"Received ACK----Timestamp:" << generateTimestamp() << "\n");
@@ -35,39 +35,10 @@ bool ipc_recieve_enq(DWORD timeout) {
 	LOGMESSAGE(L"Timeout ENQ-----Timestamp:" << generateTimestamp() << L"-----Timeout:" << timeout << "\n");
 	return false;
 }
-/*
-bool ipc_recieve_syn(DWORD timeout) {
 
-	char readChar[1];
-	DWORD toReadSize = 1;
-	char target = 0x16;
 
-	int synCounter = 0;
-	while (synCounter < 3) {
-		synCounter++;
-		if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
-			LOGMESSAGE(L"Received SYN----Timestamp:" << generateTimestamp() << "\n");
-			return true;
-		}
-	}
-	LOGMESSAGE(L"Timeout SYN-----Timestamp:" << generateTimestamp() << L"-----Timeout:" << timeout << "\n");
-	return false;
-}
-*/
-/*
-bool ipc_recieve_packet(char * readChar, DWORD timeout) {
 
-	DWORD toReadSize = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
-	char target     = 0x16;
 
-	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
-		LOGMESSAGE(L"Received PACKET-Timestamp:" << generateTimestamp() << "\n");
-		return true;
-	}
-	LOGMESSAGE(L"Timeout PACKET--Timestamp:" << generateTimestamp() << L"-----Timeout:" << timeout << "\n");
-	return false;
-}
-*/
 bool ipc_recieve_packet(char * readChar, DWORD timeout) {
 
 	DWORD toReadSize =  HEADER_SIZE + DATA_SIZE + CRC_SIZE;

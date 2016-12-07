@@ -79,7 +79,7 @@ bool ipc_recieve_packet(char* readChar, DWORD timeout) {
 		return true;
 	}
 	LOGMESSAGE(L"Timeout PAC ----------- " << generateTimestamp() << L" ----------- Timeout:" << timeout << std::endl);
-	return true;
+	return false;
 }
 
 bool ipc_read_from_port(char* readChar, DWORD toReadSize, char target, DWORD timeout) {

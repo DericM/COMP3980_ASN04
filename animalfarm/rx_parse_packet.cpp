@@ -25,5 +25,6 @@ bool rxpp_parse_packet(const char* packet) {
 	if (rxce_check_error(strData, syndrome)) {
 		return true;
 	}
+
 	return false;
 }

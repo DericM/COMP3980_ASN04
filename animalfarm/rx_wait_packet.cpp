@@ -13,7 +13,7 @@ bool rxwp_wait_for_packet() {
 
 	if (ipc_recieve_packet(packet, GlobalVar::T_RX)) {
 		packet[HEADER_SIZE + DATA_SIZE + CRC_SIZE] = '\0';
-		LOGMESSAGE(L"rawpacket:" << packet << "\n")
+		LOGMESSAGE(L"rawpacket: " << packet << "\n")
 		if (rxpp_parse_packet(packet)) {
 			return true;//packet recieved
 		}

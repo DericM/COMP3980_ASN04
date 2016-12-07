@@ -70,10 +70,10 @@ bool ipc_recieve_packet(char * readChar, DWORD timeout) {
 */
 bool ipc_recieve_packet(char * readChar, DWORD timeout) {
 
-	DWORD toReadSize = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
+	DWORD toReadSize =  DATA_SIZE + CRC_SIZE;
 	//char target     = 0x16;
 
-	if (ipc_read_from_port(readChar, toReadSize, NULL, timeout)) {
+	if (ipc_read_from_port(readChar, 1026, NULL, timeout)) {
 		LOGMESSAGE(L"Received PACKET-Timestamp:" << generateTimestamp() << "\n");
 		return true;
 	}

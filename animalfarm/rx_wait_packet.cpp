@@ -10,7 +10,8 @@ bool rxwp_wait_for_packet() {
 	DWORD packetSize = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
 	char packet[HEADER_SIZE + DATA_SIZE + CRC_SIZE];
 
-	if (ipc_recieve_packet(packet, GlobalVar::RXWP_SYN_TIMER)) {
+	static_cast<DWORD>(ceil(8.0 * packetSize / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3);
+	if (ipc_recieve_packet(packet, packetSize)) {
 		if (rxpp_parse_packet(packet)) {
 			return true;//packet recieved
 		}

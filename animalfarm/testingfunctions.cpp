@@ -4,6 +4,10 @@
 
 using namespace std::chrono;
 
+
+/*
+	Generate a timestamp for testing purposes
+*/
 long generateTimestamp() {
 	return 0;
 	/*return duration_cast<milliseconds>(

@@ -2,6 +2,11 @@
 #include "packetDefine.h"
 #include <vector>
 
+
+/*
+* Copied and modified from:
+* https://stackoverflow.com/questions/21939392/crc-16-program-to-calculate-check-sum
+*/
 uint16_t calculateCRC16(const std::string& data) {
 	static constexpr auto poly = 0x8005;
 	auto size = data.size();

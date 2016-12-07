@@ -1,3 +1,16 @@
+/*------------------------------------------------------------------------------------------------------------------
+-- SOURCE FILE: Idle.cpp : Takes care of the IDle state in the Animal farm protocol
+--
+-- PROGRAM: Animal Farm
+--
+-- FUNCTIONS:
+-- void idle_setup(LPCWSTR lpszCommName)
+-- int idle_rand_timeout() 
+-- void idle_connect()
+-- DWORD WINAPI idle_wait(LPVOID na) 
+-- bool idle_terminate_thread()
+----------------------------------------------------------------------------------------------------------------------*/
+
 #include "stdafx.h"
 #include "globalvar.h"
 #include "idle.h"

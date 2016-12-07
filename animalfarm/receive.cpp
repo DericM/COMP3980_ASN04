@@ -1,3 +1,17 @@
+/*------------------------------------------------------------------------------------------------------------------
+-- SOURCE FILE: recieve.cpp : Handles all the reading from the port for the animal farm protocol
+--
+-- PROGRAM: Animal Farm
+--
+-- FUNCTIONS:
+-- bool ipc_recieve_ack(DWORD timeout) 
+-- bool ipc_recieve_enq(DWORD timeout) 
+-- bool ipc_recieve_syn(DWORD timeout) 
+-- bool ipc_recieve_packet(char* readChar, DWORD timeout)
+-- int ipc_read_from_port(char* readChar, DWORD toReadSize, char target, DWORD timeout, bool bPacket)
+----------------------------------------------------------------------------------------------------------------------*/
+
+
 #include "stdafx.h"
 #include "receive.h"
 #include "globalvar.h"
@@ -20,7 +34,12 @@ HANDLE receiveThread;
 HANDLE receiveDataEvent;
 bool   f_runningThread;
 
-
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: ipc_recieve_ack
+--
+-- NOTES:
+-- Sets up to read an ACK from the port then calls read_from_port
+----------------------------------------------------------------------------------------------------------------------*/
 bool ipc_recieve_ack(DWORD timeout) {
 
 	char readChar[1];
@@ -34,7 +53,12 @@ bool ipc_recieve_ack(DWORD timeout) {
 
 	return false;
 }
-
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: ipc_recieve_enq
+--
+-- NOTES:
+-- Sets up to read an ENQ from the port then calls read_from_port
+----------------------------------------------------------------------------------------------------------------------*/
 bool ipc_recieve_enq(DWORD timeout) {
 
 	char readChar[1];
@@ -48,6 +72,13 @@ bool ipc_recieve_enq(DWORD timeout) {
 	LOGMESSAGE(L"Timeout ENQ ----------- " << generateTimestamp() << L" ----------- Timeout:" << timeout << std::endl);
 	return false;
 }
+
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: ipc_recieve_syn
+--
+-- NOTES:
+-- Sets up to read an SYN from the port then calls read_from_port
+----------------------------------------------------------------------------------------------------------------------*/
 bool ipc_recieve_syn(DWORD timeout) {
 
 	char readChar[1];
@@ -63,7 +94,12 @@ bool ipc_recieve_syn(DWORD timeout) {
 }
 
 
-
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: ipc_recieve_packet
+--
+-- NOTES:
+-- Sets up to read an packet from the port then calls read_from_port
+----------------------------------------------------------------------------------------------------------------------*/
 bool ipc_recieve_packet(char* readChar, DWORD timeout) {
 
 	DWORD toReadSize = DATA_SIZE + CRC_SIZE;
@@ -76,7 +112,12 @@ bool ipc_recieve_packet(char* readChar, DWORD timeout) {
 	LOGMESSAGE(L"Timeout PAC ----------- " << generateTimestamp() << L" ----------- Timeout:" << timeout << std::endl);
 	return false;
 }
-
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: ipc_read_from_port
+--
+-- NOTES:
+-- Reads for a specified target fromt he port using events
+----------------------------------------------------------------------------------------------------------------------*/
 int ipc_read_from_port(char* readChar, DWORD toReadSize, char target, DWORD timeout, bool bPacket) {
 	HANDLE& hComm = GlobalVar::g_hComm;
 

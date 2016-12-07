@@ -1,6 +1,22 @@
-// animalfarm.cpp : Defines the entry point for the application.
-//
 
+/*------------------------------------------------------------------------------------------------------------------
+-- SOURCE FILE: animalfarm.cpp : Defines the entry point for the application.
+--
+-- PROGRAM: Animal Farm
+--
+-- FUNCTIONS:
+-- int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR    lpCmdLine,_In_ int       nCmdShow)
+-- ATOM MyRegisterClass(HINSTANCE hInstance)
+-- LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+-- INT_PTR CALLBACK MainDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+-- BOOL Connect(HWND& hWnd, LPCWSTR commName)
+-- INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+--
+--
+--
+-- NOTES:
+-- This program creates the window and UI for the entire animal farm protocol and reads the command in the UI
+----------------------------------------------------------------------------------------------------------------------*/
 #include "stdafx.h"
 #include "globalvar.h"
 #include "animalfarm.h"

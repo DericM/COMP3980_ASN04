@@ -76,20 +76,6 @@ bool ipc_recieve_packet(char* readChar, DWORD timeout) {
 	return true;
 }
 
-
-
-
-DWORD WINAPI recieve_thread(LPVOID na) {
-
-	ipc_read_from_port(recieveParam.readChar, 
-					   recieveParam.toReadSize, 
-					   recieveParam.target, 
-					   recieveParam.timeout);
-	return 0;
-}
-
-
-
 bool ipc_read_from_port(char* readChar, DWORD toReadSize, char target, DWORD timeout) {
 	HANDLE& hComm = GlobalVar::g_hComm;
 

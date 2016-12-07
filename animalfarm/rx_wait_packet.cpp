@@ -15,6 +15,7 @@ bool rxwp_wait_for_packet() {
 	DWORD PACKET_TIMER = static_cast<DWORD>(ceil(8.0 * packetSize / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3);
 	PACKET_TIMER = 3000;
 
+	LOGMESSAGE(L"Wait For SYN ----------- " << generateTimestamp() << std::endl);
 	while (generateTimestamp() - startTime < PACKET_TIMER)
 	{
 		if (ipc_recieve_syn(SYN_TIMER))

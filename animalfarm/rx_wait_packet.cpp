@@ -24,26 +24,12 @@ bool rxwp_wait_for_packet() {
 					return true;//packet recieved
 				}
 			}
-			break;
+			
+			return true;
 		}
 	}
 
-	//DWORD timeout = static_cast<DWORD>(ceil(8.0 * packetSize / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3);
-	//if (ipc_recieve_packet(packet, timeout)) {
-	//	if (rxpp_parse_packet(packet)) {
-	//		return true;//packet recieved
-	//	}
-	//}
+	LOGMESSAGE(L"Timeout SYN ----------- " << generateTimestamp() << L" ----------- Timeout:" << PACKET_TIMER << std::endl);
 
-	//if (!ipc_recieve_syn(SYN_TIMER)) {
-	//	return false;//couldnt get sync
-	//}
-
-	//char * packet = "";
-	//if (ipc_recieve_packet(packet, 2000)) {
-	//	if (rxpp_parse_packet(packet)) {
-	//		return true;//packet recieved
-	//	}
-	//}
-	return false;//no packet
+	return false;
 }

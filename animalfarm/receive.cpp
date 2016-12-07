@@ -31,6 +31,8 @@ bool ipc_recieve_ack(DWORD timeout) {
 		return true;
 	}
 	LOGMESSAGE(L"Timeout ACK ----------- " << generateTimestamp() << L" ----------- Timeout:" << timeout << std::endl);
+	PurgeComm(GlobalVar::g_hComm, PURGE_TXABORT);
+	PurgeComm(GlobalVar::g_hComm, PURGE_TXCLEAR);
 	return false;
 }
 
@@ -57,7 +59,7 @@ bool ipc_recieve_syn(DWORD timeout) {
 		LOGMESSAGE(L"Received SYN ----------- " << generateTimestamp() << std::endl);
 		return true;
 	}
-	LOGMESSAGE(L"Timeout SYN ----------- " << generateTimestamp() << L" ----------- Timeout:" << timeout << std::endl);
+	//LOGMESSAGE(L"Timeout SYN ----------- " << generateTimestamp() << L" ----------- Timeout:" << timeout << std::endl);
 	return false;
 }
 

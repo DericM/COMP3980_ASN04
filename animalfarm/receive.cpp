@@ -56,6 +56,7 @@ bool ipc_recieve_packet(char * readChar, DWORD timeout) {
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
 		LOGMESSAGE(L"Received SYN ----------- " << generateTimestamp() << std::endl);
+		SendMessageA(GlobalVar::g_hSendBox, EM_REPLACESEL, 0,(LPARAM)readChar);
 		return true;
 	}
 	LOGMESSAGE(L"Timeout SYN ----------- " << generateTimestamp() << L" ----------- Timeout:" << timeout << std::endl);

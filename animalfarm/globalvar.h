@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 namespace GlobalVar
 {
 	extern HWND g_hWnd;
@@ -21,5 +23,5 @@ namespace GlobalVar
 	extern bool g_bRunIdle;
 	extern HANDLE g_hIdleThread;
 	extern HANDLE g_hTerminateIdleEvent;
-
+	extern std::vector<char> g_vFileBuffer;
 }

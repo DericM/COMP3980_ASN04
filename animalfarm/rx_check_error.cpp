@@ -18,7 +18,7 @@ bool rxce_check_error(char syn, std::string data, uint16_t syndrome) {
 	}
 
 	//call toprocess data////
-	LOGMESSAGE(L"packet: " << data.c_str() << "/n");
+	LOGMESSAGE(L"packet: " << data.c_str() << "\n");
 	////////////////////
 
 	ipc_send_ack();

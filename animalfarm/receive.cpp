@@ -32,9 +32,6 @@ bool ipc_recieve_ack(DWORD timeout) {
 	}
 	LOGMESSAGE(L"Timeout ACK ----------- " << generateTimestamp() << L" ----------- Timeout:" << timeout << std::endl);
 
-	PurgeComm(GlobalVar::g_hComm, PURGE_TXABORT);
-	PurgeComm(GlobalVar::g_hComm, PURGE_TXCLEAR);
-
 	return false;
 }
 

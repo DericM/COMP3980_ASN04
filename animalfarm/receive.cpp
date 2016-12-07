@@ -10,9 +10,13 @@ bool ipc_recieve_ack(DWORD timeout) {
 	DWORD toReadSize = 1;
 	char target = 0x06;
 
-	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
-		LOGMESSAGE(L"Received ACK----Timestamp:" << generateTimestamp() << "\n");
-		return true;
+	int ackCounter = 0;
+	while (ackCounter < 3) {
+		ackCounter++;
+		if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
+			LOGMESSAGE(L"Received ACK----Timestamp:" << generateTimestamp() << "\n");
+			return true;
+		}
 	}
 	LOGMESSAGE(L"Timeout ACK-----Timestamp:" << generateTimestamp() << L"-----Timeout:" << timeout << "\n");
 	return false;
@@ -32,7 +36,25 @@ bool ipc_recieve_enq(DWORD timeout) {
 	return false;
 }
 
+bool ipc_recieve_syn(DWORD timeout) {
 
+	char readChar[1];
+	DWORD toReadSize = 1;
+	char target = 0x16;
+
+	int synCounter = 0;
+	while (synCounter < 3) {
+		synCounter++;
+		if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
+			LOGMESSAGE(L"Received SYN----Timestamp:" << generateTimestamp() << "\n");
+			return true;
+		}
+	}
+	LOGMESSAGE(L"Timeout SYN-----Timestamp:" << generateTimestamp() << L"-----Timeout:" << timeout << "\n");
+	return false;
+}
+
+/*
 bool ipc_recieve_packet(char * readChar, DWORD timeout) {
 
 	DWORD toReadSize = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
@@ -45,7 +67,19 @@ bool ipc_recieve_packet(char * readChar, DWORD timeout) {
 	LOGMESSAGE(L"Timeout PACKET--Timestamp:" << generateTimestamp() << L"-----Timeout:" << timeout << "\n");
 	return false;
 }
+*/
+bool ipc_recieve_packet(char * readChar, DWORD timeout) {
 
+	DWORD toReadSize = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
+	//char target     = 0x16;
+
+	if (ipc_read_from_port(readChar, toReadSize, NULL, timeout)) {
+		LOGMESSAGE(L"Received PACKET-Timestamp:" << generateTimestamp() << "\n");
+		return true;
+	}
+	LOGMESSAGE(L"Timeout PACKET--Timestamp:" << generateTimestamp() << L"-----Timeout:" << timeout << "\n");
+	return false;
+}
 
 
 bool ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD timeout) {
@@ -75,7 +109,7 @@ bool ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD ti
 	}
 	else {
 
-		if (readChar[0] == target) {
+		if (target == NULL || readChar[0] == target) {
 			//LOGMESSAGE(L"GOT_TARGET1==>");
 			return true;
 		}
@@ -91,7 +125,7 @@ bool ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD ti
 				LOGMESSAGE(L"!GetOverlappedResult()");
 			}
 			else {
-				if (readChar[0] == target) {
+				if (target == NULL || readChar[0] == target) {
 					//LOGMESSAGE(L"GOT_TARGET2==>");
 					return true;
 				}
@@ -119,13 +153,19 @@ bool ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD ti
 
 
 char* checkChar(char readChar) {
+
+	char* mychar = "";
+	mychar += readChar;
+
 	switch (readChar) {
-	case '0x05':
+	case 0x05:
 		return "ENQ";
-	case '0x06':
+	case 0x06:
 		return "ACK";
+	case 0x00:
+		return "NULL";
 	default:
-		return "OTHER";
+		return mychar;
 	}
 
 }

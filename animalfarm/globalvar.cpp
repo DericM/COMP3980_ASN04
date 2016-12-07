@@ -26,4 +26,5 @@ namespace GlobalVar
 	HANDLE g_hIdleThread;
 	HANDLE g_hTerminateIdleEvent;
 	std::vector<char> g_vFileBuffer;
+	bool g_bWannaSendFile = false;
 }

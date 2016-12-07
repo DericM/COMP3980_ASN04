@@ -65,7 +65,7 @@ bool txgd_get_next_packet() {
 	{
 		memset(packetBuffer, 'x', DATA_SIZE);
 		packetCounter = 0;
-		GlobalVar::g_sending_file = false;
+		GlobalVar::g_bWannaSendFile = false;
 	}
 	if (curPos < GlobalVar::g_vFileBuffer.size())
 		memcpy_s(packetBuffer, DATA_SIZE, &GlobalVar::g_vFileBuffer[curPos], curDataSize);
@@ -81,6 +81,11 @@ bool txgd_get_next_packet() {
 	if (txsd_setup(packetize)) {
 		packetCounter++;
 		return true;
+	}
+	else
+	{
+		packetCounter = 0;
+		GlobalVar::g_bWannaSendFile = false;
 	}
 
 	return false;

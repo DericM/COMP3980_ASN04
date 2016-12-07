@@ -42,7 +42,7 @@ bool ipc_recieve_packet(char * readChar, DWORD timeout) {
 		LOGMESSAGE(L"Received PACKET-Timestamp:" << generateTimestamp() << "\n");
 		return true;
 	}
-	LOGMESSAGE(L"Timeout PACKET--Timestamp:" << generateTimestamp() << "\n");
+	LOGMESSAGE(L"Timeout PACKET--Timestamp:" << generateTimestamp() << L"-----Timeout:" << timeout << "\n");
 	return false;
 }
 

@@ -11,9 +11,6 @@
 /*Counters*/
 std::random_device rnd;
 
-/*timeouts*/
-int RAND_TIMEOUT;
-int IDLE_SEQ_TIMEOUT = 500;
 int TERMINATE_THREAD_TIMEOUT = 500;
 
 HANDLE idleThread;
@@ -31,12 +28,10 @@ void idle_setup(LPCWSTR lpszCommName) {
 /*
 * Resets randTimeout to a value between 0-100
 */
-void idle_rand_timeout_reset() {
-
+int idle_rand_timeout() {
 	std::mt19937 rng(rnd());
 	std::uniform_int_distribution<int> uni(1, 100);
-
-	RAND_TIMEOUT = uni(rng);
+	return uni(rng);
 }
 
 
@@ -56,7 +51,7 @@ void idle_connect() {
 IDLE Wait
 */
 DWORD WINAPI idle_wait(LPVOID na) {
-	int timeout = IDLE_SEQ_TIMEOUT;
+	int timeout = GlobalVar::IDLE_SEQ_TIMEOUT;
 	GlobalVar::g_sending_file = false;
 	frunningIdleThread = true;
 
@@ -69,9 +64,7 @@ DWORD WINAPI idle_wait(LPVOID na) {
 	while (frunningIdleThread) {
 		//Sending File timeout Procedure
 		if (GlobalVar::g_sending_file) {
-			idle_rand_timeout_reset();
-			timeout = RAND_TIMEOUT;
-			if (ipc_recieve_enq(timeout)) {
+			if (ipc_recieve_enq(idle_rand_timeout())) {
 				rxc_send_ack();
 			}
 			else {
@@ -82,14 +75,11 @@ DWORD WINAPI idle_wait(LPVOID na) {
 			}
 		}//Idles Sequence Timeout procedure
 		else {
-			timeout = IDLE_SEQ_TIMEOUT;
-			if (ipc_recieve_enq(timeout)) {
+			if (ipc_recieve_enq(GlobalVar::IDLE_SEQ_TIMEOUT)) {
 				rxc_send_ack();
 			}
 			else {//After idle Squence timewr times out use rand timout
-				idle_rand_timeout_reset();
-				timeout = RAND_TIMEOUT;
-				if (ipc_recieve_enq(timeout)) {
+				if (ipc_recieve_enq(idle_rand_timeout())) {
 					rxc_send_ack();
 				}
 				else {

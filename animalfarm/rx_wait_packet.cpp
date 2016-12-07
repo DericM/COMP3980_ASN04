@@ -16,14 +16,16 @@ bool rxwp_wait_for_packet() {
 	PACKET_TIMER = 3000;
 
 	while (generateTimestamp() - startTime < PACKET_TIMER)
-	if (ipc_recieve_syn(SYN_TIMER))
 	{
-		if (ipc_recieve_packet(packet, PACKET_TIMER)) {
-			if (rxpp_parse_packet(packet)) {
-				return true;//packet recieved
+		if (ipc_recieve_syn(SYN_TIMER))
+		{
+			if (ipc_recieve_packet(packet, PACKET_TIMER)) {
+				if (rxpp_parse_packet(packet)) {
+					return true;//packet recieved
+				}
 			}
+			break;
 		}
-		break;
 	}
 
 	//DWORD timeout = static_cast<DWORD>(ceil(8.0 * packetSize / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3);

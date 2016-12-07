@@ -71,8 +71,8 @@ bool ipc_recieve_syn(DWORD timeout) {
 
 bool ipc_recieve_packet(char* readChar, DWORD timeout) {
 
-	DWORD toReadSize = DATA_SIZE + CRC_SIZE;
-	char target     = NULL;
+	DWORD toReadSize = HEADER_SIZE + DATA_SIZE + CRC_SIZE;
+	char target = 0x16;
 
 	if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
 		LOGMESSAGE(L"Received PAC ----------- " << generateTimestamp() << std::endl);
@@ -86,7 +86,7 @@ bool ipc_read_from_port(char* readChar, DWORD toReadSize, char target, DWORD tim
 	HANDLE& hComm = GlobalVar::g_hComm;
 
 	OVERLAPPED osReader = { 0 };
-	DWORD eventRet;
+	DWORD readBytes;
 
 	osReader.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	if (osReader.hEvent == NULL) {
@@ -94,17 +94,21 @@ bool ipc_read_from_port(char* readChar, DWORD toReadSize, char target, DWORD tim
 		return false;
 	}
 
+	BOOL bResult = ReadFile(hComm, readChar, toReadSize, &readBytes, &osReader);
 	if (GetLastError() == ERROR_IO_PENDING)
 	{
 		DWORD dwRes = WaitForSingleObject(osReader.hEvent, timeout);
 		switch (dwRes)
 		{
 		case WAIT_OBJECT_0:
-			if (!GetOverlappedResult(hComm, &osReader, &eventRet, FALSE)) {
+			if (!GetOverlappedResult(hComm, &osReader, &readBytes, FALSE))
+			{
 				LOGMESSAGE(L"!GetOverlappedResult()" << std::endl);
 			}
-			else {
-				if (target == NULL || readChar[0] == target) {
+			else
+			{
+				if (toReadSize == readBytes && readChar[0] == target)
+				{
 					LOGMESSAGE(L"(1)RECEVIED CHARACTER : " << (int)readChar[0] << L" ---------- " << generateTimestamp() << std::endl);
 					return true;
 				}
@@ -117,25 +121,25 @@ bool ipc_read_from_port(char* readChar, DWORD toReadSize, char target, DWORD tim
 			LOGMESSAGE(L"DEFAULT" << std::endl);
 			break;
 		}
+
+		CancelIo(hComm);
 	}
-	else
+	else if (bResult == TRUE)
 	{
-		if (!ReadFile(hComm, readChar, toReadSize, &eventRet, &osReader))
+		if (!GetOverlappedResult(hComm, &osReader, &readBytes, FALSE))
 		{
-			if (GetLastError() != ERROR_IO_PENDING) {
-				LOGMESSAGE(L"Error reading from port." << GetLastError << std::endl);
-			}
+			LOGMESSAGE(L"!GetOverlappedResult()" << std::endl);
 		}
 		else
 		{
-			if (target == NULL || readChar[0] == target) {
-				LOGMESSAGE(L"(2)RECEVIED CHARACTER : " << (int)readChar[0] << L" ---------- " << generateTimestamp() << std::endl);
+			if (toReadSize == readBytes && readChar[0] == target)
+			{
+				LOGMESSAGE(L"(1)RECEVIED CHARACTER : " << (int)readChar[0] << L" ---------- " << generateTimestamp() << std::endl);
 				return true;
 			}
 		}
 	}
 
-	CancelIo(hComm);
 	CloseHandle(osReader.hEvent);
 
 	return false;

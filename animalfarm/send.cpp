@@ -43,48 +43,51 @@ bool ipc_send_data_to_port(const char* data, DWORD dwToWrite) {
 	DWORD dwWritten;
 	DWORD dwRes;
 	bool fRes;
+
+	WriteFile(hComm, data, dwToWrite, &dwWritten, &osWrite);
+	return true;
 	
-	osWrite.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-	if (osWrite.hEvent == NULL) {
-		return false;
-	}
+	//osWrite.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	//if (osWrite.hEvent == NULL) {
+	//	return false;
+	//}
 
-	if (!WriteFile(hComm, data, dwToWrite, &dwWritten, &osWrite)) {
-		if (GetLastError() != ERROR_IO_PENDING) {
-			fRes = false;
-		}
-		else {
-			if (!GetOverlappedResult(hComm, &osWrite, &dwWritten, TRUE)) {
-				fRes = false;
-			}
-			else {
-				// Write is pending.
-				dwRes = WaitForSingleObject(osWrite.hEvent, INFINITE);
-				switch (dwRes)
-				{
-					// OVERLAPPED structure's event has been signaled. 
-				case WAIT_OBJECT_0:
-					if (!GetOverlappedResult(hComm, &osWrite, &dwWritten, FALSE))
-						fRes = false;
-					else
-						// Write operation completed successfully.
-						fRes = true;
-					break;
+	//if (!WriteFile(hComm, data, dwToWrite, &dwWritten, &osWrite)) {
+	//	if (GetLastError() != ERROR_IO_PENDING) {
+	//		fRes = false;
+	//	}
+	//	else {
+	//		if (!GetOverlappedResult(hComm, &osWrite, &dwWritten, TRUE)) {
+	//			fRes = false;
+	//		}
+	//		else {
+	//			// Write is pending.
+	//			dwRes = WaitForSingleObject(osWrite.hEvent, INFINITE);
+	//			switch (dwRes)
+	//			{
+	//				// OVERLAPPED structure's event has been signaled. 
+	//			case WAIT_OBJECT_0:
+	//				if (!GetOverlappedResult(hComm, &osWrite, &dwWritten, FALSE))
+	//					fRes = false;
+	//				else
+	//					// Write operation completed successfully.
+	//					fRes = true;
+	//				break;
 
-				default:
-					// An error has occurred in WaitForSingleObject.
-					// This usually indicates a problem with the
-					// OVERLAPPED structure's event handle.
-					fRes = false;
-					
-					break;
-				}
-			}
-		}
-	}
-	else {
-		fRes = true;
-	}
-	CloseHandle(osWrite.hEvent);
-	return fRes;
+	//			default:
+	//				// An error has occurred in WaitForSingleObject.
+	//				// This usually indicates a problem with the
+	//				// OVERLAPPED structure's event handle.
+	//				fRes = false;
+	//				
+	//				break;
+	//			}
+	//		}
+	//	}
+	//}
+	//else {
+	//	fRes = true;
+	//}
+	//CloseHandle(osWrite.hEvent);
+	//return fRes;
 }

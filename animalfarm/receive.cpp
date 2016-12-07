@@ -72,6 +72,10 @@ DWORD WINAPI recieve_thread(LPVOID na) {
 					   recieveParam.toReadSize, 
 					   recieveParam.target, 
 					   recieveParam.timeout);
+
+	PurgeComm(GlobalVar::g_hComm, PURGE_RXABORT);
+	PurgeComm(GlobalVar::g_hComm, PURGE_RXCLEAR);
+
 	return 0;
 }
 
@@ -88,9 +92,6 @@ bool ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD ti
 		LOGMESSAGE(L"Failed to create hEvent. " << std::endl);
 		return false;
 	}
-
-	//PurgeComm(hComm, PURGE_RXABORT);
-	//PurgeComm(hComm, PURGE_RXCLEAR);
 
 	if (GetLastError() == ERROR_IO_PENDING)
 	{

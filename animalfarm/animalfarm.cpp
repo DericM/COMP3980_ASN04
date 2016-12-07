@@ -1,21 +1,35 @@
-
 /*------------------------------------------------------------------------------------------------------------------
--- SOURCE FILE: animalfarm.cpp : Defines the entry point for the application.
+-- SOURCE FILE: animalfarm.cpp - An application that will create a window with
+-- modifiable settings allowing us to connect to a comm port and send and receive
+-- text files using the Animalfarm itteration of the Stall'in protocall.
 --
--- PROGRAM: Animal Farm
+-- PROGRAM: animalfarm.cpp
 --
 -- FUNCTIONS:
--- int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR    lpCmdLine,_In_ int       nCmdShow)
--- ATOM MyRegisterClass(HINSTANCE hInstance)
--- LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
--- INT_PTR CALLBACK MainDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
--- BOOL Connect(HWND& hWnd, LPCWSTR commName)
--- INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+-- int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
+--                     _In_opt_ HINSTANCE hPrevInstance,
+--                   _In_ LPWSTR    lpCmdLine,
+--                   _In_ int       nCmdShow);
+-- ATOM MyRegisterClass(HINSTANCE hInstance);
+-- BOOL InitInstance(HINSTANCE, int);
+-- LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+-- INT_PTR CALLBACK MainDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+-- INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
+-- BOOL Connect(HWND& hWnd, LPCWSTR commName);
 --
 --
+-- DATE: December 06, 2016
+--
+-- REVISIONS: (Date and Description)
+--
+-- DESIGNER: Maitiu Morton, Yao Shu, Deric Mccadden, Jamie Lee
+--
+-- PROGRAMMER: Jamie Lee, Deric Mccadden, Maitiu Morton, Yao Shu,
 --
 -- NOTES:
--- This program creates the window and UI for the entire animal farm protocol and reads the command in the UI
+-- An application that will create a window with
+-- modifiable settings allowing us to connect to a comm port and send and receive
+-- text files using the Animalfarm itteration of the Stall'in protocall.
 ----------------------------------------------------------------------------------------------------------------------*/
 #include "stdafx.h"
 #include "globalvar.h"
@@ -86,11 +100,22 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 
 
-//
-//  FUNCTION: MyRegisterClass()
-//
-//  PURPOSE: Registers the window class.
-//
+/*------------------------------------------------------------------------------------------------------------------
+-- DATE: December 06, 2016
+--
+-- REVISIONS: (Date and Description)
+--
+-- DESIGNER: Maitiu Morton, Yao Shu, Deric Mccadden, Jamie Lee
+--
+-- PROGRAMMER: Jamie Lee, Deric Mccadden, Maitiu Morton, Yao Shu,
+--
+-- ATOM MyRegisterClass(HINSTANCE hInstance)
+--
+-- RETURNS: ATOM.
+--
+-- NOTES:
+-- This function registers the class.
+----------------------------------------------------------------------------------------------------------------------*/
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
     WNDCLASSEXW wcex;
@@ -112,16 +137,22 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     return RegisterClassExW(&wcex);
 }
 
-//
-//   FUNCTION: InitInstance(HINSTANCE, int)
-//
-//   PURPOSE: Saves instance handle and creates main window
-//
-//   COMMENTS:
-//
-//        In this function, we save the instance handle in a global variable and
-//        create and display the main program window.
-//
+/*------------------------------------------------------------------------------------------------------------------
+-- DATE: December 06, 2016
+--
+-- REVISIONS: (Date and Description)
+--
+-- DESIGNER: Maitiu Morton, Yao Shu, Deric Mccadden, Jamie Lee
+--
+-- PROGRAMMER: Jamie Lee, Deric Mccadden, Maitiu Morton, Yao Shu,
+--
+-- BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
+--
+-- RETURNS: BOOL.
+--
+-- NOTES:
+-- This function inits an  instance of the program.
+----------------------------------------------------------------------------------------------------------------------*/
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // Store instance handle in our global variable
@@ -144,16 +175,22 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    return TRUE;
 }
 
-//
-//  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
-//
-//  PURPOSE:  Processes messages for the main window.
-//
-//  WM_COMMAND  - process the application menu
-//  WM_PAINT    - Paint the main window
-//  WM_DESTROY  - post a quit message and return
-//
-//
+/*------------------------------------------------------------------------------------------------------------------
+-- DATE: December 06, 2016
+--
+-- REVISIONS: (Date and Description)
+--
+-- DESIGNER: Maitiu Morton, Yao Shu, Deric Mccadden, Jamie Lee
+--
+-- PROGRAMMER: Jamie Lee, Deric Mccadden, Maitiu Morton, Yao Shu,
+--
+-- LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+--
+-- RETURNS: LRESULT.
+--
+-- NOTES:
+-- This function handles events from the user.
+----------------------------------------------------------------------------------------------------------------------*/
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	LPCWSTR cName = NULL;
@@ -225,7 +262,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-// Message handler for main dlg box.
+/*------------------------------------------------------------------------------------------------------------------
+-- DATE: December 06, 2016
+--
+-- REVISIONS: (Date and Description)
+--
+-- DESIGNER: Maitiu Morton, Yao Shu, Deric Mccadden, Jamie Lee
+--
+-- PROGRAMMER: Jamie Lee, Deric Mccadden, Maitiu Morton, Yao Shu,
+--
+-- INT_PTR CALLBACK MainDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+--
+-- RETURNS: INT_PTR.
+--
+-- NOTES:
+-- This function handles the main dialog.
+----------------------------------------------------------------------------------------------------------------------*/
 INT_PTR CALLBACK MainDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	UNREFERENCED_PARAMETER(lParam);
@@ -261,7 +313,22 @@ INT_PTR CALLBACK MainDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	return (INT_PTR)FALSE;
 }
 
-// Message handler for about box.
+/*------------------------------------------------------------------------------------------------------------------
+-- DATE: December 06, 2016
+--
+-- REVISIONS: (Date and Description)
+--
+-- DESIGNER: Maitiu Morton, Yao Shu, Deric Mccadden, Jamie Lee
+--
+-- PROGRAMMER: Jamie Lee, Deric Mccadden, Maitiu Morton, Yao Shu,
+--
+-- INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+--
+-- RETURNS: INT_PTR.
+--
+-- NOTES:
+-- This function handles the about box.
+----------------------------------------------------------------------------------------------------------------------*/
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     UNREFERENCED_PARAMETER(lParam);
@@ -281,6 +348,23 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     return (INT_PTR)FALSE;
 }
 
+
+/*------------------------------------------------------------------------------------------------------------------
+-- DATE: December 06, 2016
+--
+-- REVISIONS: (Date and Description)
+--
+-- DESIGNER: Maitiu Morton, Yao Shu, Deric Mccadden, Jamie Lee
+--
+-- PROGRAMMER: Jamie Lee, Deric Mccadden, Maitiu Morton, Yao Shu,
+--
+-- BOOL Connect(HWND& hWnd, LPCWSTR commName) 
+--
+-- RETURNS: BOOL.
+--
+-- NOTES:
+-- This function checks if the comm is connected.
+----------------------------------------------------------------------------------------------------------------------*/
 BOOL Connect(HWND& hWnd, LPCWSTR commName) {
 	if (commName == NULL) {
 		MessageBox(NULL, L"Select a Com under the Config Menu", L"", MB_OK);

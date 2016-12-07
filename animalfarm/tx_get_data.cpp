@@ -53,22 +53,34 @@ bool txgd_setup() {
 
 
 bool txgd_get_next_packet() {
-	if (packetCounter == 0)
+	if (!GlobalVar::g_bStartPacket && packetCounter == 0)
+	{
+		GlobalVar::g_bStartPacket = true;
 		txgd_setup();
+	}
 
 	char syn = 0x16;
 
 	char packetBuffer[DATA_SIZE + 1];
 	size_t curPos = packetCounter * DATA_SIZE;
 	size_t curDataSize = GlobalVar::g_vFileBuffer.size() - curPos < DATA_SIZE ? GlobalVar::g_vFileBuffer.size() - curPos : DATA_SIZE;
-	if (curDataSize < DATA_SIZE)
+
+	if (GlobalVar::g_bStartPacket && packetCounter == 0)
 	{
-		memset(packetBuffer, 'x', DATA_SIZE);
-		packetCounter = 0;
-		GlobalVar::g_bWannaSendFile = false;
+		memset(packetBuffer, 0x11, DATA_SIZE);
+		GlobalVar::g_bStartPacket = false;
 	}
-	if (curPos < GlobalVar::g_vFileBuffer.size())
-		memcpy_s(packetBuffer, DATA_SIZE, &GlobalVar::g_vFileBuffer[curPos], curDataSize);
+	else
+	{
+		if (curDataSize < DATA_SIZE)
+		{
+			memset(packetBuffer, 0x14, DATA_SIZE);
+			packetCounter = 0;
+			GlobalVar::g_bWannaSendFile = false;
+		}
+		if (curPos < GlobalVar::g_vFileBuffer.size())
+			memcpy_s(packetBuffer, DATA_SIZE, &GlobalVar::g_vFileBuffer[curPos], curDataSize);
+	}
 
 	packetBuffer[DATA_SIZE] = '\0';
 	std::string strData(packetBuffer);

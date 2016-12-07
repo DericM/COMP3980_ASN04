@@ -27,4 +27,6 @@ namespace GlobalVar
 	HANDLE g_hTerminateIdleEvent;
 	std::vector<char> g_vFileBuffer;
 	bool g_bWannaSendFile = false;
+	std::vector<char> g_vInputBuffer;
+	bool g_bStartPacket = true;
 }

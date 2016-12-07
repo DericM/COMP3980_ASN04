@@ -3,6 +3,7 @@
 #include "packetDefine.h"
 #include "rx_parse_packet.h"
 #include "rx_check_error.h"
+#include <fstream>
 
 bool rxpp_parse_packet(const char* packet) {
 	char dataBuffer[DATA_SIZE + 1];
@@ -15,6 +16,24 @@ bool rxpp_parse_packet(const char* packet) {
 	size_t lastChar = strData.find_first_of('x');
 	if (lastChar != std::string::npos)
 		tempStr = strData.substr(0, lastChar);
+
+	if (dataBuffer[0] == 0x11)
+	{
+		GlobalVar::g_vInputBuffer.clear();
+		tempStr = "Start Packet\r\n";
+	}
+	else if (dataBuffer[0] == 0x14)
+	{
+		std::ofstream of(ExePathA() + "\\output.txt", std::ios::binary);
+		for (size_t i = 0; i < GlobalVar::g_vInputBuffer.size(); i++)
+			of << GlobalVar::g_vInputBuffer[i];
+
+		of.close();
+	}
+	else
+	{
+		GlobalVar::g_vInputBuffer.insert(GlobalVar::g_vInputBuffer.end(), dataBuffer, dataBuffer+DATA_SIZE);
+	}
 	
 	std::ostringstream stringStream;
 	stringStream << strData.length() << " : " << tempStr << std::endl;

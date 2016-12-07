@@ -103,7 +103,7 @@ bool ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD ti
 		return false;
 	}
 
-	if (GetLastError() != ERROR_IO_PENDING)
+	if (GetLastError() == ERROR_IO_PENDING)
 	{
 		DWORD dwRes = WaitForSingleObject(osReader.hEvent, timeout);
 		switch (dwRes)

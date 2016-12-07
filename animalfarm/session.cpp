@@ -40,7 +40,7 @@ bool is_open_port( LPCWSTR& lpszCommName) {
 	COMMTIMEOUTS timeouts;
 	timeouts.ReadIntervalTimeout = static_cast<DWORD>(ceil(8.0 * packetSize / GlobalVar::g_cc.dcb.BaudRate * 1000 / packetSize)) + 1;
 	timeouts.ReadTotalTimeoutMultiplier = 0;
-	timeouts.ReadTotalTimeoutConstant = static_cast<DWORD>(ceil(8.0 * packetSize / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3);
+	timeouts.ReadTotalTimeoutConstant = 0;//static_cast<DWORD>(ceil(8.0 * packetSize / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3);
 	timeouts.WriteTotalTimeoutMultiplier = 0;
 	timeouts.WriteTotalTimeoutConstant = 0;
 	SetCommTimeouts(GlobalVar::g_hComm, &timeouts);

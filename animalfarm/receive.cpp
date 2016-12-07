@@ -89,6 +89,9 @@ bool ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD ti
 		return false;
 	}
 
+	PurgeComm(hComm, PURGE_RXABORT);
+	PurgeComm(hComm, PURGE_RXCLEAR);
+
 	if (GetLastError() == ERROR_IO_PENDING)
 	{
 		DWORD dwRes = WaitForSingleObject(osReader.hEvent, timeout);

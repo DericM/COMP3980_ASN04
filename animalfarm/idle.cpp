@@ -73,6 +73,7 @@ DWORD WINAPI idle_wait(LPVOID na) {
 		{
 			ipc_send_enq();
 			txwc_wait_connect_ack();
+			GlobalVar::g_sending_file = !GlobalVar::g_sending_file;
 		}
 		else
 		{
@@ -86,6 +87,8 @@ DWORD WINAPI idle_wait(LPVOID na) {
 				{
 					rxc_send_ack();
 				}
+
+				GlobalVar::g_sending_file = !GlobalVar::g_sending_file;
 			}
 
 		}

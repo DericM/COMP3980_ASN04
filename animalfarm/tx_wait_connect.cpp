@@ -13,10 +13,13 @@ bool txwc_wait_connect_ack() {
 	//Tries to recieve ack returns true is ack is recieved returns false if timed out
 	if (ipc_recieve_ack(ACK_TIMER))
 	{
-		if (txgd_get_next_packet())
-			return true;
-		else
-			LOGMESSAGE(L"Sending a packet failed." << std::endl);
+		if (GlobalVar::g_bWannaSendFile)
+		{
+			if (txgd_get_next_packet())
+				return true;
+			else
+				LOGMESSAGE(L"Sending a packet failed." << std::endl);
+		}
 	}
 	else
 	{

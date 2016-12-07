@@ -24,4 +24,7 @@ namespace GlobalVar
 	extern HANDLE g_hIdleThread;
 	extern HANDLE g_hTerminateIdleEvent;
 	extern std::vector<char> g_vFileBuffer;
+	extern bool g_bWannaSendFile;
+	extern std::vector<char> g_vInputBuffer;
+	extern bool g_bStartPacket;
 }

@@ -19,7 +19,7 @@ namespace GlobalVar
 
 	DWORD IDLE_SEQ_TIMEOUT = 500;
 
-	DWORD RXWP_SYN_TIMER = 1000;
+	DWORD RXWP_SYN_TIMER = 2000;
 	//SYN_TIMER = static_cast<DWORD>(ceil(8.0 * packetSize / GlobalVar::g_cc.dcb.BaudRate * 1000) * 3);
 
 }

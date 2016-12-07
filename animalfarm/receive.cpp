@@ -11,7 +11,7 @@ bool ipc_recieve_ack(DWORD timeout) {
 	char target = 0x06;
 
 	int ackCounter = 0;
-	while (ackCounter < 3) {
+	while (ackCounter < 20) {
 		ackCounter++;
 		if (ipc_read_from_port(readChar, toReadSize, target, timeout)) {
 			LOGMESSAGE(L"Received ACK----Timestamp:" << generateTimestamp() << "\n");
@@ -83,7 +83,6 @@ bool ipc_recieve_packet(char * readChar, DWORD timeout) {
 
 
 bool ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD timeout) {
-	HANDLE& hComm = GlobalVar::g_hComm;
 
 	static BOOL fWaitingOnRead = FALSE;
 	OVERLAPPED osReader = { 0 };
@@ -98,7 +97,7 @@ bool ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD ti
 
 	//DWORD readFileTimeout = static_cast<DWORD>(ceil(8.0 * toReadSize / GlobalVar::g_cc.dcb.BaudRate * 1000 ));
 
-	if (!ReadFile(hComm, readChar, toReadSize, &eventRet, &osReader)) {
+	if (!ReadFile(GlobalVar::g_hComm, readChar, toReadSize, &eventRet, &osReader)) {
 		if (GetLastError() != ERROR_IO_PENDING) {
 			LOGMESSAGE(L"Error reading from port." << GetLastError << " \n");
 		}
@@ -121,7 +120,7 @@ bool ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD ti
 		{
 		case WAIT_OBJECT_0:
 			//LOGMESSAGE(L"WAIT_OBJECT_0==>");
-			if (!GetOverlappedResult(hComm, &osReader, &eventRet, FALSE)) {
+			if (!GetOverlappedResult(GlobalVar::g_hComm, &osReader, &eventRet, FALSE)) {
 				LOGMESSAGE(L"!GetOverlappedResult()");
 			}
 			else {
@@ -136,7 +135,7 @@ bool ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD ti
 			fWaitingOnRead = FALSE;
 			break;
 		case WAIT_TIMEOUT:
-			CancelIo(hComm);
+			CancelIo(GlobalVar::g_hComm);
 			//LOGMESSAGE(L"WAIT_TIMEOUT==>" << target << std::endl);
 			break;
 

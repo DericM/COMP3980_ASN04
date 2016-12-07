@@ -79,7 +79,7 @@ bool ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD ti
 			//LOGMESSAGE(L"GOT_TARGET1==>");
 			return true;
 		}
-		LOGMESSAGE(L"READ GARBAGE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+		LOGMESSAGE(L"READ GARBAGE!!!!!!!!!!!!!!!!!!!!!! " << checkChar(readChar[0]) << "\n");
 	}
 	if (fWaitingOnRead) {
 		DWORD dwRes = WaitForSingleObject(osReader.hEvent, timeout);
@@ -96,7 +96,7 @@ bool ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD ti
 					return true;
 				}
 				else {
-					LOGMESSAGE(L"READ GARBAGE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+					LOGMESSAGE(L"READ GARBAGE!!!!!!!!!!!!!!!!!!!!!! " << checkChar(readChar[0]) << "\n");
 				}
 			}
 			fWaitingOnRead = FALSE;
@@ -118,7 +118,17 @@ bool ipc_read_from_port(char * readChar, DWORD toReadSize, char target, DWORD ti
 
 
 
+char* checkChar(char readChar) {
+	switch (readChar) {
+	case '0x05':
+		return "ENQ";
+	case '0x06':
+		return "ACK";
+	default:
+		return "OTHER";
+	}
 
+}
 
 
 

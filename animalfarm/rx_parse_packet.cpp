@@ -15,8 +15,10 @@ bool rxpp_parse_packet(const char* packet) {
 	if (lastChar != std::string::npos)
 		strData = strData.substr(0, lastChar);
 	
-	std::string tempStr = strData;
-	tempStr += '\r\n';
+	std::string tempStr = "";
+	tempStr += strData.length();
+	tempStr += " : ";
+	tempStr += strData;
 	SendMessageA(GlobalVar::g_hSendBox, EM_REPLACESEL, 0, (LPARAM)tempStr.c_str());
 
 	if (rxce_check_error(strData, syndrome)) {

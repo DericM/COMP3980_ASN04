@@ -77,7 +77,7 @@ bool ipc_recieve_packet(char* readChar, DWORD timeout) {
 	return false;
 }
 
-bool ipc_read_from_port(char* readChar, DWORD toReadSize, char target, DWORD timeout, bool bPacket) {
+int ipc_read_from_port(char* readChar, DWORD toReadSize, char target, DWORD timeout, bool bPacket) {
 	HANDLE& hComm = GlobalVar::g_hComm;
 
 	OVERLAPPED osReader = { 0 };
@@ -86,7 +86,7 @@ bool ipc_read_from_port(char* readChar, DWORD toReadSize, char target, DWORD tim
 	osReader.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	if (osReader.hEvent == NULL) {
 		LOGMESSAGE(L"Failed to create hEvent. " << std::endl);
-		return false;
+		return 0;
 	}
 
 	BOOL bResult = ReadFile(hComm, readChar, toReadSize, &readBytes, &osReader);
@@ -102,10 +102,10 @@ bool ipc_read_from_port(char* readChar, DWORD toReadSize, char target, DWORD tim
 			}
 			else
 			{
-				if (toReadSize == readBytes && (bPacket || readChar[0] == target))
+				if (bPacket || (toReadSize == readBytes && readChar[0] == target))
 				{
 					LOGMESSAGE(L"(1)RECEVIED CHARACTER : " << (int)readChar[0] << L" ---------- " << generateTimestamp() << std::endl);
-					return true;
+					return readBytes;
 				}
 			}
 			break;
@@ -127,16 +127,16 @@ bool ipc_read_from_port(char* readChar, DWORD toReadSize, char target, DWORD tim
 		}
 		else
 		{
-			if (toReadSize == readBytes && (bPacket || readChar[0] == target))
+			if (bPacket || (toReadSize == readBytes && readChar[0] == target))
 			{
-				LOGMESSAGE(L"(1)RECEVIED CHARACTER : " << (int)readChar[0] << L" ---------- " << generateTimestamp() << std::endl);
-				return true;
+				LOGMESSAGE(L"(2)RECEVIED CHARACTER : " << (int)readChar[0] << L" ---------- " << generateTimestamp() << std::endl);
+				return readBytes;
 			}
 		}
 	}
 
 	CloseHandle(osReader.hEvent);
 
-	return false;
+	return 0;
 
 }

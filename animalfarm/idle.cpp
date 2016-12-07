@@ -47,7 +47,6 @@ IDLE Wait
 */
 DWORD WINAPI idle_wait(LPVOID na) {
 	int timeout = GlobalVar::IDLE_SEQ_TIMEOUT;
-	GlobalVar::g_sending_file = false;
 	GlobalVar::g_bRunIdle = true;
 
 	GlobalVar::g_hTerminateIdleEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
@@ -57,31 +56,22 @@ DWORD WINAPI idle_wait(LPVOID na) {
 	}
 
 	while (GlobalVar::g_bRunIdle) {
-		//Sending File timeout Procedure
-		if (GlobalVar::g_sending_file) {
-			if (ipc_recieve_enq(idle_rand_timeout())) {
+		if (GlobalVar::g_sending_file)
+		{
+			ipc_send_enq();
+			txwc_wait_connect_ack();
+		}
+		else
+		{
+			if (ipc_recieve_enq(GlobalVar::IDLE_SEQ_TIMEOUT))
+			{
 				rxc_send_ack();
 			}
-			else {
-				//Send Enq
-				ipc_send_enq();
-				//recieve ACK in tx_wait_connect.cpp
-				txwc_wait_connect_ack();
-			}
-		}//Idles Sequence Timeout procedure
-		else {
-			if (ipc_recieve_enq(GlobalVar::IDLE_SEQ_TIMEOUT)) {
-				rxc_send_ack();
-			}
-			else {//After idle Squence timewr times out use rand timout
-				if (ipc_recieve_enq(idle_rand_timeout())) {
+			else
+			{
+				if (ipc_recieve_enq(idle_rand_timeout()))
+				{
 					rxc_send_ack();
-				}
-				else {
-					//Send Enq
-					ipc_send_enq();
-					//recieve ACK in tx_wait_connect.cpp
-					txwc_wait_connect_ack();
 				}
 			}
 

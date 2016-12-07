@@ -9,7 +9,7 @@ namespace GlobalVar
 	HANDLE g_hComm;
 	COMMCONFIG g_cc;
 
-	int g_sending_file;
+	bool g_sending_file = false;
 
 
 	DWORD TXWC_ACK_TIMER = 100;//tx_wait_connect
@@ -26,5 +26,4 @@ namespace GlobalVar
 	HANDLE g_hIdleThread;
 	HANDLE g_hTerminateIdleEvent;
 	std::vector<char> g_vFileBuffer;
-
 }

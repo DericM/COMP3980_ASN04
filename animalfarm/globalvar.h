@@ -12,7 +12,7 @@ namespace GlobalVar
 
 
 
-	extern int g_sending_file;
+	extern bool g_sending_file;
 
 
 	extern DWORD TXWC_ACK_TIMER;

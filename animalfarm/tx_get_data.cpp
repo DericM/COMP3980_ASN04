@@ -53,6 +53,8 @@ bool txgd_setup() {
 
 
 bool txgd_get_next_packet() {
+	if (packetCounter == 0)
+		txgd_setup();
 
 	char syn = 0x16;
 
@@ -62,6 +64,7 @@ bool txgd_get_next_packet() {
 	if (curDataSize < DATA_SIZE)
 	{
 		memset(packetBuffer, 'x', DATA_SIZE);
+		packetCounter = 0;
 		GlobalVar::g_sending_file = false;
 	}
 	if (curPos < GlobalVar::g_vFileBuffer.size())

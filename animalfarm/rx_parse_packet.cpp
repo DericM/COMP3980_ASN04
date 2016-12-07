@@ -60,5 +60,5 @@ bool rxpp_parse_packet(const char* packet) {
 		return true;
 	}
 
-	return false;
+	return true;
 }
